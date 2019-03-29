@@ -5,6 +5,12 @@
 #include "scene/scene.h"
 #include "camera/camera.h"
 #include "core/utility.h"
+ 
+#if defined(_WIN32) 		
+#define GET_STRERR(errno, buf, len) strerror_s(buf, #errno);
+#else
+#define GET_STRERR(errno, buf, len)	strerror_r(#errno, buf, len);
+#endif
 
 // use for debugging
 #undef DEBUG
@@ -37,7 +43,7 @@ std::ostream &operator<<(std::ostream &os, glm::vec3 v)
 void helper_fun(std::string &file)
 {
 	unsigned int width, height;
-	std::vector<glm::vec3> &colors = render(width, height);
+	std::vector<glm::vec3> &&colors = render(width, height);
 	
 	if (file.empty())
 	{
