@@ -7,9 +7,9 @@
 #include "core/utility.h"
  
 #if defined(_WIN32) 		
-#define GET_STRERR(errno, buf, len) strerror_s(buf, #errno);
+#define GET_STRERR(ERROR_NUM, BUF, LEN) strerror_s(BUF, ERROR_NUM);
 #else
-#define GET_STRERR(errno, buf, len)	strerror_r(#errno, buf, len);
+#define GET_STRERR(ERROR_NUM, BUF, LEN)	strerror_r(ERROR_NUM, BUF, LEN);
 #endif
 
 // use for debugging
@@ -164,7 +164,7 @@ void write_file(const std::string &file,
 	/***************************************/
 	// WRITING TO IMAGE FILE
 	/***************************************/
-	ofs.open(file, _IOSbinary);
+	ofs.open(file, std::ios::binary);
 
 	if (ofs.fail())
 	{
@@ -172,7 +172,7 @@ void write_file(const std::string &file,
 		std::cout << "Error: Image could not be saved to \"" << file << "\"."
 			<< std::endl;
 		// print related error message
-		strerror_s(err_str, errno);
+		GET_STRERR(errno, err_str, 75);
 		std::cout << err_str;
 		exit(1);
 	}
