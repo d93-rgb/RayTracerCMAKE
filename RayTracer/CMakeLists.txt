@@ -144,7 +144,10 @@ endif()
 # to be inside filters
 add_executable( rt ${RT_MAIN} ${RT_SRC} ${RT_HEADERS})
 
-add_dependencies(rt ANTTWEAKBAR_MAKE)
+if( NOT WIN32 )
+	add_dependencies(rt ANTTWEAKBAR_MAKE)
+endif()
+
 target_link_libraries( rt ${ALL_RT_LIBRARIES} )
 
 if(WIN32)

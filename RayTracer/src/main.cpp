@@ -9,9 +9,11 @@
 #if defined(_WIN32)
 #define GET_STRERR(ERROR_NUM, BUF, LEN) strerror_s(BUF, ERROR_NUM);
 #define GET_PWD(BUF, LEN) GetModuleFileNameA(nullptr, BUF, LEN)
+constexpr auto OS_SLASH = "\\";
 #else
 #define GET_STRERR(ERROR_NUM, BUF, LEN)	strerror_r(ERROR_NUM, BUF, LEN);
 #define GET_PWD(BUF, LEN) readlink("/proc/self/exe", BUF, LEN)
+constexpr auto OS_SLASH = "/";
 #endif
 
 // use for debugging
@@ -55,8 +57,8 @@ void helper_fun(std::string &file)
         std::string fn = buf;
 
 
-		LOG(INFO) << "Image is written to \"" <<
-            fn.substr(0, fn.find_last_of("/")).append("/picture.ppm");
+		LOG(INFO) << "Image will be written to \"" <<
+            fn.substr(0, fn.find_last_of("\\/")).append(OS_SLASH).append("picture.ppm");
 		write_file("picture.ppm", colors, width, height);
 	}
 	else
