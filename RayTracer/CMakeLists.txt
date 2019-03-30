@@ -4,6 +4,10 @@ project (RayTracer VERSION 1.0)
 
 #
 set( CMAKE_EXPORT_COMPILE_COMMANDS ON )
+if( NOT WIN32 )
+    # optimization for g++
+    add_definitions("-Ofast")
+endif()
 
 # external dependencies
 ###########################################################################
