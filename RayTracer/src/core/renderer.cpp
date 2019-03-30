@@ -1,4 +1,3 @@
-#pragma once
 #include "core/renderer.h"
 #include "shape/ray.h"
 #include "scene/scene.h"

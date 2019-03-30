@@ -2,6 +2,9 @@ cmake_minimum_required (VERSION 2.8)
 cmake_policy(SET CMP0048 NEW)
 project (RayTracer VERSION 1.0)
 
+#
+set( CMAKE_EXPORT_COMPILE_COMMANDS ON )
+
 # external dependencies
 ###########################################################################
 # glog
@@ -24,7 +27,7 @@ set(ASSIMP_BUILD_ALL_IMPORTERS_BY_DEFAULT OFF CACHE BOOL " " FORCE)
 set(ASSIMP_BUILD_BLEND_IMPORTER ON CACHE BOOL " " FORCE)
 set(ASSIMP_BUILD_OBJ_IMPORTER ON CACHE BOOL " " FORCE)
 # disable testing
-set(ASSIMP_BUILD_TEST OFF CACHE BOOL " " FORCE)
+set(ASSIMP_BUILD_TESTS OFF CACHE BOOL " " FORCE)
 # disable VS pdb file generation
 set(ASSIMP_INSTALL PDB OFF CACHE BOOL " " FORCE)
 # build seperate zlib
@@ -49,9 +52,10 @@ include_directories (
 ###########################################################################
 # AntTweakBar
 if(NOT WIN32)
+    MESSAGE(STATUS "Building AntTweakBar")
 	add_custom_target( 	ANTTWEAKBAR_MAKE
-						COMMAND make run
-						WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/AntTweakBar/src)
+						COMMAND make 
+						WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/ext/AntTweakBar/src)
 endif()
 
 # save all assembled libraries  here
@@ -59,6 +63,9 @@ endif()
 set(ALL_RT_LIBRARIES
 	glog
 	assimp)
+link_directories( ${CMAKE_BINARY_DIR}/ext/glm 
+    ${CMAKE_BINARY_DIR}/ext/assimp/code
+    ${CMAKE_BINARY_DIR}/ext/glog)
 
 # ray tracer source and headers
 set (RT_MAIN src/main.cpp)
@@ -136,6 +143,8 @@ endif()
 # add headers to the target for now, because VS does not recognize header files otherwise
 # to be inside filters
 add_executable( rt ${RT_MAIN} ${RT_SRC} ${RT_HEADERS})
+
+add_dependencies(rt ANTTWEAKBAR_MAKE)
 target_link_libraries( rt ${ALL_RT_LIBRARIES} )
 
 if(WIN32)

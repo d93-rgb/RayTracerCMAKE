@@ -1,4 +1,3 @@
-#pragma once
 #include "core/rt.h"
 #include "light/light.h"
 #include "shape/shape.h"

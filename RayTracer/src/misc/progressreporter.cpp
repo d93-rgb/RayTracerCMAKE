@@ -36,7 +36,7 @@
 #include "misc/progressreporter.h"
 //#include "parallel.h"
 //#include "stats.h"
-#ifdef PBRT_IS_WINDOWS
+#ifdef _WIN32
 #include <windows.h>
 #else
 #include <sys/ioctl.h>
@@ -159,7 +159,7 @@ void ProgressReporter::Done()
 
 static int TerminalWidth()
 {
-#ifdef PBRT_IS_WINDOWS
+#ifdef _WIN32
 	HANDLE h = GetStdHandle(STD_OUTPUT_HANDLE);
 	if (h == INVALID_HANDLE_VALUE || !h) {
 		fprintf(stderr, "GetStdHandle() call failed");

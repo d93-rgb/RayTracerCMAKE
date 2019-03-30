@@ -5,11 +5,13 @@
 #include "scene/scene.h"
 #include "camera/camera.h"
 #include "core/utility.h"
- 
-#if defined(_WIN32) 		
-#define GET_STRERR(ERROR_NUM, BUFFER, LEN) strerror_s(BUFFER, ERROR_NUM);
+
+#if defined(_WIN32)
+#define GET_STRERR(ERROR_NUM, BUF, LEN) strerror_s(BUF, ERROR_NUM);
+#define GET_PWD(BUF, LEN) GetModuleFileNameA(nullptr, BUF, LEN)
 #else
-#define GET_STRERR(errno, buf, len)	strerror_r(ERROR_NUM, BUF, LEN);
+#define GET_STRERR(ERROR_NUM, BUF, LEN)	strerror_r(ERROR_NUM, BUF, LEN);
+#define GET_PWD(BUF, LEN) readlink("/proc/self/exe", BUF, LEN)
 #endif
 
 // use for debugging
@@ -44,10 +46,17 @@ void helper_fun(std::string &file)
 {
 	unsigned int width, height;
 	std::vector<glm::vec3> &&colors = render(width, height);
-	
+
 	if (file.empty())
 	{
-		LOG(INFO) << "Image is written to the directory of the executable.";
+        char buf[200];
+        GET_PWD(buf, 200);
+        std::cout << buf << std::endl;
+        std::string fn = buf;
+
+
+		LOG(INFO) << "Image is written to \"" <<
+            fn.substr(0, fn.find_last_of("/")).append("/picture.ppm");
 		write_file("picture.ppm", colors, width, height);
 	}
 	else
@@ -164,7 +173,7 @@ void write_file(const std::string &file,
 	/***************************************/
 	// WRITING TO IMAGE FILE
 	/***************************************/
-	ofs.open(file, _IOSbinary);
+	ofs.open(file, std::ios::binary);
 
 	if (ofs.fail())
 	{
@@ -260,7 +269,7 @@ ofs.close();
 */
 //getchar();
 
-// launch rendering 
+// launch rendering
 	helper_fun(dest);
 
 	if (owg)
@@ -291,14 +300,14 @@ ofs.close();
 		FALSE,          // Set handle inheritance to FALSE
 		0,              // No creation flags
 		NULL,           // Use parent's environment block
-		NULL,           // Use parent's starting directory 
+		NULL,           // Use parent's starting directory
 		&si,            // Pointer to STARTUPINFO structure
 		&pi))            // Pointer to PROCESS_INFORMATION structure (removed extra parentheses)
 	{
 		printf("CreateProcess failed (%d).\n%s\n",
 			GetLastError(), szCmdline.c_str());
 	}
-	// Close process and thread handles. 
+	// Close process and thread handles.
 	CloseHandle(pi.hProcess);
 	CloseHandle(pi.hThread);
 #endif
