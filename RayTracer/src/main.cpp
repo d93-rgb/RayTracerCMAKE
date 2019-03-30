@@ -8,8 +8,10 @@
  
 #if defined(_WIN32) 		
 #define GET_STRERR(ERROR_NUM, BUF, LEN) strerror_s(BUF, ERROR_NUM);
+#define GET_PWD(BUF, LEN) GetModuleFileNameA(nullptr, BUF, LEN)
 #else
 #define GET_STRERR(ERROR_NUM, BUF, LEN)	strerror_r(ERROR_NUM, BUF, LEN);
+#define GET_PWD(BUF, LEN) readlink("/proc/self/exe", BUF, LEN)
 #endif
 
 // use for debugging
@@ -47,7 +49,14 @@ void helper_fun(std::string &file)
 	
 	if (file.empty())
 	{
-		LOG(INFO) << "Image is written to the directory of the executable.";
+        char buf[200];
+        GET_PWD(buf, 200);
+        std::cout << buf << std::endl;
+        std::string fn = buf;
+        
+        
+		LOG(INFO) << "Image is written to \"" << 
+            fn.substr(0, fn.find_last_of("/")).append("/picture.ppm");
 		write_file("picture.ppm", colors, width, height);
 	}
 	else

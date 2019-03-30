@@ -7,9 +7,12 @@
 #define _USE_MATH_DEFINES
 //#define GLOG_NO_ABBREVIATED_SEVERITIES
 
-#if defined(WIN32) || defined(_WIN32) || defined(__WIN32) && !defined(__CYGWIN__)
+#if defined(WIN32) || \
+    defined(_WIN32) || defined(__WIN32) && !defined(__CYGWIN__)
 #define WIN32_LEAN_AND_MEAN
 #include <Windows.h>
+#else
+#include <unistd.h>
 #endif
 
 #include <iostream>
