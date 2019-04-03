@@ -37,7 +37,7 @@ set(ASSIMP_BUILD_TESTS OFF CACHE BOOL " " FORCE)
 # disable VS pdb file generation
 set(ASSIMP_INSTALL PDB OFF CACHE BOOL " " FORCE)
 # build seperate zlib
-set(ASSIMP_BUILD_ZLIB OFF CACHE BOOL " " FORCE)
+set(ASSIMP_BUILD_ZLIB ON CACHE BOOL " " FORCE)
 
 add_subdirectory(ext/assimp)
 include_directories (

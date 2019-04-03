@@ -32,8 +32,8 @@ int MAX_DEPTH = 4;
 
 //std::vector<float> debug_vec;
 void helper_fun(const std::string &file);
-std::vector<glm::vec3> render(unsigned int &width, unsigned int &height);
-void write_file(const std::string &file, std::vector<glm::vec3> &col, int width, int height);
+std::vector<glm::vec3> render(size_t &width, size_t &height);
+void write_file(const std::string &file, std::vector<glm::vec3> &col, size_t width, size_t height);
 
 std::ostream &operator<<(std::ostream &os, glm::vec3 v)
 {
@@ -46,7 +46,7 @@ std::ostream &operator<<(std::ostream &os, glm::vec3 v)
 */
 void helper_fun(std::string &file)
 {
-	unsigned int width, height;
+	size_t width, height;
 	std::vector<glm::vec3> &&colors = render(width, height);
 
 	if (file.empty())
@@ -71,10 +71,10 @@ void helper_fun(std::string &file)
 /*
 	Starts rendering a scene and returns the color vector.
 */
-std::vector<glm::vec3> render(unsigned int &width, unsigned int &height)
+std::vector<glm::vec3> render(size_t &width, size_t &height)
 {
 	int i = 0;
-	float fov = glm::radians(55.f);
+	constexpr float fov = glm::radians(55.f);
 	float fov_tan = tan(fov / 2);
 	float u = 0.f, v = 0.f;
 	// distance to view plane
@@ -87,8 +87,8 @@ std::vector<glm::vec3> render(unsigned int &width, unsigned int &height)
 
 	assert(crop_min_x <= crop_max_x && crop_min_y <= crop_max_y);
 
-	int cropped_width[2];
-	int cropped_height[2];
+	size_t cropped_width[2];
+	size_t cropped_height[2];
 
 	crop(crop_min_x, crop_max_x, WIDTH, cropped_width);
 	crop(crop_min_y, crop_max_y, HEIGHT, cropped_height);
@@ -120,11 +120,11 @@ std::vector<glm::vec3> render(unsigned int &width, unsigned int &height)
 		std::uniform_real_distribution<> dist(0, 1);
 		// dynamic schedule for proper I/O progress update
 #pragma omp parallel for schedule(dynamic, 1)
-		for (int y = cropped_height[0]; y < cropped_height[1]; ++y)
+		for (size_t y = cropped_height[0]; y < cropped_height[1]; ++y)
 		{
 			//fprintf(stderr, "\rRendering %5.2f%%", 100.*y / (HEIGHT - 1));
 			reporter.Update();
-			for (int x = cropped_width[0]; x < cropped_width[1]; ++x)
+			for (size_t x = cropped_width[0]; x < cropped_width[1]; ++x)
 			{
 				for (int m = 0; m < GRID_DIM; ++m)
 				{
@@ -133,7 +133,7 @@ std::vector<glm::vec3> render(unsigned int &width, unsigned int &height)
 						// hackery needed for omp pragma
 						// the index i will be distributed among all threads
 						// by omp automatically
-						for (int k = 0,
+						for (size_t k = 0,
 							i = (y - cropped_height[0]) * width + x - cropped_width[0];
 							k < SPP; ++k)
 						{
@@ -167,7 +167,8 @@ std::vector<glm::vec3> render(unsigned int &width, unsigned int &height)
 }
 
 void write_file(const std::string &file,
-	std::vector<glm::vec3> &col, int width, int height)
+
+	std::vector<glm::vec3> &col, size_t width, size_t height)
 {
 	static int i_debug = 0;
 	std::ofstream ofs;
@@ -232,7 +233,8 @@ int main(int argc, const char **argv)
 		int pos = 1;
 		while (pos < argc)
 		{
-			if (!strcmp(argv[pos], "--destination") || !strcmp(argv[pos], "-d"))
+			if (!strcmp(argv[pos], "--destination") 
+				|| !strcmp(argv[pos], "-d"))
 			{
 				if (++pos == argc)
 				{
@@ -242,7 +244,8 @@ int main(int argc, const char **argv)
 				printf("argc = %i, pos == %i\n", argc, pos);
 				dest = argv[pos++];
 			}
-			else if (!strcmp(argv[pos], "--open_with_gimp") || !strcmp(argv[pos], "-owg"))
+			else if (!strcmp(argv[pos], "--open_with_gimp") 
+				|| !strcmp(argv[pos], "-owg"))
 			{
 				++pos;
 				owg = true;
