@@ -32,11 +32,11 @@ constexpr auto HEIGHT = 400;
 int MAX_DEPTH = 4;
 
 //std::vector<float> debug_vec;
-void helper_fun(const std::string &file);
-std::vector<glm::vec3> render(size_t &width, size_t &height);
-void write_file(const std::string &file, std::vector<glm::vec3> &col, size_t width, size_t height);
+void helper_fun(const std::string& file);
+std::vector<glm::vec3> render(size_t& width, size_t& height);
+void write_file(const std::string& file, std::vector<glm::vec3>& col, size_t width, size_t height);
 
-std::ostream &operator<<(std::ostream &os, glm::vec3 v)
+std::ostream& operator<<(std::ostream& os, glm::vec3 v)
 {
 	os << "(" << v.x << ", " << v.y << ", " << v.z << ")" << std::endl;
 	return os;
@@ -45,21 +45,21 @@ std::ostream &operator<<(std::ostream &os, glm::vec3 v)
 /*
 	Short helper function
 */
-void helper_fun(std::string &file)
+void helper_fun(std::string& file)
 {
 	size_t width, height;
-	std::vector<glm::vec3> &&colors = render(width, height);
+	std::vector<glm::vec3>&& colors = render(width, height);
 
 	if (file.empty())
 	{
-        char buf[200];
-        GET_PWD(buf, 200);
-        std::cout << buf << std::endl;
-        std::string fn = buf;
+		char buf[200];
+		GET_PWD(buf, 200);
+		std::cout << buf << std::endl;
+		std::string fn = buf;
 
 
 		LOG(INFO) << "Image will be written to \"" <<
-            fn.substr(0, fn.find_last_of("\\/")).append(OS_SLASH).append("picture.ppm");
+			fn.substr(0, fn.find_last_of("\\/")).append(OS_SLASH).append("picture.ppm");
 		write_file("picture.ppm", colors, width, height);
 	}
 	else
@@ -72,7 +72,7 @@ void helper_fun(std::string &file)
 /*
 	Starts rendering a scene and returns the color vector.
 */
-std::vector<glm::vec3> render(size_t &width, size_t &height)
+std::vector<glm::vec3> render(size_t& width, size_t& height)
 {
 	int i = 0;
 	constexpr float fov = glm::radians(55.f);
@@ -80,7 +80,7 @@ std::vector<glm::vec3> render(size_t &width, size_t &height)
 	float u = 0.f, v = 0.f;
 	// distance to view plane
 	float d = 1.f;
-	float inv_spp = 1.f / SPP;
+	float inv_spp;
 	float inv_grid_dim = 1.f / (GRID_DIM * GRID_DIM);
 
 	float crop_min_x = 0.f, crop_max_x = 1.f;
@@ -103,6 +103,9 @@ std::vector<glm::vec3> render(size_t &width, size_t &height)
 	std::vector<glm::vec3> col{ width * height, glm::vec3(0.f) };
 
 	StratifiedSampler2D sampler{ width, height, GRID_DIM };
+	unsigned int array_size = GRID_DIM * GRID_DIM;
+	const glm::vec2 * samplingArray;
+	inv_spp = 1.f / sampler.samplesPerPixel;
 	/***************************************/
 	// CREATING SCENE
 	/***************************************/
@@ -117,9 +120,6 @@ std::vector<glm::vec3> render(size_t &width, size_t &height)
 		/***************************************/
 		// LOOPING OVER PIXELS
 		/***************************************/
-		std::random_device rd;
-		std::default_random_engine eng(rd());
-		std::uniform_real_distribution<> dist(0, 1);
 		// dynamic schedule for proper I/O progress update
 #pragma omp parallel for schedule(dynamic, 1)
 		for (size_t y = cropped_height[0]; y < cropped_height[1]; ++y)
@@ -128,49 +128,45 @@ std::vector<glm::vec3> render(size_t &width, size_t &height)
 			reporter.Update();
 			for (size_t x = cropped_width[0]; x < cropped_width[1]; ++x)
 			{
-				for (int m = 0; m < GRID_DIM; ++m)
+				samplingArray = sampler.get2DArray();
+				// hackery needed for omp pragma
+				// the index i will be distributed among all threads
+				// by omp automatically
+				for (int idx = 0; idx < array_size; ++idx)
 				{
-					for (int n = 0; n < GRID_DIM; ++n)
+					for (size_t k = 0,
+						i = (y - cropped_height[0]) * width + x - cropped_width[0];
+						k < SPP; ++k)
 					{
-						// hackery needed for omp pragma
-						// the index i will be distributed among all threads
-						// by omp automatically
-						for (size_t k = 0,
-							i = (y - cropped_height[0]) * width + x - cropped_width[0];
-							k < SPP; ++k)
-						{
-							SurfaceInteraction isect;
+						SurfaceInteraction isect;
 
-							// stratified sampling
-							float u_rnd = float(dist(eng));
-							float v_rnd = float(dist(eng));
-							// map pixel coordinates to[-1, 1]x[-1, 1]
-							float u = (2.f * (x + (m + u_rnd) / GRID_DIM) - WIDTH) / HEIGHT * fov_tan;
-							float v = (-2.f * (y + (n + v_rnd) / GRID_DIM) + HEIGHT) / HEIGHT * fov_tan;
+						// map pixel coordinates to[-1, 1]x[-1, 1]
+						float u = (2.f * (x / GRID_DIM + samplingArray[idx].x) - WIDTH) / HEIGHT * fov_tan;
+						float v = (-2.f * (y / GRID_DIM + samplingArray[idx].y) + HEIGHT) / HEIGHT * fov_tan;
 
-							// this can not be split up and needs to be in one line, otherwise
-							// omp will not take the average
-							col[i] += clamp(shoot_recursively(sc, sc.cam->getPrimaryRay(u, v, d), &isect, 0))
-								* inv_spp * inv_grid_dim;
-						}
+						// this can not be split up and needs to be in one line, otherwise
+						// omp will not take the average
+						col[i] += clamp(shoot_recursively(sc, sc.cam->getPrimaryRay(u, v, d), &isect, 0))
+							* inv_spp * inv_grid_dim;
 					}
 				}
 			}
 		}
 		reporter.Done();
 	}
+
 	//#pragma omp parallel for
-	//	for (int i = 0; i < 10; ++i)
-	//	{
-	//		std::this_thread::sleep_for(std::chrono::seconds(1));
-	//		std::cout << " thread: " << omp_get_thread_num() << std::endl;
-	//	}
+		//	for (int i = 0; i < 10; ++i)
+		//	{
+		//		std::this_thread::sleep_for(std::chrono::seconds(1));
+		//		std::cout << " thread: " << omp_get_thread_num() << std::endl;
+		//	}
 	return col;
 }
 
-void write_file(const std::string &file,
+void write_file(const std::string & file,
 
-	std::vector<glm::vec3> &col, size_t width, size_t height)
+	std::vector<glm::vec3> & col, size_t width, size_t height)
 {
 	static int i_debug = 0;
 	std::ofstream ofs;
@@ -220,7 +216,7 @@ void write_file(const std::string &file,
 	LOG(INFO) << "Writing image to \"" << file << "\" finished.";
 }
 
-int main(int argc, const char **argv)
+int main(int argc, const char** argv)
 {
 	// open image with gimp
 	auto owg = false;
@@ -235,7 +231,7 @@ int main(int argc, const char **argv)
 		int pos = 1;
 		while (pos < argc)
 		{
-			if (!strcmp(argv[pos], "--destination") 
+			if (!strcmp(argv[pos], "--destination")
 				|| !strcmp(argv[pos], "-d"))
 			{
 				if (++pos == argc)
@@ -246,7 +242,7 @@ int main(int argc, const char **argv)
 				printf("argc = %i, pos == %i\n", argc, pos);
 				dest = argv[pos++];
 			}
-			else if (!strcmp(argv[pos], "--open_with_gimp") 
+			else if (!strcmp(argv[pos], "--open_with_gimp")
 				|| !strcmp(argv[pos], "-owg"))
 			{
 				++pos;
@@ -320,4 +316,4 @@ ofs.close();
 #endif
 	//MessageBox(nullptr, TEXT("Done."), TEXT("Notification"), MB_OK);
 	return 0;
-	}
+}

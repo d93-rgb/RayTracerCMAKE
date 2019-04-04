@@ -119,6 +119,8 @@ if(MSVC)
 	SOURCE_GROUP ("Source Files\\shape" REGULAR_EXPRESSION src/shape/[^/]*cpp)
 	SOURCE_GROUP ("Source Files\\shape\\quadric" REGULAR_EXPRESSION src/shape/quadric/.*)
 	SOURCE_GROUP ("Source Files\\texture" REGULAR_EXPRESSION src/texture/.*)
+	SOURCE_GROUP ("Source Files\\samplers" REGULAR_EXPRESSION src/samplers/.*)
+
 	# header files
 	SOURCE_GROUP ("Header Files\\camera" REGULAR_EXPRESSION include/camera/.*)
 	SOURCE_GROUP ("Header Files\\core" REGULAR_EXPRESSION include/core/.*)
@@ -131,6 +133,8 @@ if(MSVC)
 	SOURCE_GROUP ("Header Files\\shape" REGULAR_EXPRESSION include/shape/[^/]*h)
 	SOURCE_GROUP ("Header Files\\shape\\quadric" REGULAR_EXPRESSION include/shape/quadric/.*)
 	SOURCE_GROUP ("Header Files\\texture" REGULAR_EXPRESSION include/texture/.*)
+	SOURCE_GROUP ("Header Files\\samplers" REGULAR_EXPRESSION include/samplers/.*)
+
 
 else(MSVC)
 	SOURCE_GROUP (camera REGULAR_EXPRESSION src/camera/.*)
@@ -144,6 +148,8 @@ else(MSVC)
 	SOURCE_GROUP (shape REGULAR_EXPRESSION src/shape/[^/]*cpp)
 	SOURCE_GROUP ("shape/quadric" REGULAR_EXPRESSION src/shape/quadric/.*)
 	SOURCE_GROUP (texture REGULAR_EXPRESSION src/texture/.*)
+	SOURCE_GROUP (samplers REGULAR_EXPRESSION src/samplers/.*)
+
 endif()
 
 # add headers to the target for now, because VS does not recognize header files otherwise
