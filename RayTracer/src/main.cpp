@@ -24,7 +24,7 @@ constexpr auto OS_SLASH = "/";
 using namespace rt;
 
 //constexpr auto SPP = 1;
-constexpr unsigned int GRID_DIM = 20;
+constexpr auto GRID_DIM = 3;
 
 constexpr auto WIDTH = 533;
 constexpr auto HEIGHT = 400;
@@ -101,9 +101,9 @@ std::vector<glm::vec3> render(unsigned int& width, unsigned int& height)
 
 	std::vector<glm::vec3> col{ width * height, glm::vec3(0.f) };
 
-	StratifiedSampler2D sampler{ width, height, GRID_DIM };
+	StratifiedSampler2D sampler{ width, height, static_cast<unsigned int>(GRID_DIM) };
 	unsigned int array_size = GRID_DIM * GRID_DIM;
-	const glm::vec2 * samplingArray;
+	const glm::vec2* samplingArray;
 	inv_spp = 1.f; // sampler.samplesPerPixel;
 	/***************************************/
 	// CREATING SCENE
@@ -115,7 +115,7 @@ std::vector<glm::vec3> render(unsigned int& width, unsigned int& height)
 		/***************************************/
 		// START PROGRESSREPORTER
 		/***************************************/
-		pbrt::ProgressReporter reporter(WIDTH, "Rendering:");
+		pbrt::ProgressReporter reporter(HEIGHT, "Rendering:");
 		/***************************************/
 		// LOOPING OVER PIXELS
 		/***************************************/
@@ -142,7 +142,7 @@ std::vector<glm::vec3> render(unsigned int& width, unsigned int& height)
 					float v = (-2.f * (y + samplingArray[idx].y) + HEIGHT) / HEIGHT * fov_tan;
 
 					// this can not be split up and needs to be in one line, otherwise
-					// omp will not take the average
+					// omp will not take the 
 					col[i] += clamp(shoot_recursively(sc, sc.cam->getPrimaryRay(u, v, d), &isect, 0))
 						* inv_grid_dim;
 				}
