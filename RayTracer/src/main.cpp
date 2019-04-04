@@ -101,7 +101,7 @@ std::vector<glm::vec3> render(unsigned int& width, unsigned int& height)
 
 	std::vector<glm::vec3> col{ width * height, glm::vec3(0.f) };
 
-	StratifiedSampler2D sampler{ width, height, static_cast<unsigned int>(GRID_DIM) };
+	StratifiedSampler2D sampler{ width, height, GRID_DIM };
 	unsigned int array_size = GRID_DIM * GRID_DIM;
 	const glm::vec2* samplingArray;
 	inv_spp = 1.f; // sampler.samplesPerPixel;
@@ -121,11 +121,11 @@ std::vector<glm::vec3> render(unsigned int& width, unsigned int& height)
 		/***************************************/
 		// dynamic schedule for proper I/O progress update
 #pragma omp parallel for schedule(dynamic, 1)
-		for (unsigned int y = cropped_height[0]; y < cropped_height[1]; ++y)
+		for (int y = cropped_height[0]; y < cropped_height[1]; ++y)
 		{
 			//fprintf(stderr, "\rRendering %5.2f%%", 100.*y / (HEIGHT - 1));
 			reporter.Update();
-			for (unsigned int x = cropped_width[0]; x < cropped_width[1]; ++x)
+			for (int x = cropped_width[0]; x < cropped_width[1]; ++x)
 			{
 				samplingArray = sampler.get2DArray();
 

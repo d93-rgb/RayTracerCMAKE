@@ -34,7 +34,7 @@ class StratifiedSampler2D : public Sampler2D
 public:
 	StratifiedSampler2D(unsigned int width,
 		unsigned int height,
-		unsigned int grid_dim) :
+		int grid_dim) :
 		Sampler2D(width, height, grid_dim* grid_dim),
 		grid_dim(grid_dim), eng(rd()), dist(0, 1)
 	{
@@ -42,14 +42,14 @@ public:
 		{
 			for (unsigned int j = 0; j < width; ++j)
 			{
-				for (unsigned int k = 0; k < grid_dim; ++k)
+				for (int k = 0; k < grid_dim; ++k)
 				{
-					for (unsigned int m = 0; m < grid_dim; ++m)
+					for (int m = 0; m < grid_dim; ++m)
 					{
 						float u_rnd = float(dist(eng));
 						float v_rnd = float(dist(eng));
 
-						sampler2Darray[i * width + j][k * m + m] = 
+						sampler2Darray[i * width + j][k * m + m] =
 							glm::vec2((k + u_rnd) / grid_dim,
 							(m + v_rnd) / grid_dim);
 					}
