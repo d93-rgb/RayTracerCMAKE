@@ -1,12 +1,6 @@
 #include "Sampler2D.h"
 
-
-
-Sampler2D::Sampler2D()
+const glm::vec2* StratifiedSampler2D::get2DArray(int n)
 {
-}
-
-
-Sampler2D::~Sampler2D()
-{
+	return nullptr;
 }
