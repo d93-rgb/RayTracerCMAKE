@@ -2,6 +2,7 @@
 
 #include "core/rt.h"
 #include "core/renderer.h"
+#include "sampler2D.h"
 #include "scene/scene.h"
 #include "camera/camera.h"
 #include "core/utility.h"
@@ -101,6 +102,7 @@ std::vector<glm::vec3> render(size_t &width, size_t &height)
 
 	std::vector<glm::vec3> col{ width * height, glm::vec3(0.f) };
 
+	StratifiedSampler2D sampler{ width, height, GRID_DIM };
 	/***************************************/
 	// CREATING SCENE
 	/***************************************/

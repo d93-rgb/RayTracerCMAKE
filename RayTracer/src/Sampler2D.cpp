@@ -1,6 +1,15 @@
-#include "Sampler2D.h"
+#include "sampler2D.h"
 
-const glm::vec2* StratifiedSampler2D::get2DArray(int n)
+namespace rt
 {
-	return nullptr;
+
+const glm::vec2* StratifiedSampler2D::get2DArray()
+{
+	if (currentPixel == sampler2Darray.size())
+	{
+		return nullptr;
+	}
+	return &sampler2Darray[currentPixel++][0];
 }
+
+} // namespace rt

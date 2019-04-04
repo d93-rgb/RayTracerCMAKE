@@ -62,6 +62,9 @@ class SurfaceInteraction;
 struct Light;
 class Camera;
 
+class Sampler2D;
+class StratifiedSampler2D;
+
 struct Plane;
 struct Rectangle;
 class Triangle;
@@ -76,7 +79,6 @@ struct Paraboloid;
 struct Hyperboloid;
 
 class Bounds3;
-
 
 class Texture;
 class CheckerBoardTexture;
