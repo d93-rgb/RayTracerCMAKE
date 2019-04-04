@@ -1,4 +1,4 @@
-#include "sampler2D.h"
+#include "samplers/sampler2D.h"
 
 namespace rt
 {

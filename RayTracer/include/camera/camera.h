@@ -10,7 +10,8 @@ public:
 	Camera() : origin(glm::vec4(0.f, 0.f, 0.f, 1.f)),
 		right(glm::vec4(1.f, 0.f, 0.f, 0.f)),
 		up(glm::vec4(0.f, 1.f, 0.f, 0.f)),
-		front(glm::vec4(0.f, 0.f, 1.f, 0.f))
+		front(glm::vec4(0.f, 0.f, 1.f, 0.f)),
+		camToWorld(1.f)
 	{
 	}
 
@@ -18,7 +19,8 @@ public:
 		origin(o),
 		up(glm::normalize(up)),
 		right(glm::normalize(right)),
-		front(glm::normalize(front))
+		front(glm::normalize(front)),
+		camToWorld(1.f)
 	{
 	}
 

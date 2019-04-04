@@ -13,7 +13,7 @@ public:
 		unsigned int y,
 		unsigned int spp) : samplesPerPixel(spp)
 	{
-		for (int i = 0; i < x * y; ++i)
+		for (unsigned int i = 0; i < x * y; ++i)
 		{
 			sampler2Darray.push_back(std::vector<glm::vec2>(spp));
 		}
@@ -38,20 +38,20 @@ public:
 		Sampler2D(width, height, grid_dim* grid_dim),
 		grid_dim(grid_dim), eng(rd()), dist(0, 1)
 	{
-		for (unsigned int i = 0; i < width; ++i)
+		for (unsigned int i = 0; i < height; ++i)
 		{
-			for (unsigned int j = 0; j < height; ++j)
+			for (unsigned int j = 0; j < width; ++j)
 			{
-				for (int k = 0; k < grid_dim; ++k)
+				for (unsigned int k = 0; k < grid_dim; ++k)
 				{
-					for (int m = 0; m < grid_dim; ++m)
+					for (unsigned int m = 0; m < grid_dim; ++m)
 					{
 						float u_rnd = float(dist(eng));
 						float v_rnd = float(dist(eng));
 
-						sampler2Darray[i * width + j].push_back(
-							glm::vec2((i + (k + u_rnd) / grid_dim),
-							(j + (m + u_rnd) / grid_dim)));
+						sampler2Darray[i * width + j][k * m + m] = 
+							glm::vec2((k + u_rnd) / grid_dim,
+							(m + v_rnd) / grid_dim);
 					}
 				}
 			}

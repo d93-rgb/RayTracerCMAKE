@@ -87,7 +87,8 @@ src/misc/*
 src/scene/*
 src/shape/*
 src/shape/quadric/*
-src/texture/*)
+src/texture/*
+src/samplers/*)
 
 file (GLOB RT_HEADERS LIST_DIRECTORIES false
 include/camera/*
@@ -100,7 +101,8 @@ include/misc/*
 include/scene/*
 include/shape/*
 include/shape/quadric/*
-src/texture/*)
+include/texture/*
+include/samplers/*)
 
 include_directories( "include/" )
 

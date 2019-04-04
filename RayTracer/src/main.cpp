@@ -2,7 +2,7 @@
 
 #include "core/rt.h"
 #include "core/renderer.h"
-#include "sampler2D.h"
+#include "samplers/sampler2D.h"
 #include "scene/scene.h"
 #include "camera/camera.h"
 #include "core/utility.h"
@@ -23,8 +23,8 @@ constexpr auto OS_SLASH = "/";
 
 using namespace rt;
 
-constexpr auto SPP = 1;
-constexpr auto GRID_DIM = 1;
+//constexpr auto SPP = 1;
+constexpr unsigned int GRID_DIM = 20;
 
 constexpr auto WIDTH = 533;
 constexpr auto HEIGHT = 400;
@@ -33,8 +33,8 @@ int MAX_DEPTH = 4;
 
 //std::vector<float> debug_vec;
 void helper_fun(const std::string& file);
-std::vector<glm::vec3> render(size_t& width, size_t& height);
-void write_file(const std::string& file, std::vector<glm::vec3>& col, size_t width, size_t height);
+std::vector<glm::vec3> render(unsigned int& width, unsigned int& height);
+void write_file(const std::string& file, std::vector<glm::vec3>& col, unsigned int width, unsigned int height);
 
 std::ostream& operator<<(std::ostream& os, glm::vec3 v)
 {
@@ -47,7 +47,7 @@ std::ostream& operator<<(std::ostream& os, glm::vec3 v)
 */
 void helper_fun(std::string& file)
 {
-	size_t width, height;
+	unsigned int width, height;
 	std::vector<glm::vec3>&& colors = render(width, height);
 
 	if (file.empty())
@@ -72,9 +72,8 @@ void helper_fun(std::string& file)
 /*
 	Starts rendering a scene and returns the color vector.
 */
-std::vector<glm::vec3> render(size_t& width, size_t& height)
+std::vector<glm::vec3> render(unsigned int& width, unsigned int& height)
 {
-	int i = 0;
 	constexpr float fov = glm::radians(55.f);
 	float fov_tan = tan(fov / 2);
 	float u = 0.f, v = 0.f;
@@ -88,8 +87,8 @@ std::vector<glm::vec3> render(size_t& width, size_t& height)
 
 	assert(crop_min_x <= crop_max_x && crop_min_y <= crop_max_y);
 
-	size_t cropped_width[2];
-	size_t cropped_height[2];
+	unsigned int cropped_width[2];
+	unsigned int cropped_height[2];
 
 	crop(crop_min_x, crop_max_x, WIDTH, cropped_width);
 	crop(crop_min_y, crop_max_y, HEIGHT, cropped_height);
@@ -105,7 +104,7 @@ std::vector<glm::vec3> render(size_t& width, size_t& height)
 	StratifiedSampler2D sampler{ width, height, GRID_DIM };
 	unsigned int array_size = GRID_DIM * GRID_DIM;
 	const glm::vec2 * samplingArray;
-	inv_spp = 1.f / sampler.samplesPerPixel;
+	inv_spp = 1.f; // sampler.samplesPerPixel;
 	/***************************************/
 	// CREATING SCENE
 	/***************************************/
@@ -116,39 +115,36 @@ std::vector<glm::vec3> render(size_t& width, size_t& height)
 		/***************************************/
 		// START PROGRESSREPORTER
 		/***************************************/
-		pbrt::ProgressReporter reporter(HEIGHT, "Rendering:");
+		pbrt::ProgressReporter reporter(WIDTH, "Rendering:");
 		/***************************************/
 		// LOOPING OVER PIXELS
 		/***************************************/
 		// dynamic schedule for proper I/O progress update
 #pragma omp parallel for schedule(dynamic, 1)
-		for (size_t y = cropped_height[0]; y < cropped_height[1]; ++y)
+		for (unsigned int y = cropped_height[0]; y < cropped_height[1]; ++y)
 		{
 			//fprintf(stderr, "\rRendering %5.2f%%", 100.*y / (HEIGHT - 1));
 			reporter.Update();
-			for (size_t x = cropped_width[0]; x < cropped_width[1]; ++x)
+			for (unsigned int x = cropped_width[0]; x < cropped_width[1]; ++x)
 			{
 				samplingArray = sampler.get2DArray();
+
 				// hackery needed for omp pragma
 				// the index i will be distributed among all threads
 				// by omp automatically
-				for (int idx = 0; idx < array_size; ++idx)
+				unsigned int i = (y - cropped_height[0]) * width + (x - cropped_width[0]);
+				for (unsigned int idx = 0; idx < array_size; ++idx)
 				{
-					for (size_t k = 0,
-						i = (y - cropped_height[0]) * width + x - cropped_width[0];
-						k < SPP; ++k)
-					{
-						SurfaceInteraction isect;
+					SurfaceInteraction isect;
 
-						// map pixel coordinates to[-1, 1]x[-1, 1]
-						float u = (2.f * (x / GRID_DIM + samplingArray[idx].x) - WIDTH) / HEIGHT * fov_tan;
-						float v = (-2.f * (y / GRID_DIM + samplingArray[idx].y) + HEIGHT) / HEIGHT * fov_tan;
+					// map pixel coordinates to[-1, 1]x[-1, 1]
+					float u = (2.f * (x + samplingArray[idx].x) - WIDTH) / HEIGHT * fov_tan;
+					float v = (-2.f * (y + samplingArray[idx].y) + HEIGHT) / HEIGHT * fov_tan;
 
-						// this can not be split up and needs to be in one line, otherwise
-						// omp will not take the average
-						col[i] += clamp(shoot_recursively(sc, sc.cam->getPrimaryRay(u, v, d), &isect, 0))
-							* inv_spp * inv_grid_dim;
-					}
+					// this can not be split up and needs to be in one line, otherwise
+					// omp will not take the average
+					col[i] += clamp(shoot_recursively(sc, sc.cam->getPrimaryRay(u, v, d), &isect, 0))
+						* inv_grid_dim;
 				}
 			}
 		}
@@ -165,8 +161,7 @@ std::vector<glm::vec3> render(size_t& width, size_t& height)
 }
 
 void write_file(const std::string & file,
-
-	std::vector<glm::vec3> & col, size_t width, size_t height)
+	std::vector<glm::vec3> & col, unsigned int width, unsigned int height)
 {
 	static int i_debug = 0;
 	std::ofstream ofs;
