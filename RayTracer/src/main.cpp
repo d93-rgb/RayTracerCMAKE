@@ -23,8 +23,8 @@ constexpr auto OS_SLASH = "/";
 
 using namespace rt;
 
-//constexpr auto SPP = 1;
-constexpr auto GRID_DIM = 3;
+constexpr auto SPP = 1;
+constexpr auto GRID_DIM = 10;
 
 constexpr auto WIDTH = 533;
 constexpr auto HEIGHT = 400;
@@ -110,7 +110,7 @@ std::vector<glm::vec3> render(unsigned int& width, unsigned int& height)
 	/***************************************/
 	//GatheringScene sc;
 	SingleCubeScene sc;
-	// enclose with braces for destructor of ProgressReporter at the end of rendering
+//	// enclose with braces for destructor of ProgressReporter at the end of rendering
 	{
 		/***************************************/
 		// START PROGRESSREPORTER
@@ -121,11 +121,11 @@ std::vector<glm::vec3> render(unsigned int& width, unsigned int& height)
 		/***************************************/
 		// dynamic schedule for proper I/O progress update
 #pragma omp parallel for schedule(dynamic, 1)
-		for (int y = cropped_height[0]; y < cropped_height[1]; ++y)
+		for (unsigned int y = cropped_height[0]; y < cropped_height[1]; ++y)
 		{
 			//fprintf(stderr, "\rRendering %5.2f%%", 100.*y / (HEIGHT - 1));
 			reporter.Update();
-			for (int x = cropped_width[0]; x < cropped_width[1]; ++x)
+			for (unsigned int x = cropped_width[0]; x < cropped_width[1]; ++x)
 			{
 				samplingArray = sampler.get2DArray();
 
@@ -150,6 +150,57 @@ std::vector<glm::vec3> render(unsigned int& width, unsigned int& height)
 		}
 		reporter.Done();
 	}
+	//enclose with braces for destructor of ProgressReporter at the end of rendering
+//	{
+		/***************************************/
+		// START PROGRESSREPORTER
+		/***************************************/
+//		pbrt::ProgressReporter reporter(HEIGHT, "Rendering:");
+//		/***************************************/
+//		// LOOPING OVER PIXELS
+//		/***************************************/
+//		std::random_device rd;
+//		std::default_random_engine eng(rd());
+//		std::uniform_real_distribution<> dist(0, 1);
+//		// dynamic schedule for proper I/O progress update
+//#pragma omp parallel for schedule(dynamic, 1)
+//		for (size_t y = cropped_height[0]; y < cropped_height[1]; ++y)
+//		{
+//			//fprintf(stderr, "\rRendering %5.2f%%", 100.*y / (HEIGHT - 1));
+//			reporter.Update();
+//			for (size_t x = cropped_width[0]; x < cropped_width[1]; ++x)
+//			{
+//				for (int m = 0; m < GRID_DIM; ++m)
+//				{
+//					for (int n = 0; n < GRID_DIM; ++n)
+//					{
+//						// hackery needed for omp pragma
+//						// the index i will be distributed among all threads
+//						// by omp automatically
+//						for (size_t k = 0,
+//							i = (y - cropped_height[0]) * width + x - cropped_width[0];
+//							k < SPP; ++k)
+//						{
+//							SurfaceInteraction isect;
+//
+//							// stratified sampling
+//							float u_rnd = float(dist(eng));
+//							float v_rnd = float(dist(eng));
+//							// map pixel coordinates to[-1, 1]x[-1, 1]
+//							float u = (2.f * (x + (m + u_rnd) / GRID_DIM) - WIDTH) / HEIGHT * fov_tan;
+//							float v = (-2.f * (y + (n + v_rnd) / GRID_DIM) + HEIGHT) / HEIGHT * fov_tan;
+//
+//							// this can not be split up and needs to be in one line, otherwise
+//							// omp will not take the average
+//							col[i] += clamp(shoot_recursively(sc, sc.cam->getPrimaryRay(u, v, d), &isect, 0))
+//								* inv_spp * inv_grid_dim;
+//						}
+//					}
+//				}
+//			}
+//		}
+//		reporter.Done();
+//	}
 
 	//#pragma omp parallel for
 		//	for (int i = 0; i < 10; ++i)

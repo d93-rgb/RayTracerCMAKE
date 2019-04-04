@@ -35,9 +35,13 @@ public:
 	StratifiedSampler2D(unsigned int width,
 		unsigned int height,
 		int grid_dim) :
-		Sampler2D(width, height, grid_dim* grid_dim),
-		grid_dim(grid_dim), eng(rd()), dist(0, 1)
+		Sampler2D(width, height, grid_dim * grid_dim),
+		grid_dim(grid_dim)
 	{
+		std::random_device rd;
+		std::default_random_engine eng(rd());
+		std::uniform_real_distribution<> dist(0,1);
+
 		for (unsigned int i = 0; i < height; ++i)
 		{
 			for (unsigned int j = 0; j < width; ++j)
@@ -49,7 +53,7 @@ public:
 						float u_rnd = float(dist(eng));
 						float v_rnd = float(dist(eng));
 
-						sampler2Darray[i * width + j][k * m + m] =
+						sampler2Darray[i * width + j][k * grid_dim + m] =
 							glm::vec2((k + u_rnd) / grid_dim,
 							(m + v_rnd) / grid_dim);
 					}
@@ -62,9 +66,7 @@ public:
 
 private:
 	int grid_dim;
-	std::random_device rd;
-	std::default_random_engine eng;
-	std::uniform_real_distribution<> dist;
+
 };
 
 } // namespace rt
