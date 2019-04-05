@@ -47,10 +47,10 @@ public:
 	void init();
 };
 
-class SingleCubeScene : public Scene
+class MixedScene : public Scene
 {
 public:
-	SingleCubeScene()
+	MixedScene()
 	{
 		init();
 	}

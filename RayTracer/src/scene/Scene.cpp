@@ -191,7 +191,7 @@ void GatheringScene::init()
 	cam->update();
 }
 
-void SingleCubeScene::init()
+void MixedScene::init()
 {
 	//glm::vec3 translation = glm::vec3(0.f, sqrtf(2.f), sqrtf(2.f));
 	glm::vec3 translation = glm::vec3(0.f, 5.f, 10.f);

@@ -84,7 +84,7 @@ class Texture;
 class CheckerBoardTexture;
 class RGB_TriangleTexture;
 
-class SingleCubeScene;
+class MixedScene;
 class GatheringScene;
 
 enum class ImageWrap;

@@ -24,7 +24,7 @@ constexpr auto OS_SLASH = "/";
 using namespace rt;
 
 constexpr auto SPP = 1;
-constexpr auto GRID_DIM = 10;
+constexpr auto GRID_DIM = 3;
 
 constexpr auto WIDTH = 533;
 constexpr auto HEIGHT = 400;
@@ -109,7 +109,7 @@ std::vector<glm::vec3> render(unsigned int& width, unsigned int& height)
 	// CREATING SCENE
 	/***************************************/
 	//GatheringScene sc;
-	SingleCubeScene sc;
+	MixedScene sc;
 //	// enclose with braces for destructor of ProgressReporter at the end of rendering
 	{
 		/***************************************/
@@ -120,13 +120,14 @@ std::vector<glm::vec3> render(unsigned int& width, unsigned int& height)
 		// LOOPING OVER PIXELS
 		/***************************************/
 		// dynamic schedule for proper I/O progress update
-#pragma omp parallel for schedule(dynamic, 1)
+//#pragma omp parallel for schedule(dynamic, 1)
 		for (unsigned int y = cropped_height[0]; y < cropped_height[1]; ++y)
 		{
 			//fprintf(stderr, "\rRendering %5.2f%%", 100.*y / (HEIGHT - 1));
 			reporter.Update();
 			for (unsigned int x = cropped_width[0]; x < cropped_width[1]; ++x)
 			{
+				//TODO: NOT threadsafe
 				samplingArray = sampler.get2DArray();
 
 				// hackery needed for omp pragma
