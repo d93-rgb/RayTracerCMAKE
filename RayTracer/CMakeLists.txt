@@ -88,7 +88,8 @@ src/scene/*
 src/shape/*
 src/shape/quadric/*
 src/texture/*
-src/samplers/*)
+src/samplers/*
+/src/image/*)
 
 file (GLOB RT_HEADERS LIST_DIRECTORIES false
 include/camera/*
@@ -102,7 +103,8 @@ include/scene/*
 include/shape/*
 include/shape/quadric/*
 include/texture/*
-include/samplers/*)
+include/samplers/*
+include/image/*)
 
 include_directories( "include/" )
 
@@ -122,6 +124,8 @@ if(MSVC)
 	SOURCE_GROUP ("Source Files\\shape\\quadric" REGULAR_EXPRESSION src/shape/quadric/.*)
 	SOURCE_GROUP ("Source Files\\texture" REGULAR_EXPRESSION src/texture/.*)
 	SOURCE_GROUP ("Source Files\\samplers" REGULAR_EXPRESSION src/samplers/.*)
+	SOURCE_GROUP ("Source Files\\image" REGULAR_EXPRESSION src/image/.*)
+
 
 	# header files
 	SOURCE_GROUP ("Header Files\\camera" REGULAR_EXPRESSION include/camera/.*)
@@ -136,6 +140,8 @@ if(MSVC)
 	SOURCE_GROUP ("Header Files\\shape\\quadric" REGULAR_EXPRESSION include/shape/quadric/.*)
 	SOURCE_GROUP ("Header Files\\texture" REGULAR_EXPRESSION include/texture/.*)
 	SOURCE_GROUP ("Header Files\\samplers" REGULAR_EXPRESSION include/samplers/.*)
+	SOURCE_GROUP ("Source Files\\image" REGULAR_EXPRESSION src/image/.*)
+
 
 
 else(MSVC)
@@ -151,6 +157,7 @@ else(MSVC)
 	SOURCE_GROUP ("shape/quadric" REGULAR_EXPRESSION src/shape/quadric/.*)
 	SOURCE_GROUP (texture REGULAR_EXPRESSION src/texture/.*)
 	SOURCE_GROUP (samplers REGULAR_EXPRESSION src/samplers/.*)
+	SOURCE_GROUP (image REGULAR_EXPRESSION src/image/.*)
 
 endif()
 
