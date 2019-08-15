@@ -11,7 +11,8 @@ struct Light
 	glm::vec3 emission;
 	float power;
 
-	Light(glm::vec3 p, glm::vec3 dir, glm::vec3 col)
+	Light(glm::vec3 p, glm::vec3 dir, glm::vec3 col) :
+		power(0)
 	{
 		this->p = p;
 		this->dir = glm::normalize(dir);

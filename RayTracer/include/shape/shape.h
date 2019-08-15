@@ -34,7 +34,8 @@ class Bounds3
 	glm::vec3 boundaries[2];
 
 public:
-	Bounds3(glm::vec3 min_bounds, glm::vec3 max_bounds)
+	Bounds3(glm::vec3 min_bounds, glm::vec3 max_bounds) :
+		normal(glm::vec3(0.f))
 	{
 		for (int i = 0; i < 3; ++i)
 		{
@@ -100,7 +101,7 @@ struct Plane : public Shape
 	float k;
 
 	Plane(glm::vec3 p, glm::vec3 n) :
-		pos(p), normal(glm::normalize(n))
+		pos(p), normal(glm::normalize(n)), color(glm::vec3(0))
 	{
 		k = glm::dot(normal, pos);
 	}
@@ -181,10 +182,10 @@ struct Rectangle : public Shape
 	// normal of the plane the rectangle resides in
 	glm::vec3 normal;
 
-	float v1_dot;
-	float v2_dot;
+	float v1_dot = 0;
+	float v2_dot = 0;
 
-	Rectangle() {};
+	Rectangle() = default;
 
 	Rectangle(glm::vec3 center, glm::vec3 u, glm::vec3 v, std::shared_ptr<Material> m) :
 		center(center - 0.5f * (u + v))
@@ -420,7 +421,8 @@ public:
 		this->p3 = objToWorld * glm::vec4(p3, 1.f);
 
 		this->n = glm::transpose(glm::inverse(objToWorld)) * glm::vec4(n, 0.f);
-
+		// base transformation to barycentric coordinates
+		// see: https://de.wikipedia.org/wiki/Basiswechsel_(Vektorraum)
 		this->m_inv = glm::inverse(glm::mat3(this->p1, this->p2, this->p3));
 
 	}

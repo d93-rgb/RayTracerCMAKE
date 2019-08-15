@@ -1,6 +1,8 @@
-cmake_minimum_required (VERSION 2.8)
+cmake_minimum_required (VERSION 3.9)
 cmake_policy(SET CMP0048 NEW)
 project (RayTracer VERSION 1.0)
+
+set(CMAKE_CXX_STANDARD 17)
 
 # create compiler specific information needed for linting
 # with vim plugin YouCompleteMe
@@ -25,6 +27,9 @@ include_directories (
   ext/glog/src
   ${CMAKE_BINARY_DIR}/ext/glog
 )
+
+find_package(OpenMP REQUIRED)
+#message(STATUS ${OpenMP_C_FLAGS}) # Link against it for C++)
 
 ###########################################################################
 # assimp
@@ -169,7 +174,7 @@ if( NOT WIN32 )
 	add_dependencies(rt ANTTWEAKBAR_MAKE)
 endif()
 
-target_link_libraries( rt ${ALL_RT_LIBRARIES} )
+target_link_libraries( rt ${ALL_RT_LIBRARIES} OpenMP::OpenMP_CXX)
 
 if(WIN32)
 	# post build command for copying dll files

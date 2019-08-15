@@ -74,7 +74,7 @@ void helper_fun(std::string& file)
 */
 std::vector<glm::vec3> render(unsigned int& width, unsigned int& height)
 {
-	constexpr float fov = glm::radians(55.f);
+	constexpr float fov = glm::radians(90.f);
 	float fov_tan = tan(fov / 2);
 	float u = 0.f, v = 0.f;
 	// distance to view plane
@@ -120,7 +120,7 @@ std::vector<glm::vec3> render(unsigned int& width, unsigned int& height)
 		// LOOPING OVER PIXELS
 		/***************************************/
 		// dynamic schedule for proper I/O progress update
-//#pragma omp parallel for schedule(dynamic, 1)
+#pragma omp parallel for schedule(dynamic, 1)
 		for (unsigned int y = cropped_height[0]; y < cropped_height[1]; ++y)
 		{
 			//fprintf(stderr, "\rRendering %5.2f%%", 100.*y / (HEIGHT - 1));
@@ -268,7 +268,8 @@ int main(int argc, const char** argv)
 	// open image with gimp
 	auto owg = false;
 	std::string dest = "";
-
+	//std::cout << "OpenMP max threads:" << omp_get_max_threads() << std::endl;
+	
 	if (argc > 1)
 	{
 		for (int i = 0; i < argc; ++i)
