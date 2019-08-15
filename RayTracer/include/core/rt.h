@@ -87,6 +87,10 @@ class RGB_TriangleTexture;
 class MixedScene;
 class GatheringScene;
 
+class Image;
+class Dispatcher;
+class Slice;
+
 enum class ImageWrap;
 
 static constexpr bool QUIET = false;
