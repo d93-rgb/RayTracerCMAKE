@@ -1,4 +1,5 @@
 #include <chrono>
+#include <set>
 
 #include "core/rt.h"
 #include "core/renderer.h"
@@ -6,6 +7,10 @@
 #include "scene/scene.h"
 #include "camera/camera.h"
 #include "core/utility.h"
+
+//threading
+#include "image/image.h"
+#include "threads/dispatcher.h"
 
 #if defined(_WIN32)
 #define GET_STRERR(ERROR_NUM, BUF, LEN) strerror_s(BUF, ERROR_NUM);
@@ -18,7 +23,8 @@ constexpr auto OS_SLASH = "/";
 #endif
 
 // use for debugging
-#undef DEBUG
+#define DEBUG
+//#define NO_THREADS
 //#define OPEN_WITH_GIMP
 
 using namespace rt;
@@ -26,15 +32,32 @@ using namespace rt;
 constexpr auto SPP = 1;
 constexpr auto GRID_DIM = 3;
 
-constexpr auto WIDTH = 533;
-constexpr auto HEIGHT = 400;
+constexpr auto WIDTH = 320;
+constexpr auto HEIGHT = 320;
+
+constexpr auto NUM_THREADS = 4;
 
 int MAX_DEPTH = 4;
 
 //std::vector<float> debug_vec;
 void helper_fun(const std::string& file);
 std::vector<glm::vec3> render(unsigned int& width, unsigned int& height);
+std::vector<glm::vec3> render_with_threads(unsigned int& width, unsigned int& height);
+
 void write_file(const std::string& file, std::vector<glm::vec3>& col, unsigned int width, unsigned int height);
+void get_color(std::vector<glm::vec3>& col,
+	const Scene& sc,
+	StratifiedSampler2D& sampler,
+	unsigned int array_size,
+	const glm::vec2* samplingArray,
+	float inv_grid_dim,
+	float inv_spp,
+	float fov_tan,
+	float d,
+	int x,
+	int y,
+	int x1,
+	int y1);
 
 std::ostream& operator<<(std::ostream& os, glm::vec3 v)
 {
@@ -48,7 +71,12 @@ std::ostream& operator<<(std::ostream& os, glm::vec3 v)
 void helper_fun(std::string& file)
 {
 	unsigned int width, height;
+	
+#ifdef NO_THREADS
 	std::vector<glm::vec3>&& colors = render(width, height);
+#else
+	std::vector<glm::vec3>&& colors = render_with_threads(width, height);
+#endif
 
 	if (file.empty())
 	{
@@ -110,7 +138,7 @@ std::vector<glm::vec3> render(unsigned int& width, unsigned int& height)
 	/***************************************/
 	//GatheringScene sc;
 	MixedScene sc;
-//	// enclose with braces for destructor of ProgressReporter at the end of rendering
+	//	// enclose with braces for destructor of ProgressReporter at the end of rendering
 	{
 		/***************************************/
 		// START PROGRESSREPORTER
@@ -120,7 +148,7 @@ std::vector<glm::vec3> render(unsigned int& width, unsigned int& height)
 		// LOOPING OVER PIXELS
 		/***************************************/
 		// dynamic schedule for proper I/O progress update
-#pragma omp parallel for schedule(dynamic, 1)
+//#pragma omp parallel for schedule(dynamic, 1)
 		for (unsigned int y = cropped_height[0]; y < cropped_height[1]; ++y)
 		{
 			//fprintf(stderr, "\rRendering %5.2f%%", 100.*y / (HEIGHT - 1));
@@ -144,8 +172,10 @@ std::vector<glm::vec3> render(unsigned int& width, unsigned int& height)
 
 					// this can not be split up and needs to be in one line, otherwise
 					// omp will not take the 
-					col[i] += clamp(shoot_recursively(sc, sc.cam->getPrimaryRay(u, v, d), &isect, 0))
-						* inv_grid_dim;
+					/*col[i] += clamp(shoot_recursively(sc, sc.cam->getPrimaryRay(u, v, d), &isect, 0))
+						* inv_grid_dim;*/
+					col[i] = glm::normalize(sc.cam->getPrimaryRay(u, v, d).rd);
+
 				}
 			}
 		}
@@ -212,9 +242,204 @@ std::vector<glm::vec3> render(unsigned int& width, unsigned int& height)
 	return col;
 }
 
-void write_file(const std::string & file,
-	std::vector<glm::vec3> & col, unsigned int width, unsigned int height)
+std::vector<glm::vec3> render_with_threads(unsigned int& width, unsigned int& height)
 {
+	constexpr float fov = glm::radians(90.f);
+	float fov_tan = tan(fov / 2);
+	float u = 0.f, v = 0.f;
+	// distance to view plane
+	float d = 1.f;
+	float inv_spp;
+	float inv_grid_dim = 1.f / (GRID_DIM * GRID_DIM);
+
+	float crop_min_x = 0.f, crop_max_x = 1.f;
+	float crop_min_y = 0.f, crop_max_y = 1.f;
+
+	assert(crop_min_x <= crop_max_x && crop_min_y <= crop_max_y);
+
+	unsigned int cropped_width[2];
+	unsigned int cropped_height[2];
+
+	crop(crop_min_x, crop_max_x, WIDTH, cropped_width);
+	crop(crop_min_y, crop_max_y, HEIGHT, cropped_height);
+
+	width = cropped_width[1] - cropped_width[0];
+	height = cropped_height[1] - cropped_height[0];
+
+	LOG(INFO) << "Image width = " << WIDTH << "; Image height = " << HEIGHT;
+	LOG(INFO) << "Cropped width = " << width << "; Cropped height = " << height;
+
+	std::vector<glm::vec3> col{ width * height, glm::vec3(0.f) };
+
+	StratifiedSampler2D sampler{ width, height, GRID_DIM };
+	unsigned int array_size = GRID_DIM * GRID_DIM;
+	const glm::vec2* samplingArray;
+	inv_spp = 1.f; // sampler.samplesPerPixel;
+	/***************************************/
+	// CREATING SCENE
+	/***************************************/
+	//GatheringScene sc;
+	MixedScene sc;
+	//	// enclose with braces for destructor of ProgressReporter at the end of rendering
+	{
+		rt::Image img( WIDTH, HEIGHT );
+		Slice slice(img, 16, 16);
+		std::mutex pairs_mutex;
+		std::vector<std::thread> threads_v;
+		/***************************************/
+		// START PROGRESSREPORTER
+		/***************************************/
+		pbrt::ProgressReporter reporter(slice.dx*slice.dy, "Rendering:");
+		/***************************************/
+		// LOOPING OVER PIXELS
+		/***************************************/
+			//fprintf(stderr, "\rRendering %5.2f%%", 100.*y / (HEIGHT - 1));
+
+		for (int i = 0; i < NUM_THREADS; ++i)
+		{
+			threads_v.push_back(std::thread(work, 
+				std::ref(slice),
+				std::ref(pairs_mutex),
+				std::ref(col),
+				std::ref(sc),
+				std::ref(sampler),
+				std::ref(reporter),
+				array_size,
+				std::ref(samplingArray),
+				inv_grid_dim,
+				inv_spp,
+				fov_tan,
+				d,
+				std::ref(get_color)));
+		}
+
+		for (int i = 0; i < NUM_THREADS; ++i)
+		{
+			threads_v[i].join();
+		}
+
+		reporter.Done();
+	}
+	//enclose with braces for destructor of ProgressReporter at the end of rendering
+//	{
+		/***************************************/
+		// START PROGRESSREPORTER
+		/***************************************/
+//		pbrt::ProgressReporter reporter(HEIGHT, "Rendering:");
+//		/***************************************/
+//		// LOOPING OVER PIXELS
+//		/***************************************/
+//		std::random_device rd;
+//		std::default_random_engine eng(rd());
+//		std::uniform_real_distribution<> dist(0, 1);
+//		// dynamic schedule for proper I/O progress update
+//#pragma omp parallel for schedule(dynamic, 1)
+//		for (size_t y = cropped_height[0]; y < cropped_height[1]; ++y)
+//		{
+//			//fprintf(stderr, "\rRendering %5.2f%%", 100.*y / (HEIGHT - 1));
+//			reporter.Update();
+//			for (size_t x = cropped_width[0]; x < cropped_width[1]; ++x)
+//			{
+//				for (int m = 0; m < GRID_DIM; ++m)
+//				{
+//					for (int n = 0; n < GRID_DIM; ++n)
+//					{
+//						// hackery needed for omp pragma
+//						// the index i will be distributed among all threads
+//						// by omp automatically
+//						for (size_t k = 0,
+//							i = (y - cropped_height[0]) * width + x - cropped_width[0];
+//							k < SPP; ++k)
+//						{
+//							SurfaceInteraction isect;
+//
+//							// stratified sampling
+//							float u_rnd = float(dist(eng));
+//							float v_rnd = float(dist(eng));
+//							// map pixel coordinates to[-1, 1]x[-1, 1]
+//							float u = (2.f * (x + (m + u_rnd) / GRID_DIM) - WIDTH) / HEIGHT * fov_tan;
+//							float v = (-2.f * (y + (n + v_rnd) / GRID_DIM) + HEIGHT) / HEIGHT * fov_tan;
+//
+//							// this can not be split up and needs to be in one line, otherwise
+//							// omp will not take the average
+//							col[i] += clamp(shoot_recursively(sc, sc.cam->getPrimaryRay(u, v, d), &isect, 0))
+//								* inv_spp * inv_grid_dim;
+//						}
+//					}
+//				}
+//			}
+//		}
+//		reporter.Done();
+//	}
+
+	//#pragma omp parallel for
+		//	for (int i = 0; i < 10; ++i)
+		//	{
+		//		std::this_thread::sleep_for(std::chrono::seconds(1));
+		//		std::cout << " thread: " << omp_get_thread_num() << std::endl;
+		//	}
+	return col;
+}
+
+
+//for debugging
+std::set<int> bin;
+
+void get_color(std::vector<glm::vec3>& col,
+	const Scene& sc,
+	StratifiedSampler2D& sampler,
+	unsigned int array_size,
+	const glm::vec2* samplingArray,
+	float inv_grid_dim,
+	float inv_spp,
+	float fov_tan,
+	float d,
+	int x,
+	int y,
+	int x1,
+	int y1)
+{
+	//TODO: NOT threadsafe
+	samplingArray = sampler.get2DArray();
+
+	// hackery needed for omp pragma
+	// the index i will be distributed among all threads
+	// by omp automatically
+	//unsigned int i = (y - cropped_height[0]) * width + (x - cropped_width[0]);
+#ifdef DEBUG
+	assert(bin.find(x1 + y1) == bin.end());
+	bin.insert(x1 + y1);
+	
+	if (x1 + y1 >= col.size())
+	{
+		printf("Error: index out of range: x1+y1 = %d > %zu\n", x * y + y, col.size());
+		exit(1);
+	}
+#endif
+
+	for (unsigned int idx = 0; idx < array_size; ++idx)
+	{
+		SurfaceInteraction isect;
+
+		// map pixel coordinates to[-1, 1]x[-1, 1]
+		float u = (2.f * (x + samplingArray[idx].x) - WIDTH) / HEIGHT * fov_tan;
+		float v = (-2.f * (y + samplingArray[idx].y) + HEIGHT) / HEIGHT * fov_tan;
+
+		// this can not be split up and needs to be in one line, otherwise
+		// omp will not take the 
+		col[x1 + y1] += clamp(shoot_recursively(sc, sc.cam->getPrimaryRay(u, v, d), &isect, 0))
+			* inv_grid_dim;
+		//col[x + y] = glm::normalize(sc.cam->getPrimaryRay(u, v, d).rd);
+	}
+}
+
+
+void write_file(const std::string& file,
+	std::vector<glm::vec3>& col, unsigned int width, unsigned int height)
+{
+#ifdef DEBUG
+	//assert(bin.size() == col.size());
+#endif
 	static int i_debug = 0;
 	std::ofstream ofs;
 
@@ -269,7 +494,7 @@ int main(int argc, const char** argv)
 	auto owg = false;
 	std::string dest = "";
 	//std::cout << "OpenMP max threads:" << omp_get_max_threads() << std::endl;
-	
+
 	if (argc > 1)
 	{
 		for (int i = 0; i < argc; ++i)
