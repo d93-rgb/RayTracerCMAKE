@@ -32,8 +32,12 @@ bool rt::Quadric::solveQuadraticEq(float* t, float a, float b, float c)
 	t0 = q / a;
 	t1 = c / q;
 
-	*t = t0 > t1 ? t1 : t0;
-	return t > 0;
+	if (t0 > t1)
+	{
+		std::swap(t0, t1);
+	}
+	*t = t1 < 0.0 ? INFINITY : (t0 < 0.0 ? t1 : t0);
+	return *t < INFINITY;
 }
 
 float Sphere::intersect(const Ray& ray, SurfaceInteraction* isect)

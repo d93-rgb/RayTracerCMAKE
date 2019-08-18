@@ -8,7 +8,7 @@ namespace rt
 class Quadric : public Shape
 {
 
-	static bool solveQuadraticEq();
+	static bool solveQuadraticEq(float* t, float a, float b, float c);
 };
 
 struct Sphere : public Quadric
