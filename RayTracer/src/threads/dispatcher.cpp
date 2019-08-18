@@ -62,7 +62,7 @@ void work(Slice& s,
 			for (int j = 0; j < s.w_step; ++j)
 			{
 				func(col, sc, sampler, array_size, samplingArray, inv_grid_dim, inv_spp,
-					fov_tan, d, s.pairs[idx].first + i, s.pairs[idx].second + j, (s.pairs[idx].second + i) * s.img_width, s.pairs[idx].first + j);
+					fov_tan, d, s.pairs[idx].first + j, s.pairs[idx].second + i, (s.pairs[idx].second + i) * s.img_width, s.pairs[idx].first + j);
 			}
 		}	
 

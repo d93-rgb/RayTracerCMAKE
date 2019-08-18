@@ -355,7 +355,7 @@ void MixedScene::init()
 	sphere_mat->setTexture(sphere_texture);
 
 	sc.emplace_back(std::make_unique<Sphere>(
-		glm::vec3(-7.f, 0.f, 1.f),
+		glm::vec3(-9.f, 6.f, -3.f),
 		2.f,
 		glm::vec3(1.f),
 		sphere_mat));
@@ -373,6 +373,7 @@ void MixedScene::init()
 	//	glm::vec3(1.f),
 	//	sphere_mat));
 
+	// purple sphere
 	sphere_mat =
 		std::make_shared<Material>(
 			glm::vec3(0.02, 0.0f, 0.02),
@@ -381,7 +382,7 @@ void MixedScene::init()
 	sphere_mat->setShininess(20.f);
 
 	sc.emplace_back(std::make_unique<Sphere>(
-		glm::vec3(-6.f, 6.f, -3.f),
+		glm::vec3(8.f, 2.f, -3.f),
 		1.f,
 		glm::vec3(1.f),
 		sphere_mat));

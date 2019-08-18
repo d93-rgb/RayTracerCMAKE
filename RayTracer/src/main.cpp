@@ -32,8 +32,8 @@ using namespace rt;
 constexpr auto SPP = 1;
 constexpr auto GRID_DIM = 3;
 
-constexpr auto WIDTH = 320;
-constexpr auto HEIGHT = 320;
+constexpr auto WIDTH = 480;
+constexpr auto HEIGHT = 400;
 
 constexpr auto NUM_THREADS = 4;
 
@@ -248,7 +248,7 @@ std::vector<glm::vec3> render_with_threads(unsigned int& width, unsigned int& he
 	float fov_tan = tan(fov / 2);
 	float u = 0.f, v = 0.f;
 	// distance to view plane
-	float d = 1.f;
+	float foc_len = 1.0f / fov_tan;
 	float inv_spp;
 	float inv_grid_dim = 1.f / (GRID_DIM * GRID_DIM);
 
@@ -309,7 +309,7 @@ std::vector<glm::vec3> render_with_threads(unsigned int& width, unsigned int& he
 				inv_grid_dim,
 				inv_spp,
 				fov_tan,
-				d,
+				foc_len,
 				std::ref(get_color)));
 		}
 

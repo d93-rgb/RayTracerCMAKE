@@ -4,12 +4,39 @@ namespace rt
 {
 
 // TODO: implement function for solving a quadratic equation
-bool rt::Quadric::solveQuadraticEq()
+bool rt::Quadric::solveQuadraticEq(float* t, float a, float b, float c)
 {
-	return false;
+	float disc = sqrt(b * b - 4 * a * c);
+
+	if (disc < 0.0f)
+	{
+		return false;
+	}
+
+	float t0;
+	float t1;
+
+	// numerically unstable, if difference |b-disc| is small
+	//float t0 = (-b + disc) / a * 0.5;
+	//float t1 = (-b - disc) / a * 0.5;
+
+	if (b < 0)
+	{
+		q = -.5 * (b - disc);
+	}
+	else
+	{
+		q = -.5 * (b + disc);
+	}
+	
+	t0 = q / a;
+	t1 = c / q;
+
+	*t = t0 > t1 ? t1 : t0;
+	return t > 0;
 }
 
-float Sphere::intersect(const Ray &ray, SurfaceInteraction *isect)
+float Sphere::intersect(const Ray& ray, SurfaceInteraction* isect)
 {
 	float t1 = INFINITY, t2 = t1;
 	float tmp;
@@ -46,7 +73,7 @@ float Sphere::intersect(const Ray &ray, SurfaceInteraction *isect)
 	return tmp;
 }
 
-float Cylinder::intersect(const Ray &ray, SurfaceInteraction *isect)
+float Cylinder::intersect(const Ray& ray, SurfaceInteraction* isect)
 {
 	Ray transformed_ray{ worldToObj * glm::vec4(ray.ro, 1.f),
 		worldToObj * glm::vec4(ray.rd, 0.f) };
