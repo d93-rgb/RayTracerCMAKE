@@ -15,6 +15,7 @@ bool rt::Quadric::solveQuadraticEq(float* t, float a, float b, float c)
 
 	float t0;
 	float t1;
+	float q;
 
 	// numerically unstable, if difference |b-disc| is small
 	//float t0 = (-b + disc) / a * 0.5;
