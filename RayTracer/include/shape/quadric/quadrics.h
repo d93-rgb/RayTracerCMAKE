@@ -7,7 +7,7 @@ namespace rt
 {
 class Quadric : public Shape
 {
-
+public:
 	static bool solveQuadraticEq(float* t, float a, float b, float c);
 };
 

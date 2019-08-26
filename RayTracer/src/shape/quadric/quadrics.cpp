@@ -4,7 +4,7 @@ namespace rt
 {
 
 // TODO: implement function for solving a quadratic equation
-bool rt::Quadric::solveQuadraticEq(float* t, float a, float b, float c)
+bool Quadric::solveQuadraticEq(float* t, float a, float b, float c)
 {
 	float disc = sqrt(b * b - 4 * a * c);
 
@@ -49,7 +49,7 @@ float Sphere::intersect(const Ray& ray, SurfaceInteraction* isect)
 	float term_1 = glm::dot(ray.rd, ray.rd);
 	float term_2 = 2 * glm::dot(ray.rd, ray.ro - origin);
 	float term_3 = glm::dot(ray.ro - origin, ray.ro - origin) - r * r;
-
+	/*
 	float disc = term_2 * term_2 - 4 * term_1 * term_3;
 
 	if (disc < 0)
@@ -64,8 +64,8 @@ float Sphere::intersect(const Ray& ray, SurfaceInteraction* isect)
 	tmp = std::fmin(t1, t2);
 	tmp = tmp >= 0 ? tmp : fmax(t1, t2);
 	tmp = tmp >= 0 ? tmp : INFINITY;
-
-	if (tmp >= 0 && tmp < INFINITY)
+	*/
+	if (Quadric::solveQuadraticEq(&tmp, term_1, term_2, term_3))
 	{
 		if (tmp < ray.tNearest)
 		{

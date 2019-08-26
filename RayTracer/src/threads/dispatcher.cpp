@@ -42,6 +42,8 @@ void work(Slice& s,
 		int y1))
 {
 	int idx = 0;
+	unsigned int h_step;
+	unsigned int w_step;
 
 	while (idx != -1)
 	{
@@ -56,10 +58,14 @@ void work(Slice& s,
 		}
 
 		assert(idx < s.get_length());
+		
+		// get step range
+		w_step = std::min(s.w_step, s.img_width - s.pairs[idx].first);
+		h_step = std::min(s.h_step, s.img_height - s.pairs[idx].second);
 
-		for (int i = 0; i < s.h_step; ++i)
+		for (unsigned int i = 0; i < h_step; ++i)
 		{
-			for (int j = 0; j < s.w_step; ++j)
+			for (unsigned int j = 0; j < w_step; ++j)
 			{
 				func(col, sc, sampler, array_size, samplingArray, inv_grid_dim, inv_spp,
 					fov_tan, d, s.pairs[idx].first + j, s.pairs[idx].second + i, (s.pairs[idx].second + i) * s.img_width, s.pairs[idx].first + j);

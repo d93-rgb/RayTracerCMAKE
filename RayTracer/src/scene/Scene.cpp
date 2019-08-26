@@ -194,9 +194,9 @@ void GatheringScene::init()
 void MixedScene::init()
 {
 	//glm::vec3 translation = glm::vec3(0.f, sqrtf(2.f), sqrtf(2.f));
-	glm::vec3 translation = glm::vec3(0.f, 5.f, 10.f);
+	glm::vec3 translation = glm::vec3(0.f, 5.f, 30.f);
 	//glm::vec3 look_pos = glm::vec3(0.f, -sqrtf(2.f), -sqrt(2.f));
-	glm::vec3 look_pos = glm::vec3(0.f, 0.f, 0.f);
+	glm::vec3 look_pos = glm::vec3(0.f, 0.f, -10.f);
 	glm::vec3 cam_up = glm::vec3(0.f, 1.f, 0.f);
 	glm::vec4 cube_position;
 	glm::vec3 cube_normal;
@@ -346,16 +346,19 @@ void MixedScene::init()
 	/*auto sphere_texture = std::make_shared<CheckerBoardTexture>(
 		std::make_shared<SphericalMapping>(glm::vec3(-3.f, 0.f, -7.f)));*/
 	auto sphere_texture = std::make_shared<CheckerBoardTexture>(
-		std::make_shared<PlanarMapping>(
+		/*std::make_shared<PlanarMapping>(
 			glm::vec3(-7.f, -4.f, -7.f),
 			glm::vec3(4.f, 0.f, 0.f),
-			glm::vec3(0.f, 4.f, 0.f)),
+			glm::vec3(0.f, 4.f, 0.f)),*/
+		std::make_shared<SphericalMapping>(
+			glm::vec3(-35.f, 6.f, -3.f)
+			),
 		glm::vec3(1.f),
 		ImageWrap::REPEAT);
 	sphere_mat->setTexture(sphere_texture);
 
 	sc.emplace_back(std::make_unique<Sphere>(
-		glm::vec3(-9.f, 6.f, -3.f),
+		glm::vec3(-35.f, 6.f, -3.f),
 		2.f,
 		glm::vec3(1.f),
 		sphere_mat));
@@ -590,4 +593,5 @@ void MixedScene::init()
 	/////////////////////////////////////
 
 }
+
 }

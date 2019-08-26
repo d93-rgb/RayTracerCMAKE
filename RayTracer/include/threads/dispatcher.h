@@ -20,8 +20,8 @@ public:
 	int dx;
 	int dy;
 
-	int w_step;
-	int h_step;
+	unsigned int w_step;
+	unsigned int h_step;
 
 	unsigned int img_width;
 	unsigned int img_height;
@@ -30,18 +30,21 @@ public:
 
 	Slice(rt::Image img, int w, int h)
 	{
-		if ((img.get_height() % 16 != 0) && (img.get_width() % 16 != 0))
+		/*if ((img.get_height() % 16 != 0) || (img.get_width() % 16 != 0))
 		{
-			printf("Error : Only image dimensions divisible by 16 supported");
+			printf("ERROR: Only image dimensions divisible by 16 supported\n");
 			exit(1);
-		}
+		}*/
 		w_step = w;
 		h_step = h;
 		img_width = img.get_width();
 		img_height = img.get_height();
 
-		dx = img_width / w;
-		dy = img_height / h;
+		/*dx = int(std::ceil(img_width / float(w)));
+		dy = int(std::ceil(img_height / float(h)));
+*/
+		dx = img_width / w + (img_width % w == 0 ? 0 : 1);
+		dy = img_height / h + (img_height % h == 0 ? 0 : 1);
 
 		idx = -1;
 

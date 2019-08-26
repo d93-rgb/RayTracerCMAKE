@@ -24,6 +24,7 @@ constexpr auto OS_SLASH = "/";
 
 // use for debugging
 #define DEBUG
+#define GAMMA_CORRECTION
 //#define NO_THREADS
 //#define OPEN_WITH_GIMP
 
@@ -32,8 +33,8 @@ using namespace rt;
 constexpr auto SPP = 1;
 constexpr auto GRID_DIM = 3;
 
-constexpr auto WIDTH = 480;
-constexpr auto HEIGHT = 400;
+constexpr unsigned int WIDTH = 480;
+constexpr unsigned int HEIGHT = 270;
 
 constexpr auto NUM_THREADS = 4;
 
@@ -43,6 +44,11 @@ int MAX_DEPTH = 4;
 void helper_fun(const std::string& file);
 std::vector<glm::vec3> render(unsigned int& width, unsigned int& height);
 std::vector<glm::vec3> render_with_threads(unsigned int& width, unsigned int& height);
+
+// for creating color gradients
+std::vector<glm::vec3> render_gradient(unsigned int& width_img, const unsigned int& width_stripe, 
+	unsigned int& height);
+
 
 void write_file(const std::string& file, std::vector<glm::vec3>& col, unsigned int width, unsigned int height);
 void get_color(std::vector<glm::vec3>& col,
@@ -76,19 +82,21 @@ void helper_fun(std::string& file)
 	std::vector<glm::vec3>&& colors = render(width, height);
 #else
 	std::vector<glm::vec3>&& colors = render_with_threads(width, height);
+	//std::vector<glm::vec3>&& colors = render_gradient(width, 10, height);
 #endif
 
 	if (file.empty())
 	{
 		char buf[200];
 		GET_PWD(buf, 200);
+		std::string file_name = "picture.ppm";
 		std::cout << buf << std::endl;
 		std::string fn = buf;
 
 
 		LOG(INFO) << "Image will be written to \"" <<
-			fn.substr(0, fn.find_last_of("\\/")).append(OS_SLASH).append("picture.ppm");
-		write_file("picture.ppm", colors, width, height);
+			fn.substr(0, fn.find_last_of("\\/")).append(OS_SLASH).append(file_name);
+		write_file(file_name, colors, width, height);
 	}
 	else
 	{
@@ -96,6 +104,32 @@ void helper_fun(std::string& file)
 		write_file(file, colors, width, height);
 	}
 }
+
+std::vector<glm::vec3> render_gradient(unsigned int& width_img, const unsigned int& width_stripe,
+	unsigned int& height)
+{
+	// do not let RAM explode, limit maximum stripe width
+	assert(width_stripe < 4e3);
+
+	// set image width and height
+	width_img = 256 * width_stripe;
+	height = HEIGHT;
+
+	std::vector<glm::vec3> color{ 256 * width_stripe * height, glm::vec3(0) };
+
+	for (int k = 0; k < 256; ++k)
+	{
+		for (unsigned int i = 0; i < height; ++i)
+		{
+			for (unsigned int j = 0; j < width_stripe; ++j)
+			{
+				color[i * width_img + j + k * width_stripe] = glm::vec3(float(k) / 255.0f);
+			}
+		}
+	}
+	return color;
+}
+
 
 /*
 	Starts rendering a scene and returns the color vector.
@@ -171,11 +205,10 @@ std::vector<glm::vec3> render(unsigned int& width, unsigned int& height)
 					float v = (-2.f * (y + samplingArray[idx].y) + HEIGHT) / HEIGHT * fov_tan;
 
 					// this can not be split up and needs to be in one line, otherwise
-					// omp will not take the 
+					// omp will not take the
 					/*col[i] += clamp(shoot_recursively(sc, sc.cam->getPrimaryRay(u, v, d), &isect, 0))
 						* inv_grid_dim;*/
 					col[i] = glm::normalize(sc.cam->getPrimaryRay(u, v, d).rd);
-
 				}
 			}
 		}
@@ -244,11 +277,11 @@ std::vector<glm::vec3> render(unsigned int& width, unsigned int& height)
 
 std::vector<glm::vec3> render_with_threads(unsigned int& width, unsigned int& height)
 {
-	constexpr float fov = glm::radians(90.f);
+	constexpr float fov = glm::radians(30.f);
 	float fov_tan = tan(fov / 2);
 	float u = 0.f, v = 0.f;
 	// distance to view plane
-	float foc_len = 1.0f / fov_tan;
+	float foc_len = 0.5f * 1.0f / fov_tan;
 	float inv_spp;
 	float inv_grid_dim = 1.f / (GRID_DIM * GRID_DIM);
 
@@ -265,7 +298,7 @@ std::vector<glm::vec3> render_with_threads(unsigned int& width, unsigned int& he
 
 	width = cropped_width[1] - cropped_width[0];
 	height = cropped_height[1] - cropped_height[0];
-
+	 
 	LOG(INFO) << "Image width = " << WIDTH << "; Image height = " << HEIGHT;
 	LOG(INFO) << "Cropped width = " << width << "; Cropped height = " << height;
 
@@ -422,11 +455,14 @@ void get_color(std::vector<glm::vec3>& col,
 		SurfaceInteraction isect;
 
 		// map pixel coordinates to[-1, 1]x[-1, 1]
-		float u = (2.f * (x + samplingArray[idx].x) - WIDTH) / HEIGHT * fov_tan;
-		float v = (-2.f * (y + samplingArray[idx].y) + HEIGHT) / HEIGHT * fov_tan;
+		float u = (2.f * (x + samplingArray[idx].x) - WIDTH) / HEIGHT;
+		float v = (-2.f * (y + samplingArray[idx].y) + HEIGHT) / HEIGHT;
 
+		/*float u = (x + samplingArray[idx].x) - WIDTH * 0.5f;
+		float v = -((y + samplingArray[idx].y) - HEIGHT * 0.5f);
+*/
 		// this can not be split up and needs to be in one line, otherwise
-		// omp will not take the 
+		// omp will not take the
 		col[x1 + y1] += clamp(shoot_recursively(sc, sc.cam->getPrimaryRay(u, v, d), &isect, 0))
 			* inv_grid_dim;
 		//col[x + y] = glm::normalize(sc.cam->getPrimaryRay(u, v, d).rd);
@@ -467,9 +503,13 @@ void write_file(const std::string& file,
 	// write to image file
 	for (size_t i = 0; i < col.size(); ++i)
 	{
+#ifdef GAMMA_CORRECTION
 		// gamma correction and mapping to [0;255]
 		col[i] = glm::pow(glm::min(glm::vec3(1), col[i]),
 			glm::vec3(1 / 2.2f)) * 255.f;
+#else
+		col[i] = glm::min(glm::vec3(1), col[i]) * 255.f;
+#endif
 
 #ifdef DEBUG
 		i_debug = (++i_debug) % 3000;
