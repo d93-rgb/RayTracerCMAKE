@@ -50,6 +50,16 @@
 // uncomment if you want to shade the color according to the direction of surface normals
 //#define DEBUG_NORMALS
 
+#if defined(_WIN32)
+#define GET_STRERR(ERROR_NUM, BUF, LEN) strerror_s(BUF, ERROR_NUM);
+#define GET_PWD(BUF, LEN) GetModuleFileNameA(nullptr, BUF, LEN)
+constexpr auto OS_SLASH = "\\";
+#else
+#define GET_STRERR(ERROR_NUM, BUF, LEN)	strerror_r(ERROR_NUM, BUF, LEN);
+#define GET_PWD(BUF, LEN) readlink("/proc/self/exe", BUF, LEN)
+constexpr auto OS_SLASH = "/";
+#endif
+
 namespace rt
 {
 

@@ -11,6 +11,9 @@ public:
 	Image(unsigned int width, unsigned int height) :
 		width(width), height(height) {}
 
+	void write_image_to_file(const std::string& file,
+		std::vector<glm::vec3>& col);
+
 	unsigned int get_width()
 	{
 		return width;

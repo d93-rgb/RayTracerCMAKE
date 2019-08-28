@@ -12,19 +12,10 @@
 #include "image/image.h"
 #include "threads/dispatcher.h"
 
-#if defined(_WIN32)
-#define GET_STRERR(ERROR_NUM, BUF, LEN) strerror_s(BUF, ERROR_NUM);
-#define GET_PWD(BUF, LEN) GetModuleFileNameA(nullptr, BUF, LEN)
-constexpr auto OS_SLASH = "\\";
-#else
-#define GET_STRERR(ERROR_NUM, BUF, LEN)	strerror_r(ERROR_NUM, BUF, LEN);
-#define GET_PWD(BUF, LEN) readlink("/proc/self/exe", BUF, LEN)
-constexpr auto OS_SLASH = "/";
-#endif
-
 // use for debugging
 #define DEBUG
 #define GAMMA_CORRECTION
+#define RENDER_SCENE
 //#define NO_THREADS
 //#define OPEN_WITH_GIMP
 
@@ -46,7 +37,7 @@ std::vector<glm::vec3> render(unsigned int& width, unsigned int& height);
 std::vector<glm::vec3> render_with_threads(unsigned int& width, unsigned int& height);
 
 // for creating color gradients
-std::vector<glm::vec3> render_gradient(unsigned int& width_img, const unsigned int& width_stripe, 
+std::vector<glm::vec3> render_gradient(unsigned int& width_img, const unsigned int& width_stripe,
 	unsigned int& height);
 
 
@@ -77,12 +68,15 @@ std::ostream& operator<<(std::ostream& os, glm::vec3 v)
 void helper_fun(std::string& file)
 {
 	unsigned int width, height;
-	
+
+#ifdef RENDER_SCENE
 #ifdef NO_THREADS
 	std::vector<glm::vec3>&& colors = render(width, height);
 #else
 	std::vector<glm::vec3>&& colors = render_with_threads(width, height);
-	//std::vector<glm::vec3>&& colors = render_gradient(width, 10, height);
+#endif
+#else
+	std::vector<glm::vec3>&& colors = render_gradient(width, 10, height);
 #endif
 
 	if (file.empty())
@@ -298,7 +292,7 @@ std::vector<glm::vec3> render_with_threads(unsigned int& width, unsigned int& he
 
 	width = cropped_width[1] - cropped_width[0];
 	height = cropped_height[1] - cropped_height[0];
-	 
+
 	LOG(INFO) << "Image width = " << WIDTH << "; Image height = " << HEIGHT;
 	LOG(INFO) << "Cropped width = " << width << "; Cropped height = " << height;
 
@@ -315,14 +309,14 @@ std::vector<glm::vec3> render_with_threads(unsigned int& width, unsigned int& he
 	MixedScene sc;
 	//	// enclose with braces for destructor of ProgressReporter at the end of rendering
 	{
-		rt::Image img( WIDTH, HEIGHT );
+		rt::Image img(WIDTH, HEIGHT);
 		Slice slice(img, 16, 16);
 		std::mutex pairs_mutex;
 		std::vector<std::thread> threads_v;
 		/***************************************/
 		// START PROGRESSREPORTER
 		/***************************************/
-		pbrt::ProgressReporter reporter(slice.dx*slice.dy, "Rendering:");
+		pbrt::ProgressReporter reporter(slice.dx * slice.dy, "Rendering:");
 		/***************************************/
 		// LOOPING OVER PIXELS
 		/***************************************/
@@ -330,7 +324,7 @@ std::vector<glm::vec3> render_with_threads(unsigned int& width, unsigned int& he
 
 		for (int i = 0; i < NUM_THREADS; ++i)
 		{
-			threads_v.push_back(std::thread(work, 
+			/*threads_v.push_back(std::thread(work,
 				std::ref(slice),
 				std::ref(pairs_mutex),
 				std::ref(col),
@@ -343,7 +337,60 @@ std::vector<glm::vec3> render_with_threads(unsigned int& width, unsigned int& he
 				inv_spp,
 				fov_tan,
 				foc_len,
-				std::ref(get_color)));
+				std::ref(get_color)));*/
+
+			threads_v.push_back(std::thread([&]() {
+				int idx = 0;
+				unsigned int h_step;
+				unsigned int w_step;
+
+				while (idx != -1)
+				{
+					// try to access the next free raster
+					pairs_mutex.lock();
+					idx = slice.get_index();
+					pairs_mutex.unlock();
+
+					if (idx < 0)
+					{
+						break;
+					}
+
+					assert(idx < slice.get_length());
+
+					// get step range
+					w_step = std::min(slice.w_step, slice.img_width - slice.pairs[idx].first);
+					h_step = std::min(slice.h_step, slice.img_height - slice.pairs[idx].second);
+
+					for (unsigned int i = 0; i < h_step; ++i)
+					{
+						for (unsigned int j = 0; j < w_step; ++j)
+						{
+							//TODO: NOT threadsafe
+							samplingArray = sampler.get2DArray();
+
+							for (unsigned int n = 0; n < array_size; ++n)
+							{
+								SurfaceInteraction isect;
+
+								// map pixel coordinates to[-1, 1]x[-1, 1]
+								float u = (2.f * (slice.pairs[idx].first + j + samplingArray[n].x) - WIDTH) / HEIGHT;
+								float v = (-2.f * (slice.pairs[idx].second + i + samplingArray[n].y) + HEIGHT) / HEIGHT;
+
+								/*float u = (x + samplingArray[idx].x) - WIDTH * 0.5f;
+								float v = -((y + samplingArray[idx].y) - HEIGHT * 0.5f);
+						*/
+								col[(slice.pairs[idx].second + i) * slice.img_width + slice.pairs[idx].first + j] +=
+									clamp(shoot_recursively(
+										sc, sc.cam->getPrimaryRay(u, v, foc_len), &isect, 0)) *
+									inv_grid_dim * inv_spp;
+								//col[x + y] = glm::normalize(sc.cam->getPrimaryRay(u, v, d).rd);
+							}
+						}
+					}
+					reporter.Update();
+				}
+				}));
 		}
 
 		for (int i = 0; i < NUM_THREADS; ++i)
@@ -415,8 +462,10 @@ std::vector<glm::vec3> render_with_threads(unsigned int& width, unsigned int& he
 }
 
 
+#ifdef DEBUG
 //for debugging
 std::set<int> bin;
+#endif
 
 void get_color(std::vector<glm::vec3>& col,
 	const Scene& sc,
@@ -442,7 +491,7 @@ void get_color(std::vector<glm::vec3>& col,
 #ifdef DEBUG
 	assert(bin.find(x1 + y1) == bin.end());
 	bin.insert(x1 + y1);
-	
+
 	if (x1 + y1 >= col.size())
 	{
 		printf("Error: index out of range: x1+y1 = %d > %zu\n", x * y + y, col.size());
@@ -461,8 +510,8 @@ void get_color(std::vector<glm::vec3>& col,
 		/*float u = (x + samplingArray[idx].x) - WIDTH * 0.5f;
 		float v = -((y + samplingArray[idx].y) - HEIGHT * 0.5f);
 */
-		// this can not be split up and needs to be in one line, otherwise
-		// omp will not take the
+// this can not be split up and needs to be in one line, otherwise
+// omp will not take the
 		col[x1 + y1] += clamp(shoot_recursively(sc, sc.cam->getPrimaryRay(u, v, d), &isect, 0))
 			* inv_grid_dim;
 		//col[x + y] = glm::normalize(sc.cam->getPrimaryRay(u, v, d).rd);
