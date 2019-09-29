@@ -35,6 +35,126 @@
           "name": "ASSIMP_INSTALL_PDB",
           "value": "False",
           "type": "BOOL"
+        },
+        {
+          "name": "ASSIMP_BUILD_ALL_EXPORTERS_BY_DEFAULT",
+          "value": "False",
+          "type": "BOOL"
+        },
+        {
+          "name": "ASSIMP_BUILD_OBJ_IMPORTER",
+          "value": "True",
+          "type": "BOOL"
+        },
+        {
+          "name": "ASSIMP_BUILD_ZLIB",
+          "value": "true",
+          "type": "BOOL"
+        },
+        {
+          "name": "GLM_TEST_ENABLE",
+          "value": "false",
+          "type": "BOOL"
+        },
+        {
+          "name": "GLM_TEST_ENABLE_CXX_11",
+          "value": "false",
+          "type": "BOOL"
+        },
+        {
+          "name": "GLM_TEST_ENABLE_CXX_14",
+          "value": "false",
+          "type": "BOOL"
+        },
+        {
+          "name": "GLM_TEST_ENABLE_CXX_17",
+          "value": "false",
+          "type": "BOOL"
+        },
+        {
+          "name": "GLM_TEST_ENABLE_CXX_20",
+          "value": "false",
+          "type": "BOOL"
+        },
+        {
+          "name": "GLM_TEST_ENABLE_CXX_98",
+          "value": "false",
+          "type": "BOOL"
+        },
+        {
+          "name": "GLM_TEST_ENABLE_FAST_MATH",
+          "value": "false",
+          "type": "BOOL"
+        },
+        {
+          "name": "GLM_TEST_ENABLE_LANG_EXTENSIONS",
+          "value": "false",
+          "type": "BOOL"
+        },
+        {
+          "name": "GLM_TEST_ENABLE_SIMD_AVX",
+          "value": "false",
+          "type": "BOOL"
+        },
+        {
+          "name": "GLM_TEST_ENABLE_SIMD_AVX2",
+          "value": "false",
+          "type": "BOOL"
+        },
+        {
+          "name": "GLM_TEST_ENABLE_SIMD_SSE2",
+          "value": "false",
+          "type": "BOOL"
+        },
+        {
+          "name": "GLM_TEST_ENABLE_SIMD_SSE3",
+          "value": "false",
+          "type": "BOOL"
+        },
+        {
+          "name": "GLM_TEST_ENABLE_SIMD_SSE4_1",
+          "value": "false",
+          "type": "BOOL"
+        },
+        {
+          "name": "GLM_TEST_ENABLE_SIMD_SSE4_2",
+          "value": "false",
+          "type": "BOOL"
+        },
+        {
+          "name": "GLM_TEST_ENABLE_SIMD_SSSE3",
+          "value": "false",
+          "type": "BOOL"
+        },
+        {
+          "name": "GLM_TEST_FORCE_PURE",
+          "value": "false",
+          "type": "BOOL"
+        },
+        {
+          "name": "HUNTER_ENABLED",
+          "value": "false",
+          "type": "BOOL"
+        },
+        {
+          "name": "HUNTER_STATUS_DEBUG",
+          "value": "false",
+          "type": "BOOL"
+        },
+        {
+          "name": "HUNTER_STATUS_PRINT",
+          "value": "true",
+          "type": "BOOL"
+        },
+        {
+          "name": "WITH_THREADS",
+          "value": "true",
+          "type": "BOOL"
+        },
+        {
+          "name": "WITH_GFLAGS",
+          "value": "false",
+          "type": "BOOL"
         }
       ]
     }
