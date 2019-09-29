@@ -579,10 +579,113 @@ void write_file(const std::string& file,
 }
 
 #ifdef WIN32
-int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
-	PWSTR lpCmdLine, int nShowCmd)
-{
+LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 
+int main(int argc, const char** argv)
+{
+	bool owg = false;
+	std::string dest = "";
+
+	// Windows stuff
+	HINSTANCE hInstance = GetModuleHandle(0);
+	const wchar_t CLASS_NAME[] = L"Sample Window Class";
+	//std::cout << "OpenMP max threads:" << omp_get_max_threads() << std::endl;
+
+	if (argc > 1)
+	{
+		for (int i = 0; i < argc; ++i)
+		{
+			printf("argv[%i] = %s\n", i, argv[i]);
+		}
+		int pos = 1;
+		while (pos < argc)
+		{
+			if (!strcmp(argv[pos], "--destination")
+				|| !strcmp(argv[pos], "-d"))
+			{
+				if (++pos == argc)
+				{
+					printf("Error: USAGE\n");
+					exit(1);
+				}
+				printf("argc = %i, pos == %i\n", argc, pos);
+				dest = argv[pos++];
+			}
+			else if (!strcmp(argv[pos], "--open_with_gimp")
+				|| !strcmp(argv[pos], "-owg"))
+			{
+				++pos;
+				owg = true;
+			}
+			else
+			{
+				printf("Error: USAGE\n");
+				exit(1);
+			}
+		}
+	}
+// launch rendering
+	//helper_fun(dest);
+
+	// create window and draw in it
+	WNDCLASS window_class = {};
+	window_class.style = CS_VREDRAW | CS_HREDRAW;
+	window_class.lpszClassName = CLASS_NAME;
+	window_class.lpfnWndProc = WindowProc;
+
+	RegisterClass(&window_class);
+
+	HWND hwnd = CreateWindowEx(
+		0,                              // Optional window styles.
+		CLASS_NAME,     // Window class
+		L"Raytracer",    // Window text
+		WS_OVERLAPPEDWINDOW,            // Window style
+		CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT,
+		NULL,       // Parent window    
+		NULL,       // Menu
+		hInstance,  // Instance handle
+		NULL        // Additional application data
+	);
+
+	if (hwnd == NULL)
+	{
+		printf("ERROR: hwnd == NULL\n");
+		return 0;
+	}
+
+	ShowWindow(hwnd, SW_SHOW);
+	// Run the message loop.
+	MSG msg = { };
+	while (GetMessage(&msg, NULL, 0, 0))
+	{
+		TranslateMessage(&msg);
+		DispatchMessage(&msg);
+	}
+
+	return 0;
+}
+
+LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
+{
+	switch (uMsg)
+	{
+	case WM_DESTROY:
+		PostQuitMessage(0);
+		return 0;
+
+	case WM_PAINT:
+	{
+		PAINTSTRUCT ps;
+		HDC hdc = BeginPaint(hwnd, &ps);
+
+		FillRect(hdc, &ps.rcPaint, (HBRUSH)(COLOR_WINDOW + 1));
+
+		EndPaint(hwnd, &ps);
+	}
+	return 0;
+
+	}
+	return DefWindowProc(hwnd, uMsg, wParam, lParam);
 }
 #else
 int main(int argc, const char** argv)
