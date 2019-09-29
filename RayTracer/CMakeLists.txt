@@ -8,7 +8,11 @@ set(CMAKE_CXX_STANDARD 17)
 # with vim plugin YouCompleteMe
 set( CMAKE_EXPORT_COMPILE_COMMANDS ON )
 
-if( NOT WIN32 )
+if(WIN32)
+	set(CMAKE_WIN32_EXECUTABLE)
+endif()
+
+if(NOT WIN32)
     # optimization for g++
     add_definitions("-Ofast")
 endif()
@@ -117,6 +121,7 @@ include_directories( "include/" )
 
 # Visual Studio filters inside the solution explorer
 if(MSVC)
+    SET(OPTIONS WIN32)
 	MESSAGE(STATUS "Detected Visual Studio as IDE")
 	# source files
 	SOURCE_GROUP ("Source Files\\camera" REGULAR_EXPRESSION src/camera/.*)
@@ -170,7 +175,7 @@ endif()
 
 # add headers to the target for now, because VS does not recognize header files otherwise
 # to be inside filters
-add_executable( rt ${RT_MAIN} ${RT_SRC} ${RT_HEADERS})
+add_executable( rt ${OPTIONS} ${RT_MAIN} ${RT_SRC} ${RT_HEADERS})
 
 if( NOT WIN32 )
 	add_dependencies(rt ANTTWEAKBAR_MAKE)

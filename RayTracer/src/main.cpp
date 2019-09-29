@@ -301,7 +301,7 @@ std::vector<glm::vec3> render_with_threads(unsigned int& width, unsigned int& he
 	StratifiedSampler2D sampler{ width, height, GRID_DIM };
 	unsigned int array_size = GRID_DIM * GRID_DIM;
 	const glm::vec2* samplingArray;
-	inv_spp = 1.f; // sampler.samplesPerPixel;
+	inv_spp = 1.0f / SPP;
 	/***************************************/
 	// CREATING SCENE
 	/***************************************/
@@ -347,6 +347,7 @@ std::vector<glm::vec3> render_with_threads(unsigned int& width, unsigned int& he
 				while (idx != -1)
 				{
 					// try to access the next free raster
+					// TODO: Change locking with mutex guards!
 					pairs_mutex.lock();
 					idx = slice.get_index();
 					pairs_mutex.unlock();
@@ -577,6 +578,13 @@ void write_file(const std::string& file,
 	LOG(INFO) << "Writing image to \"" << file << "\" finished.";
 }
 
+#ifdef WIN32
+int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
+	PWSTR lpCmdLine, int nShowCmd)
+{
+
+}
+#else
 int main(int argc, const char** argv)
 {
 	// open image with gimp
@@ -679,3 +687,4 @@ ofs.close();
 	//MessageBox(nullptr, TEXT("Done."), TEXT("Notification"), MB_OK);
 	return 0;
 }
+#endif

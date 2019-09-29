@@ -23,6 +23,18 @@ public:
 	{
 		return height;
 	}
+private:
+	float fov;
+	float fov_tan_half;
+	float u = 0.f, v = 0.f;
+	
+	// distance to view plane
+	float foc_len;
+
+	int cropped_x_start;
+	int cropped_y_start;
+	int cropped_width;
+	int cropped_height;
 };
 
 }
