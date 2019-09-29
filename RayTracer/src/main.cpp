@@ -18,6 +18,7 @@
 #define RENDER_SCENE
 //#define NO_THREADS
 //#define OPEN_WITH_GIMP
+//#define BLACK_COLOR_ARRAY_FOR_DEBUGGING
 
 using namespace rt;
 
@@ -29,10 +30,12 @@ constexpr unsigned int HEIGHT = 270;
 
 constexpr auto NUM_THREADS = 4;
 
+bool EXIT_PROGRAM = false;
+
 int MAX_DEPTH = 4;
 
 //std::vector<float> debug_vec;
-void helper_fun(const std::string& file);
+void helper_fun(std::vector<glm::vec3>& colors, const std::string& file);
 std::vector<glm::vec3> render(unsigned int& width, unsigned int& height);
 std::vector<glm::vec3> render_with_threads(unsigned int& width, unsigned int& height);
 
@@ -65,18 +68,18 @@ std::ostream& operator<<(std::ostream& os, glm::vec3 v)
 /*
 	Short helper function
 */
-void helper_fun(std::string& file)
+void helper_fun(std::vector<glm::vec3>* colors, std::string& file) 
 {
 	unsigned int width, height;
 
 #ifdef RENDER_SCENE
 #ifdef NO_THREADS
-	std::vector<glm::vec3>&& colors = render(width, height);
+	*colors = render(width, height);
 #else
-	std::vector<glm::vec3>&& colors = render_with_threads(width, height);
+	*colors = render_with_threads(width, height);
 #endif
 #else
-	std::vector<glm::vec3>&& colors = render_gradient(width, 10, height);
+	*colors = render_gradient(width, 10, height);
 #endif
 
 	if (file.empty())
@@ -90,12 +93,12 @@ void helper_fun(std::string& file)
 
 		LOG(INFO) << "Image will be written to \"" <<
 			fn.substr(0, fn.find_last_of("\\/")).append(OS_SLASH).append(file_name);
-		write_file(file_name, colors, width, height);
+		write_file(file_name, *colors, width, height);
 	}
 	else
 	{
 		file.append(".ppm");
-		write_file(file, colors, width, height);
+		write_file(file, *colors, width, height);
 	}
 }
 
@@ -297,6 +300,10 @@ std::vector<glm::vec3> render_with_threads(unsigned int& width, unsigned int& he
 	LOG(INFO) << "Cropped width = " << width << "; Cropped height = " << height;
 
 	std::vector<glm::vec3> col{ width * height, glm::vec3(0.f) };
+
+#ifdef BLACK_COLOR_ARRAY_FOR_DEBUGGING
+	return col;
+#endif
 
 	StratifiedSampler2D sampler{ width, height, GRID_DIM };
 	unsigned int array_size = GRID_DIM * GRID_DIM;
@@ -586,6 +593,8 @@ int main(int argc, const char** argv)
 	bool owg = false;
 	std::string dest = "";
 
+	std::unique_ptr<std::vector<glm::vec3>> colors(new std::vector<glm::vec3>);
+
 	// Windows stuff
 	HINSTANCE hInstance = GetModuleHandle(0);
 	const wchar_t CLASS_NAME[] = L"Sample Window Class";
@@ -625,7 +634,7 @@ int main(int argc, const char** argv)
 		}
 	}
 // launch rendering
-	//helper_fun(dest);
+	helper_fun(colors.get(), dest);
 
 	// create window and draw in it
 	WNDCLASS window_class = {};
@@ -633,14 +642,32 @@ int main(int argc, const char** argv)
 	window_class.lpszClassName = CLASS_NAME;
 	window_class.lpfnWndProc = WindowProc;
 
-	RegisterClass(&window_class);
+	if (!RegisterClass(&window_class))                                    
+	{
+		MessageBox(NULL, L"Failed To Register the window class.", L"ERROR", MB_OK | MB_ICONEXCLAMATION);
+		exit(1);                                           
+	}
+
+	RECT client_rect = {
+		0,
+		0,
+		WIDTH,
+		HEIGHT
+	};
+
+	if (!AdjustWindowRect(&client_rect, WS_OVERLAPPEDWINDOW ^ WS_THICKFRAME, false))
+	{
+		std::cout << "ERROR: Adjusting window rectangle failed." << std::endl;
+	}
 
 	HWND hwnd = CreateWindowEx(
 		0,                              // Optional window styles.
 		CLASS_NAME,     // Window class
 		L"Raytracer",    // Window text
-		WS_OVERLAPPEDWINDOW,            // Window style
-		CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT,
+		WS_OVERLAPPEDWINDOW ^ WS_THICKFRAME,    // prevent resizing
+		CW_USEDEFAULT, CW_USEDEFAULT, 
+		client_rect.right - client_rect.left, 
+		client_rect.bottom - client_rect.top,
 		NULL,       // Parent window    
 		NULL,       // Menu
 		hInstance,  // Instance handle
@@ -653,14 +680,45 @@ int main(int argc, const char** argv)
 		return 0;
 	}
 
-	ShowWindow(hwnd, SW_SHOW);
-	// Run the message loop.
-	MSG msg = { };
-	while (GetMessage(&msg, NULL, 0, 0))
+	// data of a single pixel is as big as an unsinged int (= 4 bytes)
+	size_t buffer_size = WIDTH * HEIGHT * 4;
+	std::vector<unsigned char> color_mem(buffer_size, 0);
+	BITMAPINFO bmi;
+	HDC hdc = GetDC(hwnd);
+
+	for (size_t i = 0, j = 0; i < buffer_size; i += 4, ++j)
 	{
-		TranslateMessage(&msg);
-		DispatchMessage(&msg);
+		// prevent sign extension by casting to unsigned char
+		color_mem[i + 2]	= (unsigned char)round((*colors)[j].x);
+		color_mem[i + 1]	= (unsigned char)round((*colors)[j].y);
+		color_mem[i]		= (unsigned char)round((*colors)[j].z);
+		//color_mem[i + 3]	= 0;
 	}
+
+	bmi.bmiHeader.biSize = sizeof(bmi.bmiHeader);
+	bmi.bmiHeader.biWidth = WIDTH;
+	bmi.bmiHeader.biHeight = -HEIGHT; // top-down image requires negative height
+	bmi.bmiHeader.biPlanes = 1;
+	bmi.bmiHeader.biBitCount = 32;
+	bmi.bmiHeader.biCompression = BI_RGB;
+
+	ShowWindow(hwnd, SW_SHOW);
+	
+	// Run the message loop.
+	while(!EXIT_PROGRAM)
+	{
+		MSG msg = { };
+		while (PeekMessage(&msg, hwnd, 0, 0, PM_REMOVE))
+		{
+			TranslateMessage(&msg);
+			DispatchMessage(&msg);
+		}
+
+		// render into window
+		StretchDIBits(hdc, 0, 0, WIDTH, HEIGHT, 0, 0, WIDTH, HEIGHT, color_mem.data(), &bmi,
+			DIB_RGB_COLORS, SRCCOPY);
+	}
+	ReleaseDC(hwnd, hdc);
 
 	return 0;
 }
@@ -670,6 +728,7 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 	switch (uMsg)
 	{
 	case WM_DESTROY:
+		EXIT_PROGRAM = true;
 		PostQuitMessage(0);
 		return 0;
 
