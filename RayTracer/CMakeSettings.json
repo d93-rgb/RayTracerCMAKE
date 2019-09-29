@@ -13,7 +13,7 @@
       "variables": [
         {
           "name": "ASSIMP_BUILD_3MF_IMPORTER",
-          "value": "True",
+          "value": "False",
           "type": "BOOL"
         },
         {
@@ -28,6 +28,11 @@
         },
         {
           "name": "WITH_TLS",
+          "value": "False",
+          "type": "BOOL"
+        },
+        {
+          "name": "ASSIMP_INSTALL_PDB",
           "value": "False",
           "type": "BOOL"
         }

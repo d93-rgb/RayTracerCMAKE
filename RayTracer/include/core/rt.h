@@ -13,6 +13,7 @@
 #define UNICODE
 #define _UNICODE
 #include <Windows.h>
+#include <ShellScalingApi.h>
 #else
 #include <unistd.h>
 #endif

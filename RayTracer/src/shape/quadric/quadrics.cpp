@@ -23,11 +23,11 @@ bool Quadric::solveQuadraticEq(float* t, float a, float b, float c)
 
 	if (b < 0)
 	{
-		q = -.5 * (b - disc);
+		q = -.5f * (b - disc);
 	}
 	else
 	{
-		q = -.5 * (b + disc);
+		q = -.5f * (b + disc);
 	}
 	
 	t0 = q / a;

@@ -18,7 +18,7 @@
 #define RENDER_SCENE
 //#define NO_THREADS
 //#define OPEN_WITH_GIMP
-//#define BLACK_COLOR_ARRAY_FOR_DEBUGGING
+#define BLACK_COLOR_ARRAY_FOR_DEBUGGING
 
 using namespace rt;
 
@@ -660,6 +660,9 @@ int main(int argc, const char** argv)
 		std::cout << "ERROR: Adjusting window rectangle failed." << std::endl;
 	}
 
+	// disable automatic rescaling 
+	SetProcessDpiAwareness(PROCESS_SYSTEM_DPI_AWARE);
+	
 	HWND hwnd = CreateWindowEx(
 		0,                              // Optional window styles.
 		CLASS_NAME,     // Window class
@@ -697,7 +700,7 @@ int main(int argc, const char** argv)
 
 	bmi.bmiHeader.biSize = sizeof(bmi.bmiHeader);
 	bmi.bmiHeader.biWidth = WIDTH;
-	bmi.bmiHeader.biHeight = -HEIGHT; // top-down image requires negative height
+	bmi.bmiHeader.biHeight = -int(HEIGHT); // top-down image requires negative height
 	bmi.bmiHeader.biPlanes = 1;
 	bmi.bmiHeader.biBitCount = 32;
 	bmi.bmiHeader.biCompression = BI_RGB;

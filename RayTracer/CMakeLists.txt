@@ -8,9 +8,11 @@ set(CMAKE_CXX_STANDARD 17)
 # with vim plugin YouCompleteMe
 set( CMAKE_EXPORT_COMPILE_COMMANDS ON )
 
-#if(WIN32)
-#	set(CMAKE_WIN32_EXECUTABLE)
-#endif()
+if(WIN32)
+	#set(CMAKE_WIN32_EXECUTABLE)
+	LINK_DIRECTORIES("C:/Program Files (x86)/Windows Kits/10/Lib/10.0.18362.0/um/x64")
+	set(SHCORE_LIB shcore.lib)
+endif()
 
 if(NOT WIN32)
     # optimization for g++
@@ -77,7 +79,8 @@ endif()
 #TODO: Change assimp library contents
 set(ALL_RT_LIBRARIES
 	glog
-	assimp)
+	assimp
+	${SHCORE_LIB})
 link_directories( ${CMAKE_BINARY_DIR}/ext/glm 
     ${CMAKE_BINARY_DIR}/ext/assimp/code
     ${CMAKE_BINARY_DIR}/ext/glog)
