@@ -3,14 +3,13 @@ cmake_policy(SET CMP0048 NEW)
 project (RayTracer VERSION 1.0)
 
 set(CMAKE_CXX_STANDARD 17)
-
 # create compiler specific information needed for linting
 # with vim plugin YouCompleteMe
 set( CMAKE_EXPORT_COMPILE_COMMANDS ON )
 
 if(WIN32)
 	#set(CMAKE_WIN32_EXECUTABLE)
-	LINK_DIRECTORIES("C:/Program Files (x86)/Windows Kits/10/Lib/10.0.18362.0/um/x64")
+	#LINK_DIRECTORIES("C:/Program Files (x86)/Windows Kits/10/Lib/10.0.18362.0/um/x64")
 	set(SHCORE_LIB shcore.lib)
 endif()
 
@@ -43,6 +42,8 @@ find_package(OpenMP REQUIRED)
 set(ASSIMP_BUILD_ALL_IMPORTERS_BY_DEFAULT OFF CACHE BOOL " " FORCE)
 set(ASSIMP_BUILD_BLEND_IMPORTER ON CACHE BOOL " " FORCE)
 set(ASSIMP_BUILD_OBJ_IMPORTER ON CACHE BOOL " " FORCE)
+set(ASSIMP_BUILD_OBJ_EXPORTER ON CACHE BOOL " " FORCE)
+
 # disable testing
 set(ASSIMP_BUILD_TESTS OFF CACHE BOOL " " FORCE)
 # disable VS pdb file generation
