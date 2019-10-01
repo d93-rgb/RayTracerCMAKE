@@ -76,43 +76,4 @@ private:
 	size_t length;
 };
 
-void work(Slice& s,
-	std::mutex& pairs_mutex,
-	std::vector<glm::vec3>& col,
-	const Scene& sc,
-	StratifiedSampler2D& sampler,
-	pbrt::ProgressReporter& reporter,
-	unsigned int array_size,
-	const glm::vec2* samplingArray,
-	float inv_grid_dim,
-	float inv_spp,
-	float fov_tan,
-	float d,
-	void (*func)(std::vector<glm::vec3>&,
-		const Scene&,
-		StratifiedSampler2D&,
-		unsigned int,
-		const glm::vec2*,
-		float,
-		float,
-		float,
-		float,
-		int,
-		int,
-		int,
-		int));
-
-//void work(Slice& s,
-//	std::mutex& pairs_mutex,
-//	std::vector<glm::vec3>& col,
-//	const Scene& sc,
-//	StratifiedSampler2D& sampler,
-//	unsigned int array_size,
-//	const glm::vec2* samplingArray,
-//	float inv_grid_dim,
-//	float inv_spp,
-//	float fov_tan,
-//	float d) {}
-//}
-
 }
