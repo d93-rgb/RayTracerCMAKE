@@ -35,7 +35,7 @@ bool EXIT_PROGRAM = false;
 int MAX_DEPTH = 4;
 
 //std::vector<float> debug_vec;
-void helper_fun(std::vector<glm::vec3>& colors, const std::string& file);
+void helper_fun(std::vector<glm::vec3>* colors, const std::string& file);
 std::vector<glm::vec3> render(unsigned int& width, unsigned int& height);
 std::vector<glm::vec3> render_with_threads(unsigned int& width, unsigned int& height);
 
@@ -58,12 +58,6 @@ void get_color(std::vector<glm::vec3>& col,
 	int y,
 	int x1,
 	int y1);
-
-std::ostream& operator<<(std::ostream& os, glm::vec3 v)
-{
-	os << "(" << v.x << ", " << v.y << ", " << v.z << ")" << std::endl;
-	return os;
-}
 
 /*
 	Short helper function

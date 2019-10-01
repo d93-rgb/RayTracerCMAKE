@@ -16,3 +16,9 @@ inline void crop(float min, float max, unsigned int x, unsigned int cropped[])
 	cropped[0] = int(round(clamp(min) * x));
 	cropped[1] = int(round(clamp(max) * x));
 }
+
+std::ostream& operator<<(std::ostream& os, glm::vec3 v)
+{
+	os << "(" << v.x << ", " << v.y << ", " << v.z << ")" << std::endl;
+	return os;
+}
