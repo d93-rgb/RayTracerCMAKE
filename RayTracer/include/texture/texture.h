@@ -4,8 +4,8 @@
 #include "shape/shape.h"
 #include "core/utility.h"
 
-constexpr auto NUM = 0.2f;
-constexpr auto GAP = NUM / 2.f;
+static constexpr auto NUM = 0.2f;
+static constexpr auto GAP = NUM / 2.f;
 
 namespace rt
 {
