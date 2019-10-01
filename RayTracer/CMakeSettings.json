@@ -6,7 +6,7 @@
       "cmakeCommandArgs": "",
       "configurationType": "Debug",
       "ctestCommandArgs": "",
-      "generator": "Visual Studio 16 2019 Win64",
+      "generator": "Ninja",
       "inheritEnvironments": [ "msvc_x64_x64" ],
       "installRoot": "${projectDir}\\out\\install\\${name}",
       "name": "x64-Debug",
@@ -155,6 +155,16 @@
           "name": "WITH_GFLAGS",
           "value": "false",
           "type": "BOOL"
+        },
+        {
+          "name": "BUILD_SHARED_LIBS",
+          "value": "True",
+          "type": "BOOL"
+        },
+        {
+          "name": "LIBRARY_SUFFIX",
+          "value": "-vc150-mt",
+          "type": "STRING"
         }
       ]
     }

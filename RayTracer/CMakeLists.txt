@@ -5,7 +5,7 @@ project (RayTracer VERSION 1.0)
 set(CMAKE_CXX_STANDARD 17)
 # create compiler specific information needed for linting
 # with vim plugin YouCompleteMe
-set( CMAKE_EXPORT_COMPILE_COMMANDS ON )
+set( CMAKE_EXPORT_COMPILE_COMMANDS OFF )
 
 if(WIN32)
 	#set(CMAKE_WIN32_EXECUTABLE)

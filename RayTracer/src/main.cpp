@@ -18,7 +18,7 @@
 #define RENDER_SCENE
 //#define NO_THREADS
 //#define OPEN_WITH_GIMP
-#define BLACK_COLOR_ARRAY_FOR_DEBUGGING
+//#define BLACK_COLOR_ARRAY_FOR_DEBUGGING
 
 using namespace rt;
 
@@ -710,16 +710,16 @@ int main(int argc, const char** argv)
 	// Run the message loop.
 	while(!EXIT_PROGRAM)
 	{
+		// render into window
+		StretchDIBits(hdc, 0, 0, WIDTH, HEIGHT, 0, 0, WIDTH, HEIGHT, color_mem.data(), &bmi,
+			DIB_RGB_COLORS, SRCCOPY);
+
 		MSG msg = { };
-		while (PeekMessage(&msg, hwnd, 0, 0, PM_REMOVE))
+		while (GetMessage(&msg, NULL, 0, 0))
 		{
 			TranslateMessage(&msg);
 			DispatchMessage(&msg);
 		}
-
-		// render into window
-		StretchDIBits(hdc, 0, 0, WIDTH, HEIGHT, 0, 0, WIDTH, HEIGHT, color_mem.data(), &bmi,
-			DIB_RGB_COLORS, SRCCOPY);
 	}
 	ReleaseDC(hwnd, hdc);
 
@@ -740,7 +740,7 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 		PAINTSTRUCT ps;
 		HDC hdc = BeginPaint(hwnd, &ps);
 
-		FillRect(hdc, &ps.rcPaint, (HBRUSH)(COLOR_WINDOW + 1));
+		//FillRect(hdc, &ps.rcPaint, (HBRUSH)(COLOR_WINDOW + 1));
 
 		EndPaint(hwnd, &ps);
 	}
