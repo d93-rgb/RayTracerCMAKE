@@ -45,19 +45,6 @@ std::vector<glm::vec3> render_gradient(unsigned int& width_img, const unsigned i
 
 
 void write_file(const std::string& file, std::vector<glm::vec3>& col, unsigned int width, unsigned int height);
-void get_color(std::vector<glm::vec3>& col,
-	const Scene& sc,
-	StratifiedSampler2D& sampler,
-	unsigned int array_size,
-	const glm::vec2* samplingArray,
-	float inv_grid_dim,
-	float inv_spp,
-	float fov_tan,
-	float d,
-	int x,
-	int y,
-	int x1,
-	int y1);
 
 /*
 	Short helper function
@@ -462,64 +449,6 @@ std::vector<glm::vec3> render_with_threads(unsigned int& width, unsigned int& he
 		//	}
 	return col;
 }
-
-
-#ifdef DEBUG
-//for debugging
-std::set<int> bin;
-#endif
-
-void get_color(std::vector<glm::vec3>& col,
-	const Scene& sc,
-	StratifiedSampler2D& sampler,
-	unsigned int array_size,
-	const glm::vec2* samplingArray,
-	float inv_grid_dim,
-	float inv_spp,
-	float fov_tan,
-	float d,
-	int x,
-	int y,
-	int x1,
-	int y1)
-{
-	//TODO: NOT threadsafe
-	samplingArray = sampler.get2DArray();
-
-	// hackery needed for omp pragma
-	// the index i will be distributed among all threads
-	// by omp automatically
-	//unsigned int i = (y - cropped_height[0]) * width + (x - cropped_width[0]);
-#ifdef DEBUG
-	assert(bin.find(x1 + y1) == bin.end());
-	bin.insert(x1 + y1);
-
-	if (x1 + y1 >= col.size())
-	{
-		printf("Error: index out of range: x1+y1 = %d > %zu\n", x * y + y, col.size());
-		exit(1);
-	}
-#endif
-
-	for (unsigned int idx = 0; idx < array_size; ++idx)
-	{
-		SurfaceInteraction isect;
-
-		// map pixel coordinates to[-1, 1]x[-1, 1]
-		float u = (2.f * (x + samplingArray[idx].x) - WIDTH) / HEIGHT;
-		float v = (-2.f * (y + samplingArray[idx].y) + HEIGHT) / HEIGHT;
-
-		/*float u = (x + samplingArray[idx].x) - WIDTH * 0.5f;
-		float v = -((y + samplingArray[idx].y) - HEIGHT * 0.5f);
-*/
-// this can not be split up and needs to be in one line, otherwise
-// omp will not take the
-		col[x1 + y1] += clamp(shoot_recursively(sc, sc.cam->getPrimaryRay(u, v, d), &isect, 0))
-			* inv_grid_dim;
-		//col[x + y] = glm::normalize(sc.cam->getPrimaryRay(u, v, d).rd);
-	}
-}
-
 
 void write_file(const std::string& file,
 	std::vector<glm::vec3>& col, unsigned int width, unsigned int height)
