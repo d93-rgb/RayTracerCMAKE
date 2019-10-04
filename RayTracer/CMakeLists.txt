@@ -33,7 +33,7 @@ include_directories (
   ${CMAKE_BINARY_DIR}/ext/glog
 )
 
-find_package(OpenMP REQUIRED)
+#find_package(OpenMP REQUIRED)
 #message(STATUS ${OpenMP_C_FLAGS}) # Link against it for C++)
 
 ###########################################################################
