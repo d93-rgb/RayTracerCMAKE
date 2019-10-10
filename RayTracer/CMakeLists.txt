@@ -185,7 +185,7 @@ if( NOT WIN32 )
 	add_dependencies(rt ANTTWEAKBAR_MAKE)
 endif()
 
-target_link_libraries( rt ${ALL_RT_LIBRARIES} OpenMP::OpenMP_CXX)
+target_link_libraries( rt ${ALL_RT_LIBRARIES})
 
 if(WIN32)
 	# post build command for copying dll files

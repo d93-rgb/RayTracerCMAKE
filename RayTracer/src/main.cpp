@@ -18,15 +18,15 @@
 #define RENDER_SCENE
 //#define NO_THREADS
 //#define OPEN_WITH_GIMP
-//#define BLACK_COLOR_ARRAY_FOR_DEBUGGING
+#define BLACK_COLOR_ARRAY_FOR_DEBUGGING
 
 using namespace rt;
 
 constexpr auto SPP = 1;
 constexpr auto GRID_DIM = 3;
 
-constexpr unsigned int WIDTH = 480;
-constexpr unsigned int HEIGHT = 270;
+constexpr unsigned int WIDTH = 800;
+constexpr unsigned int HEIGHT = 600;
 
 constexpr auto NUM_THREADS = 4;
 
@@ -40,8 +40,8 @@ std::vector<glm::vec3> render(unsigned int& width, unsigned int& height);
 std::vector<glm::vec3> render_with_threads(unsigned int& width, unsigned int& height);
 
 // for creating color gradients
-std::vector<glm::vec3> render_gradient(unsigned int& width_img, const unsigned int& width_stripe,
-	unsigned int& height);
+std::vector<glm::vec3> render_gradient(size_t& width_img, const size_t& width_stripe,
+	size_t& height);
 
 
 void write_file(const std::string& file, std::vector<glm::vec3>& col, unsigned int width, unsigned int height);
@@ -49,7 +49,9 @@ void write_file(const std::string& file, std::vector<glm::vec3>& col, unsigned i
 /*
 	Short helper function
 */
-void helper_fun(std::vector<glm::vec3>* colors, std::string& file) 
+void helper_fun(
+	std::vector<glm::vec3>* colors, 
+	std::string& file) 
 {
 	unsigned int width, height;
 
@@ -83,8 +85,10 @@ void helper_fun(std::vector<glm::vec3>* colors, std::string& file)
 	}
 }
 
-std::vector<glm::vec3> render_gradient(unsigned int& width_img, const unsigned int& width_stripe,
-	unsigned int& height)
+std::vector<glm::vec3> render_gradient(
+	size_t& width_img, 
+	const size_t& width_stripe,
+	size_t& height)
 {
 	// do not let RAM explode, limit maximum stripe width
 	assert(width_stripe < 4e3);
@@ -112,7 +116,9 @@ std::vector<glm::vec3> render_gradient(unsigned int& width_img, const unsigned i
 /*
 	Starts rendering a scene and returns the color vector.
 */
-std::vector<glm::vec3> render(unsigned int& width, unsigned int& height)
+std::vector<glm::vec3> render(
+	unsigned int& width, 
+	unsigned int& height)
 {
 	constexpr float fov = glm::radians(90.f);
 	float fov_tan = tan(fov / 2);
@@ -253,7 +259,9 @@ std::vector<glm::vec3> render(unsigned int& width, unsigned int& height)
 	return col;
 }
 
-std::vector<glm::vec3> render_with_threads(unsigned int& width, unsigned int& height)
+std::vector<glm::vec3> render_with_threads(
+	unsigned int& width, 
+	unsigned int& height)
 {
 	constexpr float fov = glm::radians(30.f);
 	float fov_tan = tan(fov / 2);
@@ -450,8 +458,17 @@ std::vector<glm::vec3> render_with_threads(unsigned int& width, unsigned int& he
 	return col;
 }
 
-void write_file(const std::string& file,
-	std::vector<glm::vec3>& col, unsigned int width, unsigned int height)
+
+/* Export image to a ppm file.
+ file:	destination file
+ col:	colors of pixels in RGB format
+ width:	
+ */
+void write_file(
+	const std::string& file,
+	std::vector<glm::vec3>& col, 
+	unsigned int width, 
+	unsigned int height)
 {
 #ifdef DEBUG
 	//assert(bin.size() == col.size());
@@ -649,7 +666,11 @@ int main(int argc, const char** argv)
 	return 0;
 }
 
-LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
+LRESULT CALLBACK WindowProc(
+	HWND hwnd, 
+	UINT uMsg, 
+	WPARAM wParam, 
+	LPARAM lParam)
 {
 	switch (uMsg)
 	{
