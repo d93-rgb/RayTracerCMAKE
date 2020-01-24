@@ -18,7 +18,7 @@
 #define RENDER_SCENE
 //#define NO_THREADS
 //#define OPEN_WITH_GIMP
-#define BLACK_COLOR_ARRAY_FOR_DEBUGGING
+//#define BLACK_COLOR_ARRAY_FOR_DEBUGGING
 
 using namespace rt;
 
@@ -32,7 +32,7 @@ constexpr auto NUM_THREADS = 4;
 
 bool EXIT_PROGRAM = false;
 
-int MAX_DEPTH = 4;
+constexpr int MAX_DEPTH = 4;
 
 //std::vector<float> debug_vec;
 void helper_fun(std::vector<glm::vec3>* colors, const std::string& file);
