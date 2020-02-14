@@ -2,10 +2,11 @@
 #include "core/rt.h"
 #include "interaction/interaction.h"
 
-extern int MAX_DEPTH;
 
 namespace rt
 {
+extern int MAX_DEPTH;
+
 float shoot_ray(const Scene &s, const Ray &ray, SurfaceInteraction *isect);
 
 glm::vec3 shoot_recursively(const Scene &s,

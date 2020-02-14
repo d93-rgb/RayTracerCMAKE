@@ -69,14 +69,4 @@ public:
 	void init();
 };
 
-class SingleTriangleScene : public Scene
-{
-public:
-	SingleTriangleScene()
-	{
-		init();
-	}
-
-	void init();
-};
 }

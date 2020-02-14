@@ -22,6 +22,8 @@
 
 using namespace rt;
 
+namespace rt
+{
 constexpr auto SPP = 1;
 constexpr auto GRID_DIM = 3;
 
@@ -32,7 +34,7 @@ constexpr auto NUM_THREADS = 4;
 
 bool EXIT_PROGRAM = false;
 
-constexpr int MAX_DEPTH = 4;
+int MAX_DEPTH = 4;
 
 //std::vector<float> debug_vec;
 void helper_fun(std::vector<glm::vec3>* colors, const std::string& file);
@@ -50,19 +52,19 @@ void write_file(const std::string& file, std::vector<glm::vec3>& col, unsigned i
 	Short helper function
 */
 void helper_fun(
-	std::vector<glm::vec3>* colors, 
-	std::string& file) 
+	std::vector<glm::vec3>* colors,
+	std::string& file)
 {
 	unsigned int width, height;
 
 #ifdef RENDER_SCENE
 #ifdef NO_THREADS
-	*colors = render(width, height);
+	* colors = render(width, height);
 #else
-	*colors = render_with_threads(width, height);
+	* colors = render_with_threads(width, height);
 #endif
 #else
-	*colors = render_gradient(width, 10, height);
+	* colors = render_gradient(width, 10, height);
 #endif
 
 	if (file.empty())
@@ -86,7 +88,7 @@ void helper_fun(
 }
 
 std::vector<glm::vec3> render_gradient(
-	size_t& width_img, 
+	size_t& width_img,
 	const size_t& width_stripe,
 	size_t& height)
 {
@@ -117,7 +119,7 @@ std::vector<glm::vec3> render_gradient(
 	Starts rendering a scene and returns the color vector.
 */
 std::vector<glm::vec3> render(
-	unsigned int& width, 
+	unsigned int& width,
 	unsigned int& height)
 {
 	constexpr float fov = glm::radians(90.f);
@@ -260,7 +262,7 @@ std::vector<glm::vec3> render(
 }
 
 std::vector<glm::vec3> render_with_threads(
-	unsigned int& width, 
+	unsigned int& width,
 	unsigned int& height)
 {
 	constexpr float fov = glm::radians(30.f);
@@ -302,7 +304,9 @@ std::vector<glm::vec3> render_with_threads(
 	// CREATING SCENE
 	/***************************************/
 	//GatheringScene sc;
-	MixedScene sc;
+	//MixedScene sc;
+	std::unique_ptr<Scene> sc = std::make_unique<TeapotScene>();
+
 	//	// enclose with braces for destructor of ProgressReporter at the end of rendering
 	{
 		rt::Image img(WIDTH, HEIGHT);
@@ -379,7 +383,7 @@ std::vector<glm::vec3> render_with_threads(
 						*/
 								col[(slice.pairs[idx].second + i) * slice.img_width + slice.pairs[idx].first + j] +=
 									clamp(shoot_recursively(
-										sc, sc.cam->getPrimaryRay(u, v, foc_len), &isect, 0)) *
+										*sc, sc->cam->getPrimaryRay(u, v, foc_len), &isect, 0)) *
 									inv_grid_dim * inv_spp;
 								//col[x + y] = glm::normalize(sc.cam->getPrimaryRay(u, v, d).rd);
 							}
@@ -462,12 +466,12 @@ std::vector<glm::vec3> render_with_threads(
 /* Export image to a ppm file.
  file:	destination file
  col:	colors of pixels in RGB format
- width:	
+ width:
  */
 void write_file(
 	const std::string& file,
-	std::vector<glm::vec3>& col, 
-	unsigned int width, 
+	std::vector<glm::vec3>& col,
+	unsigned int width,
 	unsigned int height)
 {
 #ifdef DEBUG
@@ -524,6 +528,7 @@ void write_file(
 
 	LOG(INFO) << "Writing image to \"" << file << "\" finished.";
 }
+} // namespace rt
 
 #ifdef WIN32
 LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
