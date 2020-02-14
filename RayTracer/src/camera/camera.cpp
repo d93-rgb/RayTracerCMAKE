@@ -36,4 +36,12 @@ void Camera::update()
 	right = camToWorld * right;
 	front = camToWorld * front;
 }
+
+void OrthographicCamera::update()
+{
+	origin = camToWorld * origin;
+	up = camToWorld * up;
+	right = camToWorld * right;
+	front = camToWorld * front;
+}
 }

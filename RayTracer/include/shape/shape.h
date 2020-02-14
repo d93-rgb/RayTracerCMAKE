@@ -26,14 +26,19 @@ struct Shape
 	std::shared_ptr<Material> mat;
 
 	virtual float intersect(const Ray &ray, SurfaceInteraction *isect) = 0;
+
+	Bounds3 bounding_box;
 };
 
 class Bounds3
 {
 	glm::vec3 normal;
-	glm::vec3 boundaries[2];
 
 public:
+	glm::vec3 boundaries[2];
+
+	Bounds3() = default;
+
 	Bounds3(glm::vec3 min_bounds, glm::vec3 max_bounds) :
 		normal(glm::vec3(0.f))
 	{
@@ -414,6 +419,10 @@ public:
 		objToWorld(objToWorld),
 		worldToObj(glm::inverse(objToWorld))
 	{
+		//construct surrounding aabb
+		this->bounding_box = Bounds3(glm::vec3(glm::min(glm::min(p1, p2),p3)),
+			glm::vec3(glm::max(glm::max(p1, p2), p3)));
+
 		this->mat = mat;
 
 		this->p1 = objToWorld * glm::vec4(p1, 1.f);
@@ -437,6 +446,11 @@ public:
 	glm::vec3 get_normal() const
 	{
 		return n;
+	}
+
+	Bounds3 get_bounding_box()
+	{
+		return bounding_box;
 	}
 
 private:

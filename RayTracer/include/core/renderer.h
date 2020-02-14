@@ -19,7 +19,7 @@ glm::vec3 handle_transmission(const Scene &s,
 	const glm::vec3 &isect_p,
 	SurfaceInteraction *isect,
 	int depth);
-
+	
 glm::vec3 handle_reflection(const Scene &s,
 	const Ray &ray,
 	const glm::vec3 &isect_p,

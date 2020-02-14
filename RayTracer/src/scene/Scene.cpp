@@ -703,14 +703,14 @@ void SingleTriangleScene::init()
 		glm::vec3(4.f, 4.f, -4.f),
 		glm::vec3(0.f, 0.f, 1.f),
 		glm::translate(glm::scale(glm::mat4(1.f), glm::vec3(2.f)),
-			glm::vec3(0.f, 0.f, -3.f)),
+			glm::vec3(0.f, 0.f, 5.f)),
 		triangle_mat_1));
 	auto tr_tex = std::make_shared<RGB_TextureTriangle>(
 		dynamic_cast<Triangle*>(sc.back().get()));
 	triangle_mat_1->setTexture(tr_tex);
 
-	lights.emplace_back(std::make_unique<PointLight>(glm::vec3(-2.f, 20.f, -5.f),
-		glm::vec3(-2, -4, -2),
+	lights.emplace_back(std::make_unique<PointLight>(glm::vec3(0.f, 0.f, 30.f),
+		glm::vec3(0, 0, -1),
 		glm::vec3(110.f)));
 
 	cam.reset(new Camera());

@@ -28,7 +28,7 @@ public:
 	
 	void setCamToWorld(glm::vec3 eyePosition, glm::vec3 gazePoint, glm::vec3 upVector);
 
-	Ray getPrimaryRay(float u, float v, float d)
+	virtual Ray getPrimaryRay(float u, float v, float d)
 	{
 		return Ray(origin, glm::normalize(u * right + v * up - d * front));
 	}
@@ -51,9 +51,38 @@ protected:
 	glm::mat4 camToWorld;
 };
 
-// Free flight camera
-class FFCamera
+// orthographic projection camera
+class OrthographicCamera : public Camera
 {
+public:
+	OrthographicCamera() : origin(glm::vec4(0.f, 0.f, 0.f, 1.f)),
+		right(glm::vec4(1.f, 0.f, 0.f, 0.f)),
+		up(glm::vec4(0.f, 1.f, 0.f, 0.f)),
+		front(glm::vec4(0.f, 0.f, 1.f, 0.f)),
+		camToWorld(1.f)
+	{
+	};
 
+	Ray getPrimaryRay(float u, float v, float d) override
+	{
+		return Ray(15.f*u * right + 15.f*v * up, -front);
+	}
+
+	glm::vec4 getOrigin()
+	{
+		return origin;
+	}
+
+	glm::vec4 getUpVec()
+	{
+		return up;
+	}
+
+	void update();
+
+protected:
+	glm::vec4 origin;
+	glm::vec4 up, right, front;
+	glm::mat4 camToWorld;
 };
 }
