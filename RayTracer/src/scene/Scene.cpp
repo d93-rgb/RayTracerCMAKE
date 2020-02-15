@@ -607,6 +607,7 @@ void TeapotScene::init()
 		"C:\\Users\\Damian\\Documents\\ComputerGraphics\\models\\teapot.obj";
 
 	std::vector<glm::vec3> vertices;
+	std::vector<glm::vec3> normals;
 	std::vector<unsigned int> indices;
 
 	glm::mat4 teapot_to_world = glm::rotate(
@@ -630,6 +631,7 @@ void TeapotScene::init()
 			glm::vec3(0.4, 0.4, 0.4),
 			glm::vec3(0.0, 0.0, 0.0));
 	wall_left->setReflective(glm::vec3(1.0f));
+
 	//bottom
 	sc.emplace_back(std::make_unique<Rectangle>(glm::vec3(-4, 0, -18),
 		glm::vec3(150, 0, 0), glm::vec3(0, 0, -150), wall_bot));
@@ -651,7 +653,7 @@ void TeapotScene::init()
 	/////////////////////////////////////
 	glm::vec3 b_min = glm::vec3(INFINITY), b_max = glm::vec3(-INFINITY);
 
-	extractMesh(teapot, vertices, indices);
+	extractMesh(teapot, vertices, normals, indices);
 
 	std::shared_ptr<Material> teapot_mat =
 		std::shared_ptr<Material>(

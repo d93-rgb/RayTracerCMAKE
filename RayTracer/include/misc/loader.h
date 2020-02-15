@@ -58,7 +58,8 @@ inline bool loadObjFile(const std::string &file,
 	data from a file.
 */
 void extractMesh(const std::string &file, 
-	std::vector<glm::vec3> &vert, 
+	std::vector<glm::vec3> &vert,
+	std::vector<glm::vec3>& normals,
 	std::vector<unsigned int> &indices)
 {
 	Assimp::Importer imp;
@@ -80,6 +81,11 @@ void extractMesh(const std::string &file,
 			y = (a_scene->mMeshes[mesh_num]->mVertices[i].y);
 			z = (a_scene->mMeshes[mesh_num]->mVertices[i].z);
 			vert.push_back(glm::vec3(x, y, z));
+
+			x = a_scene->mMeshes[mesh_num]->mNormals[i].x;
+			y = a_scene->mMeshes[mesh_num]->mNormals[i].y;
+			z = a_scene->mMeshes[mesh_num]->mNormals[i].z;
+			normals.push_back(glm::vec3(x,y,z));
 		}
 	}
 
