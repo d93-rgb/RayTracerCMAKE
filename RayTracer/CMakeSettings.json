@@ -167,6 +167,24 @@
           "type": "STRING"
         }
       ]
+    },
+    {
+      "name": "x64-Release",
+      "generator": "Ninja",
+      "configurationType": "RelWithDebInfo",
+      "buildRoot": "${projectDir}\\out\\build\\${name}",
+      "installRoot": "${projectDir}\\out\\install\\${name}",
+      "cmakeCommandArgs": "",
+      "buildCommandArgs": "-v",
+      "ctestCommandArgs": "",
+      "inheritEnvironments": [ "msvc_x64_x64" ],
+      "variables": [
+        {
+          "name": "ASSIMP_BUILD_ALL_EXPORTERS_BY_DEFAULT",
+          "value": "False",
+          "type": "BOOL"
+        }
+      ]
     }
   ]
 }

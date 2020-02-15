@@ -597,10 +597,9 @@ void MixedScene::init()
 
 void TeapotScene::init()
 {
-	//glm::vec3 translation = glm::vec3(0.f, sqrtf(2.f), sqrtf(2.f));
-	glm::vec3 translation = glm::vec3(0.f, 5.f, 30.f);
-	//glm::vec3 look_pos = glm::vec3(0.f, -sqrtf(2.f), -sqrt(2.f));
-	glm::vec3 look_pos = glm::vec3(0.f, 0.f, -10.f);
+	//camera position
+	glm::vec3 translation = glm::vec3(0.f, 2.5f, 25.f);
+	glm::vec3 look_pos = glm::vec3(-1.0f, 0.f, -10.f);
 	glm::vec3 cam_up = glm::vec3(0.f, 1.f, 0.f);
 	glm::vec3 p1, p2, p3, tr_normal;
 
@@ -618,8 +617,34 @@ void TeapotScene::init()
 		glm::radians(30.f),
 		glm::vec3(0.f, 1.f, 0.f));
 
-	Rectangle* floor;
-	std::unique_ptr<Shape> cube_2[6];
+	// material for walls
+	auto wall_bot =
+		std::make_shared<Material>(
+			glm::vec3(0.02, 0.02, 0.02),
+			glm::vec3(0.4, 0.4, 0.4),
+			glm::vec3(0.0, 0.0, 0.0));
+	wall_bot->setReflective(glm::vec3(0.1f));
+	auto wall_left =
+		std::make_shared<Material>(
+			glm::vec3(0.02, 0.02, 0.02),
+			glm::vec3(0.4, 0.4, 0.4),
+			glm::vec3(0.0, 0.0, 0.0));
+	wall_left->setReflective(glm::vec3(1.0f));
+	//bottom
+	sc.emplace_back(std::make_unique<Rectangle>(glm::vec3(-4, 0, -18),
+		glm::vec3(150, 0, 0), glm::vec3(0, 0, -150), wall_bot));
+	//front
+	sc.emplace_back(std::make_unique<Rectangle>(glm::vec3(-4, 0, -18-75),
+		glm::vec3(300, 0, 0), glm::vec3(0, 300, 0), wall_bot));
+	//back
+	sc.emplace_back(std::make_unique<Rectangle>(glm::vec3(-4, 0, -18+75),
+		glm::vec3(300, 0, 0), glm::vec3(0, 300, 0), wall_bot));
+	//left
+	sc.emplace_back(std::make_unique<Rectangle>(glm::vec3(-4, 0, -18),
+		glm::vec3(0, 300, 0), glm::vec3(0, 0, -300), wall_left));
+	//right
+	sc.emplace_back(std::make_unique<Rectangle>(glm::vec3(-4+75, 0, -18),
+		glm::vec3(0, 300, 0), glm::vec3(0, 0, -300), wall_bot));
 
 	/////////////////////////////////////
 	// Triangle mesh
@@ -630,10 +655,11 @@ void TeapotScene::init()
 
 	std::shared_ptr<Material> teapot_mat =
 		std::shared_ptr<Material>(
-			new Material(glm::vec3(0.02f, 0.f, 0.02f),
-				glm::vec3(0.4f, 0.f, 0.4f),
-				glm::vec3(0.05f, 0.05f, 0.05f)));
-	teapot_mat->setShininess(20.f);
+			new Material(glm::vec3(0.01f, 0.01f, 0.01f),
+				glm::vec3(0.1f, 0.1f, 0.1f),
+				glm::vec3(0.2f, 0.2f, 0.2f)));
+	teapot_mat->setShininess(1.f);
+	//teapot_mat->setReflective(glm::vec3(1.0f));
 
 	std::vector<std::shared_ptr<Shape>> t_pot_triangles;
 	for (size_t i = 0; i < indices.size() / TEAPOTSIZE; i += 3)
@@ -671,9 +697,9 @@ void TeapotScene::init()
 	// END
 	////////////////////////////////
 
-	lights.emplace_back(std::make_unique<PointLight>(glm::vec3(-2.f, 20.f, -5.f),
+	lights.emplace_back(std::make_unique<PointLight>(glm::vec3(-1.f, 5.f, 25.f),
 		glm::vec3(-2, -4, -2),
-		glm::vec3(110.f)));
+		glm::vec3(120.f)));
 
 	cam.reset(new Camera());
 	/*cam->setCamToWorld(glm::rotate(glm::translate(glm::mat4(1.f), translation),

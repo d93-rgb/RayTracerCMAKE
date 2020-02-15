@@ -28,8 +28,8 @@ class BVH
 public:
 	BVH(const std::vector<std::shared_ptr<Shape>>& scene_objects, 
 		const Bounds3* surrounding_box, 
-		size_t max_triangle_count = 30,
-		size_t max_depth = 10) :
+		size_t max_triangle_count = 10,
+		size_t max_depth = 20) :
 		MAX_TRIANGLE_COUNT(max_triangle_count),
 		MAX_DEPTH(max_depth)
 	{

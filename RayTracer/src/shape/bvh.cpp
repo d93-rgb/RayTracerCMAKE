@@ -36,17 +36,17 @@ float BVH_Node::intersect(const Ray& ray, SurfaceInteraction* isect)
 		return INFINITY;
 	}
 	
-	float t0_left = INFINITY;
-	float t1_right = INFINITY;
+	//float t0_left = INFINITY;
+	//float t1_right = INFINITY;
 	if (t0 < INFINITY)
 	{
-		t0_left = left_node->intersect(ray, isect);
+		t0= left_node->intersect(ray, isect);
 	}
 	if (t1 < INFINITY)
 	{
-		t1_right = right_node->intersect(ray, isect);
+		t1= right_node->intersect(ray, isect);
 	}
-	return std::min(t0_left, t1_right);
+	return std::min(t0, t1);
 }
 
 float BVH_Tree::intersect(const Ray& ray, SurfaceInteraction* isect)
