@@ -415,6 +415,9 @@ public:
 	Triangle(glm::vec3 p1,
 		glm::vec3 p2,
 		glm::vec3 p3,
+		glm::vec3 n1,
+		glm::vec3 n2,
+		glm::vec3 n3,
 		glm::vec3 n,
 		glm::mat4 objToWorld,
 		std::shared_ptr<Material> mat) :
@@ -431,7 +434,12 @@ public:
 		this->bounding_box = std::make_unique<Bounds3>(glm::vec3(glm::min(glm::min(this->p1, this->p2), this->p3)),
 			glm::vec3(glm::max(glm::max(this->p1, this->p2), this->p3)));
 
-		this->n = glm::transpose(glm::inverse(objToWorld)) * glm::vec4(n, 0.f);
+		this->n1 = glm::transpose(glm::inverse(objToWorld)) * glm::vec4(n1, 0.f);
+		this->n2 = glm::transpose(glm::inverse(objToWorld)) * glm::vec4(n2, 0.f);
+		this->n3 = glm::transpose(glm::inverse(objToWorld)) * glm::vec4(n3, 0.f);
+
+		this->plane_normal = glm::transpose(glm::inverse(objToWorld)) * glm::vec4(n, 0.f);
+
 		// base transformation to barycentric coordinates
 		// see: https://de.wikipedia.org/wiki/Basiswechsel_(Vektorraum)
 		this->m_inv = glm::inverse(glm::mat3(this->p1, this->p2, this->p3));
@@ -442,13 +450,18 @@ public:
 
 	glm::vec3 get_normal(glm::vec3 p) const
 	{
-		return n;
+		// flat shading
+		//return plane_normal;
+		glm::vec3 barycentric_coord = m_inv * p;
+		return glm::normalize(barycentric_coord.x * n1 + barycentric_coord.y * n2 + 
+			barycentric_coord.z * n3);
 	}
 
-	glm::vec3 get_normal() const
+	//deprecated, replace with get_normal(glm::vec3)
+	/*glm::vec3 get_normal() const
 	{
-		return n;
-	}
+		return n1;
+	}*/
 
 	Bounds3* get_bounding_box()
 	{
@@ -459,7 +472,8 @@ private:
 	// vertices
 	glm::vec3 p1, p2, p3;
 	// normal
-	glm::vec3 n;
+	glm::vec3 n1, n2, n3;
+	glm::vec3 plane_normal;
 	glm::mat4 objToWorld;
 	glm::mat4 worldToObj;
 	glm::mat3 m_inv;

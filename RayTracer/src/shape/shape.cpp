@@ -275,7 +275,7 @@ float Cube::intersect(const Ray& ray)
 float Triangle::intersect(const Ray& ray, SurfaceInteraction* isect)
 {
 	float t_plane = INFINITY;
-	Plane plane{ p1, n };
+	Plane plane{ p1, plane_normal };
 
 	// intersect without updating nearest intersection parameter
 	t_plane = plane.intersect(ray);

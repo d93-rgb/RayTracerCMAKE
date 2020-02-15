@@ -327,6 +327,9 @@ void MixedScene::init()
 		glm::vec3(4.f, 0.f, -4.f),
 		glm::vec3(4.f, 4.f, -4.f),
 		glm::vec3(0.f, 0.f, 1.f),
+		glm::vec3(0.f, 0.f, 1.f),
+		glm::vec3(0.f, 0.f, 1.f),
+		glm::vec3(0.f, 0.f, 1.f),
 		glm::translate(glm::scale(glm::mat4(1.f), glm::vec3(2.f)),
 			glm::vec3(0.f, 0.f, -3.f)),
 		triangle_mat_1));
@@ -605,7 +608,8 @@ void TeapotScene::init()
 
 	std::string teapot =
 		"C:\\Users\\Damian\\Documents\\ComputerGraphics\\models\\teapot.obj";
-
+	teapot =
+		"C:\\Users\\Damian\\Documents\\ComputerGraphics\\models\\newell_teaset\\newell_teaset\\teapot.obj";
 	std::vector<glm::vec3> vertices;
 	std::vector<glm::vec3> normals;
 	std::vector<unsigned int> indices;
@@ -615,7 +619,7 @@ void TeapotScene::init()
 			//glm::mat4(1.f),
 			glm::translate(glm::mat4(1.f), glm::vec3(0.f, 0.f, 15.f)),
 			glm::vec3(0.9f)),
-		glm::radians(30.f),
+		glm::radians(90.f),
 		glm::vec3(0.f, 1.f, 0.f));
 
 	// material for walls
@@ -661,7 +665,7 @@ void TeapotScene::init()
 				glm::vec3(0.1f, 0.1f, 0.1f),
 				glm::vec3(0.2f, 0.2f, 0.2f)));
 	teapot_mat->setShininess(1.f);
-	//teapot_mat->setReflective(glm::vec3(1.0f));
+	teapot_mat->setReflective(glm::vec3(1.0f));
 
 	std::vector<std::shared_ptr<Shape>> t_pot_triangles;
 	for (size_t i = 0; i < indices.size() / TEAPOTSIZE; i += 3)
@@ -678,6 +682,9 @@ void TeapotScene::init()
 		t_pot_triangles.push_back(std::make_shared<Triangle>(p1,
 			p2,
 			p3,
+			normals[indices[i]],
+			normals[indices[i + 1]],
+			normals[indices[i + 2]],
 			tr_normal,
 			teapot_to_world,
 			teapot_mat));
@@ -699,9 +706,13 @@ void TeapotScene::init()
 	// END
 	////////////////////////////////
 
-	lights.emplace_back(std::make_unique<PointLight>(glm::vec3(-1.f, 5.f, 25.f),
+	lights.emplace_back(std::make_unique<PointLight>(glm::vec3(5.f, 5.f, 25.f),
 		glm::vec3(-2, -4, -2),
 		glm::vec3(120.f)));
+	
+	lights.emplace_back(std::make_unique<PointLight>(glm::vec3(-5.f, 5.f, 25.f),
+		glm::vec3(-2, -4, -2),
+		glm::vec3(80.f)));
 
 	cam.reset(new Camera());
 	/*cam->setCamToWorld(glm::rotate(glm::translate(glm::mat4(1.f), translation),
@@ -727,6 +738,9 @@ void SingleTriangleScene::init()
 	sc.emplace_back(std::make_unique<Triangle>(glm::vec3(0.f, 0.f, -4.f),
 		glm::vec3(4.f, 0.f, -4.f),
 		glm::vec3(4.f, 4.f, -4.f),
+		glm::vec3(0.f, 0.f, 1.f),
+		glm::vec3(0.f, 0.f, 1.f),
+		glm::vec3(0.f, 0.f, 1.f),
 		glm::vec3(0.f, 0.f, 1.f),
 		glm::translate(glm::scale(glm::mat4(1.f), glm::vec3(2.f)),
 			glm::vec3(0.f, 0.f, 5.f)),

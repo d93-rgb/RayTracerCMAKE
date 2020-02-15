@@ -63,7 +63,7 @@ void extractMesh(const std::string &file,
 	std::vector<unsigned int> &indices)
 {
 	Assimp::Importer imp;
-	const aiScene *a_scene = imp.ReadFile(file, 0);
+	const aiScene *a_scene = imp.ReadFile(file, aiProcess_Triangulate);
 	
 	if (!a_scene || (a_scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE))
 	{
@@ -85,7 +85,7 @@ void extractMesh(const std::string &file,
 			x = a_scene->mMeshes[mesh_num]->mNormals[i].x;
 			y = a_scene->mMeshes[mesh_num]->mNormals[i].y;
 			z = a_scene->mMeshes[mesh_num]->mNormals[i].z;
-			normals.push_back(glm::vec3(x,y,z));
+			normals.push_back(glm::vec3(x, y, z));
 		}
 	}
 
