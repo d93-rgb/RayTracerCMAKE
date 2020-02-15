@@ -179,6 +179,7 @@ endif()
 
 # add headers to the target for now, because VS does not recognize header files otherwise
 # to be inside filters
+message(${RT_SRC})
 add_executable( rt ${OPTIONS} ${RT_MAIN} ${RT_SRC} ${RT_HEADERS})
 
 if( NOT WIN32 )

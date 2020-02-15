@@ -1,47 +1,54 @@
 #pragma once
-#include "rt.h"
+#include "core/rt.h"
 #include <vector>
 
 namespace rt
 {
-typedef struct BVH_Node
+class BVH_Node
 {
-	BVH_Node* left_node;
-	BVH_Node* right_node;
-	Bounds3* box;
-	std::vector<Shape*> shapes;
+public:
+	std::unique_ptr<BVH_Node> left_node;
+	std::unique_ptr<BVH_Node> right_node;
+	std::unique_ptr<Bounds3> box;
+	std::vector<std::shared_ptr<Shape>> shapes;
 
 	float intersect(const Ray& ray, SurfaceInteraction* isect);
-} BVH_Node;
+};
 
-typedef struct BVH_Tree
+class BVH_Tree
 {
-	BVH_Node* bvh_node;
+public:
+	std::unique_ptr<BVH_Node> bvh_node;
 	float intersect(const Ray& ray, SurfaceInteraction* isect);
-
-} BVH_Tree;
+};
 
 
 class BVH
 {
 public:
-	BVH(const std::vector<Shape*>& scene_objects, 
-		const Bounds3& surrounding_box, 
-		size_t max_triangle_count = 5) :
-		scene_objects(scene_objects), 
-		surrounding_box(surrounding_box)
-		MAX_TRIANGLE_COUNT(max_triangle_count)
-	{}
+	BVH(const std::vector<std::shared_ptr<Shape>>& scene_objects, 
+		const Bounds3* surrounding_box, 
+		size_t max_triangle_count = 30,
+		size_t max_depth = 10) :
+		MAX_TRIANGLE_COUNT(max_triangle_count),
+		MAX_DEPTH(max_depth)
+	{
+		bvh_tree.bvh_node = std::make_unique<BVH_Node>();
+		this->bvh_tree.bvh_node->box = std::make_unique<Bounds3>(*surrounding_box);
+		this->bvh_tree.bvh_node->shapes = scene_objects;
 
-	bool build_bvh(const Bounds3& current_box);
-	bool traverse_bvh();
+		build_bvh();
+	}
 
-	float intersect(const Ray& ray, SurfaceInteraction* isect);
+	bool build_bvh();
+	float traverse_bvh(const Ray& ray, SurfaceInteraction* isect);
 
 private:
+	bool build_bvh(BVH_Node* current_node, int depth);
+
 	size_t MAX_TRIANGLE_COUNT;
-	std::vector<Shape*> scene_objects;
-	Bounds3 surrounding_box;
+	size_t MAX_DEPTH;
+	BVH_Tree bvh_tree;
 };
 
 } // namespace rt

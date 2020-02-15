@@ -1,8 +1,9 @@
 #include "shape/shape.h"
+#include "shape/bvh.h"
 
 namespace rt
 {
-float Plane::intersect(const Ray &ray, SurfaceInteraction * isect)
+float Plane::intersect(const Ray& ray, SurfaceInteraction* isect)
 {
 	float denom = glm::dot(normal, ray.rd);
 
@@ -29,7 +30,7 @@ float Plane::intersect(const Ray &ray, SurfaceInteraction * isect)
 	return t;
 }
 
-float Plane::intersect(const Ray &ray)
+float Plane::intersect(const Ray& ray)
 {
 	float denom = glm::dot(normal, ray.rd);
 
@@ -42,7 +43,7 @@ float Plane::intersect(const Ray &ray)
 	return t >= 0 ? t : INFINITY;
 }
 
-float Rectangle::intersect(const Ray &ray, SurfaceInteraction * isect)
+float Rectangle::intersect(const Ray& ray, SurfaceInteraction* isect)
 {
 	float denom = glm::dot(ray.rd, normal);
 
@@ -76,7 +77,7 @@ float Rectangle::intersect(const Ray &ray, SurfaceInteraction * isect)
 
 }
 
-float Cube::intersect(const Ray &ray, SurfaceInteraction *isect)
+float Cube::intersect(const Ray& ray, SurfaceInteraction* isect)
 {
 	assert(abs(length(ray.rd)) > 0);
 
@@ -182,7 +183,7 @@ float Cube::intersect(const Ray &ray, SurfaceInteraction *isect)
 	return isec_t;
 }
 
-float Cube::intersect(const Ray &ray)
+float Cube::intersect(const Ray& ray)
 {
 	assert(abs(length(ray.rd)) > 0);
 
@@ -271,7 +272,7 @@ float Cube::intersect(const Ray &ray)
 	return isec_t;
 }
 
-float Triangle::intersect(const Ray &ray, SurfaceInteraction * isect)
+float Triangle::intersect(const Ray& ray, SurfaceInteraction* isect)
 {
 	float t_plane = INFINITY;
 	Plane plane{ p1, n };
@@ -298,7 +299,7 @@ float Triangle::intersect(const Ray &ray, SurfaceInteraction * isect)
 	return INFINITY;
 }
 
-float UnitCube::intersect(const Ray & ray, SurfaceInteraction * isect)
+float UnitCube::intersect(const Ray& ray, SurfaceInteraction* isect)
 {
 	assert(abs(length(ray.rd)) > 0);
 
@@ -355,4 +356,30 @@ float UnitCube::intersect(const Ray & ray, SurfaceInteraction * isect)
 
 	return t0;
 }
+
+float TriangleMesh::intersect(const Ray& ray, SurfaceInteraction* isect)
+{
+	float t_int = INFINITY;
+	float tmp = INFINITY;
+	bool hit = false;
+
+	return bvh->traverse_bvh(ray, isect);
+	/*hit = boundary->intersect(ray);
+	if (!hit) {
+		return INFINITY;
+	}*/
+
+	// get nearest intersection point
+	/*for (auto &objs : tr_mesh)
+	{
+		tmp = objs->intersect(ray, isect);
+
+		if (tmp >= 0 && t_int > tmp)
+		{
+			t_int = tmp;
+		}
+	}
+	return t_int;*/
+}
+
 } //namespace rt

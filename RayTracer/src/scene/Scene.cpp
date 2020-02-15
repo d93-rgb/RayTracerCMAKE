@@ -10,6 +10,7 @@
 #include "shape/shape.h"
 #include "shape/quadric/quadrics.h"
 #include "light/light.h"
+#include "shape/bvh.h"
 
 //#define SHOW_AXIS
 //#define LOAD_TEAPOT
@@ -601,8 +602,6 @@ void TeapotScene::init()
 	//glm::vec3 look_pos = glm::vec3(0.f, -sqrtf(2.f), -sqrt(2.f));
 	glm::vec3 look_pos = glm::vec3(0.f, 0.f, -10.f);
 	glm::vec3 cam_up = glm::vec3(0.f, 1.f, 0.f);
-	glm::vec4 cube_position;
-	glm::vec3 cube_normal;
 	glm::vec3 p1, p2, p3, tr_normal;
 
 	std::string teapot =
@@ -625,7 +624,6 @@ void TeapotScene::init()
 	/////////////////////////////////////
 	// Triangle mesh
 	/////////////////////////////////////
-	std::unique_ptr<TriangleMesh> t_pot{ new TriangleMesh() };
 	glm::vec3 b_min = glm::vec3(INFINITY), b_max = glm::vec3(-INFINITY);
 
 	extractMesh(teapot, vertices, indices);
@@ -637,6 +635,7 @@ void TeapotScene::init()
 				glm::vec3(0.05f, 0.05f, 0.05f)));
 	teapot_mat->setShininess(20.f);
 
+	std::vector<std::shared_ptr<Shape>> t_pot_triangles;
 	for (size_t i = 0; i < indices.size() / TEAPOTSIZE; i += 3)
 	{
 		p1 = vertices[indices[i]];
@@ -648,22 +647,21 @@ void TeapotScene::init()
 		b_min = glm::min(b_min, glm::min(glm::min(p1, p2), p3));
 		b_max = glm::max(b_max, glm::max(glm::max(p1, p2), p3));
 
-		t_pot->tr_mesh.push_back(std::unique_ptr<Triangle>(new Triangle(p1,
+		t_pot_triangles.push_back(std::make_shared<Triangle>(p1,
 			p2,
 			p3,
 			tr_normal,
 			teapot_to_world,
-			teapot_mat)));
+			teapot_mat));
 	}
 	/////////////////////////////////////
 	// Triangle mesh END
 	/////////////////////////////////////
 
 
-	////////////////////////////////
-	// BOUNDARY FOR THE TEAPOT
-	////////////////////////////////
-	t_pot->boundary.reset(new Bounds3(
+	std::unique_ptr<TriangleMesh> t_pot = std::make_unique<TriangleMesh>(
+		t_pot_triangles,
+		std::make_unique<Bounds3>(
 		teapot_to_world * glm::vec4(b_min, 1.f),
 		teapot_to_world * glm::vec4(b_max, 1.f)));
 

@@ -305,7 +305,7 @@ std::vector<glm::vec3> render_with_threads(
 	/***************************************/
 	//GatheringScene sc;
 	//MixedScene sc;
-	std::unique_ptr<Scene> sc = std::make_unique<MixedScene>();
+	std::unique_ptr<Scene> sc = std::make_unique<TeapotScene>();
 
 	//	// enclose with braces for destructor of ProgressReporter at the end of rendering
 	{

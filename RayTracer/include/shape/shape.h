@@ -6,6 +6,7 @@
 #include "shape/ray.h"
 #include "interaction/interaction.h"
 #include "texture/texture.h"
+#include "shape/bvh.h"
 
 //#define DEBUG
 
@@ -27,7 +28,7 @@ struct Shape
 
 	virtual float intersect(const Ray &ray, SurfaceInteraction *isect) = 0;
 
-	Bounds3 bounding_box;
+	std::unique_ptr<Bounds3> bounding_box;
 };
 
 class Bounds3
@@ -36,22 +37,23 @@ class Bounds3
 
 public:
 	glm::vec3 boundaries[2];
+	glm::vec3 centroid;
 
 	Bounds3() = default;
 
 	Bounds3(glm::vec3 min_bounds, glm::vec3 max_bounds) :
-		normal(glm::vec3(0.f))
+		normal(glm::vec3(0.f)), centroid(0.5f * (min_bounds + max_bounds))
 	{
 		for (int i = 0; i < 3; ++i)
 		{
-			assert(min_bounds[i] < max_bounds[i]);
+			assert(min_bounds[i] <= max_bounds[i]);
 		}
 
 		boundaries[0] = (min_bounds);
 		boundaries[1] = (max_bounds);
 	}
 
-	bool intersect(const Ray &ray)
+	float intersect(const Ray &ray)
 	{
 		assert(abs(length(ray.rd)) > 0);
 
@@ -85,11 +87,11 @@ public:
 
 			if (t0 > t1)
 			{
-				return false;
+				return INFINITY;
 			}
 		}
 
-		return true;
+		return t0;
 	}
 
 	glm::vec3 get_normal(glm::vec3 p) const
@@ -419,15 +421,15 @@ public:
 		objToWorld(objToWorld),
 		worldToObj(glm::inverse(objToWorld))
 	{
-		//construct surrounding aabb
-		this->bounding_box = Bounds3(glm::vec3(glm::min(glm::min(p1, p2),p3)),
-			glm::vec3(glm::max(glm::max(p1, p2), p3)));
-
 		this->mat = mat;
 
 		this->p1 = objToWorld * glm::vec4(p1, 1.f);
 		this->p2 = objToWorld * glm::vec4(p2, 1.f);
 		this->p3 = objToWorld * glm::vec4(p3, 1.f);
+
+		//construct surrounding aabb
+		this->bounding_box = std::make_unique<Bounds3>(glm::vec3(glm::min(glm::min(this->p1, this->p2), this->p3)),
+			glm::vec3(glm::max(glm::max(this->p1, this->p2), this->p3)));
 
 		this->n = glm::transpose(glm::inverse(objToWorld)) * glm::vec4(n, 0.f);
 		// base transformation to barycentric coordinates
@@ -448,9 +450,9 @@ public:
 		return n;
 	}
 
-	Bounds3 get_bounding_box()
+	Bounds3* get_bounding_box()
 	{
-		return bounding_box;
+		return bounding_box.get();
 	}
 
 private:
@@ -469,43 +471,24 @@ class TriangleMesh : public Shape
 {
 public:
 	std::unique_ptr<Bounds3> boundary;
-	std::vector<std::unique_ptr<Triangle>> tr_mesh;
+	std::vector<std::shared_ptr<Shape>> tr_mesh;
 
-	TriangleMesh(std::unique_ptr<Bounds3> &bounds) : boundary(std::move(bounds))
+	TriangleMesh(std::vector<std::shared_ptr<Shape>> tr_mesh, 
+		std::unique_ptr<Bounds3> bounds) :
+		tr_mesh(tr_mesh),
+		boundary(std::move(bounds))
 	{
+		bvh = std::make_unique<BVH>(tr_mesh, boundary.get());
 	}
 
-	TriangleMesh() {}
-
-	float intersect(const Ray &ray, SurfaceInteraction *isect)
-	{
-		float t_int = INFINITY;
-		float tmp = INFINITY;
-		bool hit = false;
-
-		hit = boundary->intersect(ray);
-		if (!hit) {
-			return INFINITY;
-		}
-
-		// get nearest intersection point
-		for (auto &objs : tr_mesh)
-		{
-			tmp = objs->intersect(ray, isect);
-
-			if (tmp >= 0 && t_int > tmp)
-			{
-				t_int = tmp;
-			}
-		}
-		return t_int;
-	}
+	float intersect(const Ray& ray, SurfaceInteraction* isect);
 
 	glm::vec3 get_normal(glm::vec3 p) const
 	{
 		return glm::vec3(0.f);
 	}
-
+private:
+	std::unique_ptr<BVH> bvh;
 };
 
 inline void create_cube(glm::vec3 center,

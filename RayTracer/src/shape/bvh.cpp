@@ -1,16 +1,16 @@
-#include "bvh.h"
-#include "shape.h"
+#include "shape/bvh.h"
+#include "shape/shape.h"
+#include "shape/ray.h"
+#include "interaction/interaction.h"
 
 namespace rt
 {
-
 float BVH_Node::intersect(const Ray& ray, SurfaceInteraction* isect)
 {
 	if (!left_node && !right_node)
 	{
 		float t_min = INFINITY;
 		float t_tmp;
-		next_node = nullptr;
 
 		for (const auto& object : shapes)
 		{
@@ -22,21 +22,31 @@ float BVH_Node::intersect(const Ray& ray, SurfaceInteraction* isect)
 		}
 		return t_min;
 	}
+	float t0 = INFINITY;
+	float t1 = INFINITY;
 
 	if(left_node)
-		float t0 = left_node->box->intersect(ray);
+		t0 = left_node->box->intersect(ray);
 	
 	if(right_node)
-		float t1 = right_node->box->intersect(ray);
+		t1 = right_node->box->intersect(ray);
 
-	if (t0 < t1)
+	if (t0 == INFINITY && t1 == INFINITY)
 	{
-		left_node->intersect(ray, isect);
+		return INFINITY;
 	}
-	else
+	
+	float t0_left = INFINITY;
+	float t1_right = INFINITY;
+	if (t0 < INFINITY)
 	{
-		right_node->intersect(ray, isect);
+		t0_left = left_node->intersect(ray, isect);
 	}
+	if (t1 < INFINITY)
+	{
+		t1_right = right_node->intersect(ray, isect);
+	}
+	return std::min(t0_left, t1_right);
 }
 
 float BVH_Tree::intersect(const Ray& ray, SurfaceInteraction* isect)
@@ -48,38 +58,104 @@ float BVH_Tree::intersect(const Ray& ray, SurfaceInteraction* isect)
 	return t_min;
 }
 
-bool BVH::build_bvh(const Bounds3& current_box)
+// split order x, y then z, so n goes from 0 to 2
+bool BVH::build_bvh(BVH_Node* current_node, int depth)
 {
-	// split order x, y then z, so n goes from 0 to 2
-	int n = 0;
+	if (depth > MAX_DEPTH)
+	{
+		return false;
+	}
+
 	// middle point
 	float m;
+	int n = depth % 3;
 
-	BVH_Node l_node;
-	BVH_Node r_node;
+	current_node->left_node.reset(new BVH_Node());
+	current_node->right_node.reset(new BVH_Node());
 
-	Bounds3 first_half = current_box;
-	Bounds3 second_half = current_box;
+	current_node->left_node->box = std::make_unique<Bounds3>(current_node->box->boundaries[0],
+		current_node->box->boundaries[1]);
+	current_node->right_node->box = std::make_unique<Bounds3>(current_node->box->boundaries[0],
+		current_node->box->boundaries[1]);
 
 	// split the box
-	m = 0.5f * (current_box.boundaries[0][n] + current_box.boundaries[1][n]);
-	first_half.boundaries[1][n] = m;
-	second_half.boundaries[0][n] = m;
 
-	// assign triangles to the appropriate box
-	for (const auto& t : this->scene_objects)
+	// split axis
+	m = 0.5f * (current_node->box->boundaries[0][n] + current_node->box->boundaries[1][n]);
+	
+	glm::vec3 left_min_bound(INFINITY);
+	glm::vec3 left_max_bound(-INFINITY);
+	glm::vec3 right_min_bound(INFINITY);
+	glm::vec3 right_max_bound(-INFINITY);
+
+	// TODO: implement correct splitting
+	for (const auto& triangle : current_node->shapes)
 	{
-		if (first_half[0] <= t->bounding_box[0] ||
-			t->bounding_box[1] <= first_half[1])
+		if (triangle->bounding_box->centroid[n] < m)
 		{
-			l_node.shapes.push_back(t);
+			current_node->left_node->shapes.push_back(triangle);
+			left_min_bound = glm::min(left_min_bound, triangle->bounding_box->boundaries[0]);
+			left_max_bound = glm::max(left_max_bound, triangle->bounding_box->boundaries[1]);
 		}
-		if (second_half[0] <= t->bounding_box[0] ||
-			t->bounding_box[1] <= second_half[1])
+		else
 		{
-			r_node.shapes.push_back(t);
+			current_node->right_node->shapes.push_back(triangle);
+			right_min_bound = glm::min(right_min_bound, triangle->bounding_box->boundaries[0]);
+			right_max_bound = glm::max(right_max_bound, triangle->bounding_box->boundaries[1]);
 		}
 	}
+
+	// create new box boundaries
+	current_node->left_node->box->boundaries[0] = left_min_bound;
+	current_node->left_node->box->boundaries[1] = left_max_bound;
+	current_node->right_node->box->boundaries[0] = right_min_bound;
+	current_node->right_node->box->boundaries[1] = right_max_bound;
+
+	
+	// TODO: ignore for now because of incorrect splitting 
+	/*for (const auto& t : current_node->shapes)
+	{
+		auto comp_l = glm::lessThanEqual(current_node->left_node->box->boundaries[0], 
+			t->bounding_box->boundaries[0]);
+		auto comp_r = glm::lessThanEqual(t->bounding_box->boundaries[1], 
+			current_node->left_node->box->boundaries[1]);
+		
+		if (glm::all(comp_l) || glm::all(comp_r))
+		{
+			current_node->left_node->shapes.push_back(t);
+		}
+
+		comp_l = glm::lessThanEqual(current_node->right_node->box->boundaries[0],
+			t->bounding_box->boundaries[0]);
+		comp_r = glm::lessThanEqual(t->bounding_box->boundaries[1], 
+			current_node->right_node->box->boundaries[1]);
+		if (glm::all(comp_l) || glm::all(comp_r))
+		{
+			current_node->right_node->shapes.push_back(t);
+		}
+	}
+	*/
+	if (current_node->left_node->shapes.size() > MAX_TRIANGLE_COUNT)
+	{
+		build_bvh(current_node->left_node.get(),  depth+1);
+	} 
+	if (current_node->right_node->shapes.size() > MAX_TRIANGLE_COUNT)
+	{
+		build_bvh(current_node->right_node.get(), depth+1);
+	}
+
+	return true;
+}
+
+bool BVH::build_bvh()
+{
+	this->build_bvh(this->bvh_tree.bvh_node.get(), 0);
+	return true;
+}
+
+float BVH::traverse_bvh(const Ray& ray, SurfaceInteraction *isect)
+{
+	return this->bvh_tree.intersect(ray, isect);
 }
 
 } //namespace rt
