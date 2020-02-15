@@ -80,7 +80,7 @@ bool BVH::build_bvh(BVH_Node* current_node, int depth)
 
 	// split the box
 
-	// split axis
+	// the split axis which divides the triangles into two groups
 	m = 0.5f * (current_node->box->boundaries[0][n] + current_node->box->boundaries[1][n]);
 	
 	glm::vec3 left_min_bound(INFINITY);
@@ -88,7 +88,6 @@ bool BVH::build_bvh(BVH_Node* current_node, int depth)
 	glm::vec3 right_min_bound(INFINITY);
 	glm::vec3 right_max_bound(-INFINITY);
 
-	// TODO: implement correct splitting
 	for (const auto& triangle : current_node->shapes)
 	{
 		if (triangle->bounding_box->centroid[n] < m)
@@ -111,30 +110,6 @@ bool BVH::build_bvh(BVH_Node* current_node, int depth)
 	current_node->right_node->box->boundaries[0] = right_min_bound;
 	current_node->right_node->box->boundaries[1] = right_max_bound;
 
-	
-	// TODO: ignore for now because of incorrect splitting 
-	/*for (const auto& t : current_node->shapes)
-	{
-		auto comp_l = glm::lessThanEqual(current_node->left_node->box->boundaries[0], 
-			t->bounding_box->boundaries[0]);
-		auto comp_r = glm::lessThanEqual(t->bounding_box->boundaries[1], 
-			current_node->left_node->box->boundaries[1]);
-		
-		if (glm::all(comp_l) || glm::all(comp_r))
-		{
-			current_node->left_node->shapes.push_back(t);
-		}
-
-		comp_l = glm::lessThanEqual(current_node->right_node->box->boundaries[0],
-			t->bounding_box->boundaries[0]);
-		comp_r = glm::lessThanEqual(t->bounding_box->boundaries[1], 
-			current_node->right_node->box->boundaries[1]);
-		if (glm::all(comp_l) || glm::all(comp_r))
-		{
-			current_node->right_node->shapes.push_back(t);
-		}
-	}
-	*/
 	if (current_node->left_node->shapes.size() > MAX_TRIANGLE_COUNT)
 	{
 		build_bvh(current_node->left_node.get(),  depth+1);
