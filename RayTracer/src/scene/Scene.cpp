@@ -343,7 +343,7 @@ void MixedScene::init()
 	auto sphere_mat =
 		std::make_shared<Material>(
 			glm::vec3(0.02, 0.02, 0.02),
-			glm::vec3(0.3, 0.3, 0.3f),
+			glm::vec3(0.1f, 0.1f, 0.1f),
 			glm::vec3(0.4f, 0.4f, 0.4f));
 	sphere_mat->setShininess(10.f);
 
@@ -355,14 +355,14 @@ void MixedScene::init()
 			glm::vec3(4.f, 0.f, 0.f),
 			glm::vec3(0.f, 4.f, 0.f)),*/
 		std::make_shared<SphericalMapping>(
-			glm::vec3(-35.f, 6.f, -3.f)
+			glm::vec3(-15.f, 2.f, -3.f)
 			),
 		glm::vec3(1.f),
 		ImageWrap::REPEAT);
 	sphere_mat->setTexture(sphere_texture);
 
 	sc.emplace_back(std::make_unique<Sphere>(
-		glm::vec3(-35.f, 6.f, -3.f),
+		glm::vec3(-15.f, 2.f, -3.f),
 		2.f,
 		glm::vec3(1.f),
 		sphere_mat));
@@ -468,7 +468,7 @@ void MixedScene::init()
 	////////////////////////////////
 	// NEW CUBE
 	////////////////////////////////
-	cube_position = floor->getRectPos(8.f, 3.f, 'z') +
+	cube_position = floor->getRectPos(17.f, -3.f, 'z') +
 		1.5f * glm::vec4(cube_normal, 0.f);
 	// cube material for new cube class object
 	auto new_cube_mat = std::shared_ptr<Material>(new Material(
@@ -479,7 +479,7 @@ void MixedScene::init()
 	auto cube_tex_mapping = std::make_shared<SphericalMapping>(cube_position);
 
 	sc.emplace_back(std::make_unique<Cube>(
-		glm::vec3(3.f),
+		glm::vec3(3.0f),
 		new_cube_mat));
 	auto cube_texture = std::make_shared<RGBCubeTexture>(
 		dynamic_cast<Cube*>(sc.back().get()));

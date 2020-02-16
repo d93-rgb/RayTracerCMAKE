@@ -104,6 +104,10 @@ class Image;
 class Dispatcher;
 class Slice;
 
+class BVH;
+class BVH_Tree;
+class BVH_Node;
+
 enum class ImageWrap;
 
 static constexpr bool QUIET = false;

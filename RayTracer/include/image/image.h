@@ -4,8 +4,8 @@ namespace rt
 {
 class Image
 {
-	unsigned int width;
-	unsigned int height;
+	size_t width;
+	size_t height;
 
 public:
 	Image(unsigned int width, unsigned int height) :
@@ -31,6 +31,7 @@ public:
 	{
 		return height;
 	}
+
 private:
 	float fov = 0.f;
 	float fov_tan_half = 0.f;

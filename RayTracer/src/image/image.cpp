@@ -1,7 +1,11 @@
 #include <core/rt.h>
 #include "..\..\include\image\image.h"
 
-void rt::Image::write_image_to_file(const std::string& file, std::vector<glm::vec3>& col)
+namespace rt
+{
+
+void Image::write_image_to_file(const std::string& file,
+	std::vector<glm::vec3>& col)
 {
 #ifdef DEBUG
 	//assert(bin.size() == col.size());
@@ -51,10 +55,11 @@ void rt::Image::write_image_to_file(const std::string& file, std::vector<glm::ve
 		unsigned char b = (unsigned int)round(col[i].z);
 
 		ofs << r << g << b;
-	}
+}
 
 	ofs.close();
 
 	LOG(INFO) << "Writing image to \"" << file << "\" finished.";
-
 }
+
+} // namespace rt
