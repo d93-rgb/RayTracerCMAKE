@@ -28,7 +28,7 @@ public:
 
 	std::vector<std::pair<unsigned int, unsigned int>> pairs;
 
-	Slice(rt::Image img, int w, int h)
+	Slice(const rt::Image& img, int w, int h)
 	{
 		/*if ((img.get_height() % 16 != 0) || (img.get_width() % 16 != 0))
 		{

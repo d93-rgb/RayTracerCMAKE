@@ -1,17 +1,26 @@
 #include "core/renderer.h"
 #include "shape/ray.h"
 #include "scene/scene.h"
+#include "camera/camera.h"
 #include "shape/shape.h"
 #include "light/light.h"
+#include "image/image.h"
+#include "samplers/sampler2D.h"
+#include "threads/dispatcher.h"
 
 namespace rt
 {
+
+Renderer::Renderer(size_t max_depth = 4) :
+	MAX_DEPTH(max_depth)
+{}
+
 /*
 	Calculate the normalized reflection vector.
 	dir	: the incident ray
 	N	: the normalized normal vector of a surface
 */
-glm::vec3 reflect(glm::vec3 dir, glm::vec3 N)
+glm::vec3 Renderer::reflect(glm::vec3 dir, glm::vec3 N)
 {
 	return glm::normalize(dir - 2 * glm::dot(N, dir) * N);
 }
@@ -21,7 +30,7 @@ glm::vec3 reflect(glm::vec3 dir, glm::vec3 N)
 	V	: the view direction
 	N	: the normalized normal vector of a surface
 */
-bool refract(glm::vec3 V, glm::vec3 N, float refr_idx, glm::vec3 *refracted)
+bool Renderer::refract(glm::vec3 V, glm::vec3 N, float refr_idx, glm::vec3 *refracted)
 {
 	float cos_alpha = glm::dot(-V, N);
 
@@ -54,7 +63,7 @@ bool refract(glm::vec3 V, glm::vec3 N, float refr_idx, glm::vec3 *refracted)
 	rel_eta: the relative refractive coefficient
 	c: the cosine of the angle between incident and normal ray
 */
-float fresnel(float rel_eta, float c)
+float Renderer::fresnel(float rel_eta, float c)
 {
 
 	if (c < 0.f)
@@ -71,7 +80,7 @@ float fresnel(float rel_eta, float c)
 	return r0 + (1.f - r0) * powf(c, 5);
 }
 
-glm::vec3 handle_reflection(const Scene &s,
+glm::vec3 Renderer::handle_reflection(const Scene &s,
 	const Ray &ray,
 	const glm::vec3 &isect_p,
 	SurfaceInteraction *isect,
@@ -85,7 +94,7 @@ glm::vec3 handle_reflection(const Scene &s,
 		++depth);
 }
 
-glm::vec3 handle_transmission(const Scene &s,
+glm::vec3 Renderer::handle_transmission(const Scene &s,
 	const Ray &ray,
 	const glm::vec3 &isect_p,
 	SurfaceInteraction *isect,
@@ -128,7 +137,7 @@ glm::vec3 handle_transmission(const Scene &s,
 	ray: the next ray to trace
 	o: the object that was hit
 */
-float shoot_ray(const Scene &s, const Ray &ray, SurfaceInteraction *isect)
+float Renderer::shoot_ray(const Scene &s, const Ray &ray, SurfaceInteraction *isect)
 {
 	float t_int = INFINITY;
 	float tmp = INFINITY;
@@ -149,7 +158,7 @@ float shoot_ray(const Scene &s, const Ray &ray, SurfaceInteraction *isect)
 	return ray.tNearest;
 }
 
-glm::vec3 shoot_recursively(const Scene &s,
+glm::vec3 Renderer::shoot_recursively(const Scene &s,
 	const Ray &ray,
 	SurfaceInteraction *isect,
 	int depth)
@@ -203,4 +212,301 @@ glm::vec3 shoot_recursively(const Scene &s,
 
 	return contribution;
 }
+
+std::vector<glm::vec3> Renderer::render_gradient(
+	size_t& width_img,
+	const size_t& width_stripe,
+	size_t& height)
+{
+	// do not let RAM explode, limit maximum stripe width
+	assert(width_stripe < 4e3);
+
+	// set image width and height
+	width_img = 256 * width_stripe;
+	height = img->get_height();
+
+	std::vector<glm::vec3> color{ 256 * width_stripe * height, glm::vec3(0) };
+
+	for (int k = 0; k < 256; ++k)
+	{
+		for (unsigned int i = 0; i < height; ++i)
+		{
+			for (unsigned int j = 0; j < width_stripe; ++j)
+			{
+				color[i * width_img + j + k * width_stripe] = glm::vec3(float(k) / 255.0f);
+			}
+		}
+	}
+	return color;
 }
+
+/*
+	Starts rendering a scene and returns the color vector.
+*/
+std::vector<glm::vec3> Renderer::render(
+	unsigned int& width,
+	unsigned int& height)
+{
+	constexpr float fov = glm::radians(90.f);
+	float fov_tan = tan(fov / 2);
+	float u = 0.f, v = 0.f;
+	// distance to view plane
+	float d = 1.f;
+	float inv_spp;
+	float inv_grid_dim = 1.f / (GRID_DIM * GRID_DIM);
+
+	float crop_min_x = 0.f, crop_max_x = 1.f;
+	float crop_min_y = 0.f, crop_max_y = 1.f;
+
+	assert(crop_min_x <= crop_max_x && crop_min_y <= crop_max_y);
+
+	unsigned int cropped_width[2];
+	unsigned int cropped_height[2];
+
+	crop(crop_min_x, crop_max_x, img->get_width(), cropped_width);
+	crop(crop_min_y, crop_max_y, img->get_height(), cropped_height);
+
+	width = cropped_width[1] - cropped_width[0];
+	height = cropped_height[1] - cropped_height[0];
+
+	LOG(INFO) << "Image width = " << img->get_width() << "; Image height = " << img->get_height();
+	LOG(INFO) << "Cropped width = " << width << "; Cropped height = " << height;
+
+	std::vector<glm::vec3> col{ width * height, glm::vec3(0.f) };
+
+	StratifiedSampler2D sampler{ width, height, GRID_DIM };
+	unsigned int array_size = GRID_DIM * GRID_DIM;
+	const glm::vec2* samplingArray;
+	inv_spp = 1.f; // sampler.samplesPerPixel;
+	/***************************************/
+	// CREATING SCENE
+	/***************************************/
+	//GatheringScene sc;
+	MixedScene sc;
+	//	// enclose with braces for destructor of ProgressReporter at the end of rendering
+	{
+		/***************************************/
+		// START PROGRESSREPORTER
+		/***************************************/
+		pbrt::ProgressReporter reporter(img->get_height(), "Rendering:");
+		/***************************************/
+		// LOOPING OVER PIXELS
+		/***************************************/
+		// dynamic schedule for proper I/O progress update
+//#pragma omp parallel for schedule(dynamic, 1)
+		for (unsigned int y = cropped_height[0]; y < cropped_height[1]; ++y)
+		{
+			//fprintf(stderr, "\rRendering %5.2f%%", 100.*y / (HEIGHT - 1));
+			reporter.Update();
+			for (unsigned int x = cropped_width[0]; x < cropped_width[1]; ++x)
+			{
+				//TODO: NOT threadsafe
+				samplingArray = sampler.get2DArray();
+
+				// hackery needed for omp pragma
+				// the index i will be distributed among all threads
+				// by omp automatically
+				unsigned int i = (y - cropped_height[0]) * width + (x - cropped_width[0]);
+				for (unsigned int idx = 0; idx < array_size; ++idx)
+				{
+					SurfaceInteraction isect;
+
+					// map pixel coordinates to[-1, 1]x[-1, 1]
+					float u = (2.f * (x + samplingArray[idx].x) - img->get_width()) / img->get_height() * fov_tan;
+					float v = (-2.f * (y + samplingArray[idx].y) + img->get_height()) / img->get_height() * fov_tan;
+
+					// this can not be split up and needs to be in one line, otherwise
+					// omp will not take the
+					/*col[i] += clamp(shoot_recursively(sc, sc.cam->getPrimaryRay(u, v, d), &isect, 0))
+						* inv_grid_dim;*/
+					col[i] = glm::normalize(sc.cam->getPrimaryRay(u, v, d).rd);
+				}
+			}
+		}
+		reporter.Done();
+	}
+	return col;
+}
+
+std::vector<glm::vec3> Renderer::render_with_threads(
+	unsigned int& width,
+	unsigned int& height)
+{
+	constexpr float fov = glm::radians(30.f);
+	float fov_tan = tan(fov / 2);
+	float u = 0.f, v = 0.f;
+	// distance to view plane
+	float foc_len = 0.5f * 1.0f / fov_tan;
+	float inv_spp;
+	float inv_grid_dim = 1.f / (GRID_DIM * GRID_DIM);
+
+	float crop_min_x = 0.f, crop_max_x = 1.f;
+	float crop_min_y = 0.f, crop_max_y = 1.f;
+
+	assert(crop_min_x <= crop_max_x && crop_min_y <= crop_max_y);
+
+	unsigned int cropped_width[2];
+	unsigned int cropped_height[2];
+
+	crop(crop_min_x, crop_max_x, img->get_width(), cropped_width);
+	crop(crop_min_y, crop_max_y, img->get_height(), cropped_height);
+
+	width = cropped_width[1] - cropped_width[0];
+	height = cropped_height[1] - cropped_height[0];
+
+	LOG(INFO) << "Image width = " << img->get_width() << "; Image height = " << img->get_height();
+	LOG(INFO) << "Cropped width = " << width << "; Cropped height = " << height;
+
+	std::vector<glm::vec3> col{ width * height, glm::vec3(0.f) };
+
+#ifdef BLACK_COLOR_ARRAY_FOR_DEBUGGING
+	return col;
+#endif
+
+	StratifiedSampler2D sampler{ width, height, GRID_DIM };
+	unsigned int array_size = GRID_DIM * GRID_DIM;
+	const glm::vec2* samplingArray;
+	inv_spp = 1.0f / SPP;
+	/***************************************/
+	// CREATING SCENE
+	/***************************************/
+	//GatheringScene sc;
+	//MixedScene sc;
+	std::unique_ptr<Scene> sc = std::make_unique<MixedScene>();
+
+	//	// enclose with braces for destructor of ProgressReporter at the end of rendering
+	{
+		Slice slice(*img, 16, 16);
+		std::mutex pairs_mutex;
+		std::vector<std::thread> threads_v;
+		/***************************************/
+		// START PROGRESSREPORTER
+		/***************************************/
+		pbrt::ProgressReporter reporter(slice.dx * slice.dy, "Rendering:");
+		/***************************************/
+		// LOOPING OVER PIXELS
+		/***************************************/
+			//fprintf(stderr, "\rRendering %5.2f%%", 100.*y / (HEIGHT - 1));
+
+		for (int i = 0; i < NUM_THREADS; ++i)
+		{
+			/*threads_v.push_back(std::thread(work,
+				std::ref(slice),
+				std::ref(pairs_mutex),
+				std::ref(col),
+				std::ref(sc),
+				std::ref(sampler),
+				std::ref(reporter),
+				array_size,
+				std::ref(samplingArray),
+				inv_grid_dim,
+				inv_spp,
+				fov_tan,
+				foc_len,
+				std::ref(get_color)));*/
+
+			threads_v.push_back(std::thread([&]() {
+				int idx = 0;
+				unsigned int h_step;
+				unsigned int w_step;
+
+				while (idx != -1)
+				{
+					// try to access the next free raster
+					// TODO: Change locking with mutex guards!
+					pairs_mutex.lock();
+					idx = slice.get_index();
+					pairs_mutex.unlock();
+
+					if (idx < 0)
+					{
+						break;
+					}
+
+					assert(idx < slice.get_length());
+
+					// get step range
+					w_step = std::min(slice.w_step, slice.img_width - slice.pairs[idx].first);
+					h_step = std::min(slice.h_step, slice.img_height - slice.pairs[idx].second);
+
+					for (unsigned int i = 0; i < h_step; ++i)
+					{
+						for (unsigned int j = 0; j < w_step; ++j)
+						{
+							//TODO: NOT threadsafe
+							samplingArray = sampler.get2DArray();
+
+							for (unsigned int n = 0; n < array_size; ++n)
+							{
+								SurfaceInteraction isect;
+
+								// map pixel coordinates to[-1, 1]x[-1, 1]
+								float u = (2.f * (slice.pairs[idx].first + j + samplingArray[n].x) - img->get_width()) / img->get_height();
+								float v = (-2.f * (slice.pairs[idx].second + i + samplingArray[n].y) + img->get_height()) / img->get_height();
+
+								/*float u = (x + samplingArray[idx].x) - WIDTH * 0.5f;
+								float v = -((y + samplingArray[idx].y) - HEIGHT * 0.5f);
+						*/
+								col[(slice.pairs[idx].second + i) * slice.img_width + slice.pairs[idx].first + j] +=
+									clamp(shoot_recursively(
+										*sc, sc->cam->getPrimaryRay(u, v, foc_len), &isect, 0)) *
+									inv_grid_dim * inv_spp;
+								//col[x + y] = glm::normalize(sc.cam->getPrimaryRay(u, v, d).rd);
+							}
+						}
+					}
+					reporter.Update();
+				}
+				}));
+		}
+
+		for (int i = 0; i < NUM_THREADS; ++i)
+		{
+			threads_v[i].join();
+		}
+
+		reporter.Done();
+	}
+	return col;
+}
+
+/*
+	Short helper function
+*/
+void Renderer::run(
+	std::vector<glm::vec3>* colors,
+	std::string& file)
+{
+	size_t width, height;
+
+#ifdef RENDER_SCENE
+#ifdef NO_THREADS
+	* colors = render(width, height);
+#else
+	* colors = render_with_threads(width, height);
+#endif
+#else
+	* colors = render_gradient(width, 10, height);
+#endif
+
+	if (file.empty())
+	{
+		char buf[200];
+		GET_PWD(buf, 200);
+		std::string file_name = "picture.ppm";
+		std::cout << buf << std::endl;
+		std::string fn = buf;
+
+
+		LOG(INFO) << "Image will be written to \"" <<
+			fn.substr(0, fn.find_last_of("\\/")).append(OS_SLASH).append(file_name);
+		img->write_image_to_file(file_name, *colors);
+	}
+	else
+	{
+		file.append(".ppm");
+		img->write_image_to_file(file, *colors);
+	}
+}
+
+} // namespace rt

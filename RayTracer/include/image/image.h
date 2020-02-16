@@ -22,12 +22,12 @@ public:
 	void write_image_to_file(const std::string& file,
 		std::vector<glm::vec3>& col);
 
-	unsigned int get_width()
+	unsigned int get_width() const
 	{
 		return width;
 	}
 
-	unsigned int get_height()
+	unsigned int get_height() const
 	{
 		return height;
 	}
