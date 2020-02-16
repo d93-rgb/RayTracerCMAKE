@@ -8,7 +8,7 @@ class Image
 	size_t height;
 
 public:
-	Image(unsigned int width, unsigned int height) :
+	Image(size_t width, size_t height) :
 		width(width), 
 		height(height),
 		fov{ 0 },

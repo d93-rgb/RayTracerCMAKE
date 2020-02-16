@@ -11,8 +11,9 @@
 namespace rt
 {
 
-Renderer::Renderer(size_t max_depth = 4) :
-	MAX_DEPTH(max_depth)
+Renderer::Renderer(size_t w, size_t h, size_t max_depth = 4) :
+	MAX_DEPTH(max_depth),
+	img(new Image(w, h))
 {}
 
 /*

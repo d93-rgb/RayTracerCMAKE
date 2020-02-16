@@ -8,7 +8,7 @@ namespace rt
 class Renderer
 {
 public:
-	Renderer(size_t max_depth = 4);
+	Renderer(size_t w, size_t h, size_t max_depth = 4);
 
 
 	std::vector<glm::vec3> render_with_threads(unsigned int& width, unsigned int& height);
