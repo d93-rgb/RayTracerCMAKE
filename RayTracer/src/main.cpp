@@ -1,6 +1,9 @@
 #include <chrono>
 #include <set>
 
+// OpenGL loader
+#include <GL/gl3w.h>
+
 #include <GLFW/glfw3.h>
 
 #include "core/rt.h"
@@ -25,6 +28,14 @@ using namespace rt;
 
 bool RT_EXIT_PROGRAM = false;
 
+
+void key_callback(GLFWwindow* window, int key, int scancode, int action, int mode);
+
+void key_callback(GLFWwindow* window, int key, int scancode, int action, int mode) {
+	if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS) {
+		glfwSetWindowShouldClose(window, GL_TRUE);
+	}
+}
 
 #ifdef NOGLFW
 LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
@@ -198,6 +209,9 @@ LRESULT CALLBACK WindowProc(
 
 int main(int argc, char* argv[])
 {
+	int img_w = 800;
+	int img_h = 600;
+
 	int error_code;
 	const char* error_description;
 
@@ -215,9 +229,9 @@ int main(int argc, char* argv[])
 	glfwWindowHint(GLFW_RESIZABLE, GL_FALSE);
 
 	GLFWwindow* window = glfwCreateWindow(
-		screenWidth,
-		screenHeight,
-		"Minimal OpenGL Example",
+		img_w,
+		img_h,
+		"RayTracer",
 		nullptr,
 		nullptr);
 
@@ -234,83 +248,46 @@ int main(int argc, char* argv[])
 	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
 	glfwSetKeyCallback(window, key_callback);
 
-	//glewExperimental = GL_TRUE;
-
-	if ((error_code = glewInit()) != GLEW_OK) {
-		std::cout << glewGetErrorString(error_code) << std::endl;
+	if (gl3wInit()) {
+		std::cout << "failed to initialize OpenGL" << std::endl;
 		std::exit(1);
 	}
 
-	std::string file_path = std::string(__FILE__);
-	file_path = file_path.substr(0, file_path.find_last_of("\\/"));
-
-	std::string vertexPath = file_path + "/shaders/vertex_shader.glsl";
-	std::string fragPath = file_path + "/shaders/fragment_shader.glsl";
-
-	std::string vertexCode;
-	std::string fragmentCode;
-
-	std::ifstream vShaderFile;
-	std::ifstream fShaderFile;
-
-	// ensure ifstream objects can throw exceptions:
-	vShaderFile.exceptions(std::ifstream::failbit | std::ifstream::badbit);
-	fShaderFile.exceptions(std::ifstream::failbit | std::ifstream::badbit);
-	try
-	{
-		// open files
-		vShaderFile.open(vertexPath);
-		fShaderFile.open(fragPath);
-		std::stringstream vShaderStream, fShaderStream;
-		// read file's buffer contents into streams
-		vShaderStream << vShaderFile.rdbuf();
-		fShaderStream << fShaderFile.rdbuf();
-		// close file handlers
-		vShaderFile.close();
-		fShaderFile.close();
-		// convert stream into string
-		vertexCode = vShaderStream.str();
-		fragmentCode = fShaderStream.str();
-	}
-	catch (std::ifstream::failure e)
-	{
-		std::cout << "error: shader file(s) not successfully read" << std::endl;
-		std::exit(1);
-	}
-
-	const char* vShaderCode = vertexCode.c_str();
-	const char* fShaderCode = fragmentCode.c_str();
+	
 	unsigned int vertex, fragment;
-
-	// vertex shader
-	vertex = glCreateShader(GL_VERTEX_SHADER);
-	glShaderSource(vertex, 1, &vShaderCode, NULL);
-	glCompileShader(vertex);
-	checkCompileErrors(vertex, "VERTEX");
-
-	// fragment Shader
-	fragment = glCreateShader(GL_FRAGMENT_SHADER);
-	glShaderSource(fragment, 1, &fShaderCode, NULL);
-	glCompileShader(fragment);
-	checkCompileErrors(fragment, "FRAGMENT");
-
-	// shader Program
-	GLint ID = glCreateProgram();
-	glAttachShader(ID, vertex);
-	glAttachShader(ID, fragment);
-	glLinkProgram(ID);
-	checkCompileErrors(ID, "PROGRAM");
-
-	// delete the shaders as they're linked into our program now and no longer necessery
-	glDeleteShader(vertex);
-	glDeleteShader(fragment);
-
-	glViewport(0, 0, screenWidth, screenHeight);
+	
+	glViewport(0, 0, img_w, img_h);
 	glEnable(GL_DEPTH_TEST);
 
 	unsigned int VAO;
 	glGenVertexArrays(1, &VAO);
 	glBindVertexArray(VAO);
+
+	Renderer renderer(img_w, img_h, std::string("picture.ppm"));
+	renderer.run(RenderMode::THREADS);
+
+	int idx = 0;
+	std::unique_ptr<char[]> img_data(new char[img_w * img_h * 3]);
+	for (const auto& c : renderer.get_colors())
+	{
+		for (int i = 0; i < c.length; ++i)
+		{
+			img_data[++idx] = c[i];
+		}
+	}
+	
+	// Create an OpenGL texture identifier
+	GLuint image_texture;
+	glGenTextures(1, &image_texture);
+	glBindTexture(GL_TEXTURE_2D, image_texture);
+
+	// Setup filtering parameters for display
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+	// Upload pixels into texture
+	glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, img_w, img_h, 0, GL_RGBA, GL_UNSIGNED_BYTE, image_data);
 
 	while (!glfwWindowShouldClose(window)) {
 		glfwWaitEvents();

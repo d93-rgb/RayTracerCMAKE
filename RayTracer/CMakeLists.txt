@@ -76,7 +76,6 @@ if(NOT WIN32)
 						WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/ext/AntTweakBar/src)
 endif()
 
-
 ###########################################################################
 # glfw
 # build as static library - so no dll
@@ -84,6 +83,13 @@ add_subdirectory(ext/glfw)
 include_directories (
   ext/glfw/include
 )
+###########################################################################
+
+# gl3w 
+###########################################################################
+include_directories(ext/gl3w)
+set(GL3W_SOURCES ext/gl3w/GL/gl3w.c)
+
 ###########################################################################
 
 # save all assembled libraries  here
@@ -99,7 +105,7 @@ link_directories( ${CMAKE_BINARY_DIR}/ext/glm
 	${CMAKE_BINARY_DIR}/ext/glfw)
 
 # ray tracer source and headers
-set (RT_MAIN src/main.cpp)
+set (RT_MAIN src/main.cpp ${GL3W_SOURCES})
 
 file (GLOB RT_SRC LIST_DIRECTORIES false
 src/camera/*
