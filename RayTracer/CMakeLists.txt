@@ -76,15 +76,27 @@ if(NOT WIN32)
 						WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/ext/AntTweakBar/src)
 endif()
 
+
+###########################################################################
+# glfw
+# build as static library - so no dll
+add_subdirectory(ext/glfw)
+include_directories (
+  ext/glfw/include
+)
+###########################################################################
+
 # save all assembled libraries  here
 #TODO: Change assimp library contents
 set(ALL_RT_LIBRARIES
 	glog
 	assimp
+	glfw
 	${SHCORE_LIB})
 link_directories( ${CMAKE_BINARY_DIR}/ext/glm 
     ${CMAKE_BINARY_DIR}/ext/assimp/code
-    ${CMAKE_BINARY_DIR}/ext/glog)
+    ${CMAKE_BINARY_DIR}/ext/glog
+	${CMAKE_BINARY_DIR}/ext/glfw)
 
 # ray tracer source and headers
 set (RT_MAIN src/main.cpp)
