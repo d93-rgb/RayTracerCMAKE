@@ -9,8 +9,8 @@ namespace rt
 class Sampler2D
 {
 public:
-	Sampler2D(unsigned int x,
-		unsigned int y,
+	Sampler2D(size_t x,
+		size_t y,
 		unsigned int spp) : samplesPerPixel(spp)
 	{
 		for (unsigned int i = 0; i < x * y; ++i)
@@ -32,9 +32,9 @@ protected:
 class StratifiedSampler2D : public Sampler2D
 {
 public:
-	StratifiedSampler2D(unsigned int width,
-		unsigned int height,
-		int grid_dim) :
+	StratifiedSampler2D(size_t width,
+		size_t height,
+		size_t grid_dim) :
 		Sampler2D(width, height, grid_dim * grid_dim),
 		grid_dim(grid_dim)
 	{

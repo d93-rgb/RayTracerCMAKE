@@ -5,10 +5,15 @@
 
 namespace rt
 {
+
+enum class RenderMode {
+	NO_THREADS, THREADS, GRADIENT
+};
+
 class Renderer
 {
 public:
-	Renderer(size_t w, size_t h, const std::string& file, size_t max_depth = 4);
+	Renderer(size_t w, size_t h, const std::string& file, size_t max_depth);
 
 
 	std::vector<glm::vec3> render_with_threads(size_t& width, size_t& height);
@@ -19,7 +24,7 @@ public:
 
 	std::vector<glm::vec3> render(size_t& width, size_t& height);
 
-	void run();
+	void run(RenderMode mode);
 
 
 private:

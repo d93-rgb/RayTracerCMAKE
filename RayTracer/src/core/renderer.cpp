@@ -476,19 +476,26 @@ std::vector<glm::vec3> Renderer::render_with_threads(
 /*
 	Short helper function
 */
-void Renderer::run()
+void Renderer::run(RenderMode mode)
 {
 	size_t width, height;
 
-#ifdef RENDER_SCENE
-#ifdef NO_THREADS
-	* colors = render(width, height);
-#else
-	* colors = render_with_threads(width, height);
-#endif
-#else
-	* colors = render_gradient(width, 10, height);
-#endif
+	if (mode == RenderMode::NO_THREADS)
+	{
+		colors = render(width, height);
+	}
+	else if (mode == RenderMode::THREADS)
+	{
+		colors = render_with_threads(width, height);
+	}
+	else if (mode == RenderMode::GRADIENT)
+	{
+		colors = render_gradient(width, 10, height);
+	}
+	else
+	{
+		colors = render_with_threads(width, height);
+	}
 
 	if (img->get_file_name().empty())
 	{
@@ -505,7 +512,7 @@ void Renderer::run()
 	}
 	else
 	{
-		img->append_to_file_name(".ppm"));
+		img->append_to_file_name(".ppm");
 		img->write_image_to_file(colors);
 	}
 }
