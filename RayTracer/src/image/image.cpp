@@ -4,6 +4,8 @@
 namespace rt
 {
 
+#define GAMMA_CORRECTION
+
 void Image::write_image_to_file(std::vector<glm::vec3>& col)
 {
 #ifdef DEBUG

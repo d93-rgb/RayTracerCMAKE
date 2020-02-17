@@ -29,10 +29,9 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 
 int main(int argc, const char** argv)
 {
-	bool owg = false;
+	size_t img_w = 800;
+	size_t img_h = 600;
 	std::string dest = "";
-
-	std::unique_ptr<std::vector<glm::vec3>> colors(new std::vector<glm::vec3>);
 
 	// Windows stuff
 	HINSTANCE hInstance = GetModuleHandle(0);
@@ -59,12 +58,6 @@ int main(int argc, const char** argv)
 				printf("argc = %i, pos == %i\n", argc, pos);
 				dest = argv[pos++];
 			}
-			else if (!strcmp(argv[pos], "--open_with_gimp")
-				|| !strcmp(argv[pos], "-owg"))
-			{
-				++pos;
-				owg = true;
-			}
 			else
 			{
 				printf("Error: USAGE\n");
@@ -73,8 +66,8 @@ int main(int argc, const char** argv)
 		}
 	}
 // launch rendering
-	Renderer renderer(800, 600, std::string(""), 4);
-	renderer.run();
+	Renderer renderer(img_w, img_h, std::string("picture.ppm"));
+	renderer.run(RenderMode::THREADS);
 
 	// create window and draw in it
 	WNDCLASS window_class = {};
@@ -91,8 +84,8 @@ int main(int argc, const char** argv)
 	RECT client_rect = {
 		0,
 		0,
-		WIDTH,
-		HEIGHT
+		img_w,
+		img_h
 	};
 
 	if (!AdjustWindowRect(&client_rect, WS_OVERLAPPEDWINDOW ^ WS_THICKFRAME, false))
@@ -124,23 +117,24 @@ int main(int argc, const char** argv)
 	}
 
 	// data of a single pixel is as big as an unsinged int (= 4 bytes)
-	size_t buffer_size = WIDTH * HEIGHT * 4;
+	size_t buffer_size = img_w * img_h * 4;
 	std::vector<unsigned char> color_mem(buffer_size, 0);
 	BITMAPINFO bmi;
 	HDC hdc = GetDC(hwnd);
 
+	const auto & colors = renderer.get_colors();
 	for (size_t i = 0, j = 0; i < buffer_size; i += 4, ++j)
 	{
 		// prevent sign extension by casting to unsigned char
-		color_mem[i + 2]	= (unsigned char)round((*colors)[j].x);
-		color_mem[i + 1]	= (unsigned char)round((*colors)[j].y);
-		color_mem[i]		= (unsigned char)round((*colors)[j].z);
+		color_mem[i + 2]	= (unsigned char)round((colors)[j].x);
+		color_mem[i + 1]	= (unsigned char)round((colors)[j].y);
+		color_mem[i]		= (unsigned char)round((colors)[j].z);
 		//color_mem[i + 3]	= 0;
 	}
 
 	bmi.bmiHeader.biSize = sizeof(bmi.bmiHeader);
-	bmi.bmiHeader.biWidth = WIDTH;
-	bmi.bmiHeader.biHeight = -int(HEIGHT); // top-down image requires negative height
+	bmi.bmiHeader.biWidth = static_cast<long>(img_w);
+	bmi.bmiHeader.biHeight = -int(img_h); // top-down image requires negative height
 	bmi.bmiHeader.biPlanes = 1;
 	bmi.bmiHeader.biBitCount = 32;
 	bmi.bmiHeader.biCompression = BI_RGB;
@@ -151,7 +145,12 @@ int main(int argc, const char** argv)
 	while(!RT_EXIT_PROGRAM)
 	{
 		// render into window
-		StretchDIBits(hdc, 0, 0, WIDTH, HEIGHT, 0, 0, WIDTH, HEIGHT, color_mem.data(), &bmi,
+		StretchDIBits(hdc, 0, 0, static_cast<int>(img_w), 
+			static_cast<int>(img_h), 0, 0, 
+			static_cast<int>(img_w), 
+			static_cast<int>(img_h), 
+			color_mem.data(), 
+			&bmi,
 			DIB_RGB_COLORS, SRCCOPY);
 
 		MSG msg = { };

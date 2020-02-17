@@ -5,7 +5,7 @@ namespace rt
 class Image
 {
 public:
-	Image(size_t width, size_t height, const std::string& file_name) :
+	Image(size_t width, size_t height, const std::string& file_name = "picture.ppm") :
 		width(width), 
 		height(height),
 		fov{ 0 },

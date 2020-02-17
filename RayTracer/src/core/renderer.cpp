@@ -11,11 +11,15 @@
 namespace rt
 {
 
-Renderer::Renderer(size_t w, size_t h, 
+Renderer::Renderer(size_t w, size_t h,
 	const std::string& file,
-	size_t max_depth = 4) :
+	size_t max_depth) :
 	MAX_DEPTH(max_depth),
-	img(new Image(w, h, file))
+	img(new Image(w, h, file)),
+	colors(w*h, glm::vec3(0)),
+	SPP(4),
+	GRID_DIM(3),
+	NUM_THREADS(4)
 {}
 
 /*
@@ -216,7 +220,7 @@ glm::vec3 Renderer::shoot_recursively(const Scene &s,
 	return contribution;
 }
 
-std::vector<glm::vec3> Renderer::render_gradient(
+void Renderer::render_gradient(
 	size_t& width_img,
 	const size_t& width_stripe,
 	size_t& height)
@@ -228,7 +232,7 @@ std::vector<glm::vec3> Renderer::render_gradient(
 	width_img = 256 * width_stripe;
 	height = img->get_height();
 
-	std::vector<glm::vec3> color{ 256 * width_stripe * height, glm::vec3(0) };
+	colors.resize(256 * width_stripe * height);
 
 	for (int k = 0; k < 256; ++k)
 	{
@@ -236,17 +240,16 @@ std::vector<glm::vec3> Renderer::render_gradient(
 		{
 			for (unsigned int j = 0; j < width_stripe; ++j)
 			{
-				color[i * width_img + j + k * width_stripe] = glm::vec3(float(k) / 255.0f);
+				colors[i * width_img + j + k * width_stripe] = glm::vec3(float(k) / 255.0f);
 			}
 		}
 	}
-	return color;
 }
 
 /*
 	Starts rendering a scene and returns the color vector.
 */
-std::vector<glm::vec3> Renderer::render(
+void Renderer::render(
 	size_t& width,
 	size_t& height)
 {
@@ -263,8 +266,8 @@ std::vector<glm::vec3> Renderer::render(
 
 	assert(crop_min_x <= crop_max_x && crop_min_y <= crop_max_y);
 
-	unsigned int cropped_width[2];
-	unsigned int cropped_height[2];
+	size_t cropped_width[2];
+	size_t cropped_height[2];
 
 	crop(crop_min_x, crop_max_x, img->get_width(), cropped_width);
 	crop(crop_min_y, crop_max_y, img->get_height(), cropped_height);
@@ -275,10 +278,8 @@ std::vector<glm::vec3> Renderer::render(
 	LOG(INFO) << "Image width = " << img->get_width() << "; Image height = " << img->get_height();
 	LOG(INFO) << "Cropped width = " << width << "; Cropped height = " << height;
 
-	std::vector<glm::vec3> col{ width * height, glm::vec3(0.f) };
-
 	StratifiedSampler2D sampler{ width, height, GRID_DIM };
-	unsigned int array_size = GRID_DIM * GRID_DIM;
+	size_t array_size = GRID_DIM * GRID_DIM;
 	const glm::vec2* samplingArray;
 	inv_spp = 1.f; // sampler.samplesPerPixel;
 	/***************************************/
@@ -297,11 +298,11 @@ std::vector<glm::vec3> Renderer::render(
 		/***************************************/
 		// dynamic schedule for proper I/O progress update
 //#pragma omp parallel for schedule(dynamic, 1)
-		for (unsigned int y = cropped_height[0]; y < cropped_height[1]; ++y)
+		for (size_t y = cropped_height[0]; y < cropped_height[1]; ++y)
 		{
 			//fprintf(stderr, "\rRendering %5.2f%%", 100.*y / (HEIGHT - 1));
 			reporter.Update();
-			for (unsigned int x = cropped_width[0]; x < cropped_width[1]; ++x)
+			for (size_t x = cropped_width[0]; x < cropped_width[1]; ++x)
 			{
 				//TODO: NOT threadsafe
 				samplingArray = sampler.get2DArray();
@@ -309,8 +310,8 @@ std::vector<glm::vec3> Renderer::render(
 				// hackery needed for omp pragma
 				// the index i will be distributed among all threads
 				// by omp automatically
-				unsigned int i = (y - cropped_height[0]) * width + (x - cropped_width[0]);
-				for (unsigned int idx = 0; idx < array_size; ++idx)
+				size_t i = (y - cropped_height[0]) * width + (x - cropped_width[0]);
+				for (size_t idx = 0; idx < array_size; ++idx)
 				{
 					SurfaceInteraction isect;
 
@@ -322,16 +323,15 @@ std::vector<glm::vec3> Renderer::render(
 					// omp will not take the
 					/*col[i] += clamp(shoot_recursively(sc, sc.cam->getPrimaryRay(u, v, d), &isect, 0))
 						* inv_grid_dim;*/
-					col[i] = glm::normalize(sc.cam->getPrimaryRay(u, v, d).rd);
+					colors[i] = glm::normalize(sc.cam->getPrimaryRay(u, v, d).rd);
 				}
 			}
 		}
 		reporter.Done();
 	}
-	return col;
 }
 
-std::vector<glm::vec3> Renderer::render_with_threads(
+void Renderer::render_with_threads(
 	size_t& width,
 	size_t& height)
 {
@@ -348,8 +348,8 @@ std::vector<glm::vec3> Renderer::render_with_threads(
 
 	assert(crop_min_x <= crop_max_x && crop_min_y <= crop_max_y);
 
-	unsigned int cropped_width[2];
-	unsigned int cropped_height[2];
+	size_t cropped_width[2];
+	size_t cropped_height[2];
 
 	crop(crop_min_x, crop_max_x, img->get_width(), cropped_width);
 	crop(crop_min_y, crop_max_y, img->get_height(), cropped_height);
@@ -359,8 +359,6 @@ std::vector<glm::vec3> Renderer::render_with_threads(
 
 	LOG(INFO) << "Image width = " << img->get_width() << "; Image height = " << img->get_height();
 	LOG(INFO) << "Cropped width = " << width << "; Cropped height = " << height;
-
-	std::vector<glm::vec3> col{ width * height, glm::vec3(0.f) };
 
 #ifdef BLACK_COLOR_ARRAY_FOR_DEBUGGING
 	return col;
@@ -375,7 +373,7 @@ std::vector<glm::vec3> Renderer::render_with_threads(
 	/***************************************/
 	//GatheringScene sc;
 	//MixedScene sc;
-	std::unique_ptr<Scene> sc = std::make_unique<MixedScene>();
+	std::unique_ptr<Scene> sc = std::make_unique<TeapotScene>();
 
 	//	// enclose with braces for destructor of ProgressReporter at the end of rendering
 	{
@@ -439,23 +437,27 @@ std::vector<glm::vec3> Renderer::render_with_threads(
 							//TODO: NOT threadsafe
 							samplingArray = sampler.get2DArray();
 
-							for (unsigned int n = 0; n < array_size; ++n)
+							for (int s = 0; s < SPP; ++s)
 							{
-								SurfaceInteraction isect;
+								for (unsigned int n = 0; n < array_size; ++n)
+								{
+									SurfaceInteraction isect;
 
-								// map pixel coordinates to[-1, 1]x[-1, 1]
-								float u = (2.f * (slice.pairs[idx].first + j + samplingArray[n].x) - img->get_width()) / img->get_height();
-								float v = (-2.f * (slice.pairs[idx].second + i + samplingArray[n].y) + img->get_height()) / img->get_height();
+									// map pixel coordinates to[-1, 1]x[-1, 1]
+									float u = (2.f * (slice.pairs[idx].first + j + samplingArray[n].x) - img->get_width()) / img->get_height();
+									float v = (-2.f * (slice.pairs[idx].second + i + samplingArray[n].y) + img->get_height()) / img->get_height();
 
-								/*float u = (x + samplingArray[idx].x) - WIDTH * 0.5f;
-								float v = -((y + samplingArray[idx].y) - HEIGHT * 0.5f);
-						*/
-								col[(slice.pairs[idx].second + i) * slice.img_width + slice.pairs[idx].first + j] +=
-									clamp(shoot_recursively(
-										*sc, sc->cam->getPrimaryRay(u, v, foc_len), &isect, 0)) *
-									inv_grid_dim * inv_spp;
-								//col[x + y] = glm::normalize(sc.cam->getPrimaryRay(u, v, d).rd);
+									/*float u = (x + samplingArray[idx].x) - WIDTH * 0.5f;
+									float v = -((y + samplingArray[idx].y) - HEIGHT * 0.5f);
+							*/
+									colors[(slice.pairs[idx].second + i) * slice.img_width + slice.pairs[idx].first + j] +=
+										clamp(shoot_recursively(
+											*sc, sc->cam->getPrimaryRay(u, v, foc_len), &isect, 0));
+									//col[x + y] = glm::normalize(sc.cam->getPrimaryRay(u, v, d).rd);
+								}
 							}
+							colors[(slice.pairs[idx].second + i) * slice.img_width + slice.pairs[idx].first + j] *= 
+								inv_grid_dim * inv_spp;
 						}
 					}
 					reporter.Update();
@@ -470,7 +472,6 @@ std::vector<glm::vec3> Renderer::render_with_threads(
 
 		reporter.Done();
 	}
-	return col;
 }
 
 /*
@@ -482,32 +483,32 @@ void Renderer::run(RenderMode mode)
 
 	if (mode == RenderMode::NO_THREADS)
 	{
-		colors = render(width, height);
+		render(width, height);
 	}
 	else if (mode == RenderMode::THREADS)
 	{
-		colors = render_with_threads(width, height);
+		render_with_threads(width, height);
 	}
 	else if (mode == RenderMode::GRADIENT)
 	{
-		colors = render_gradient(width, 10, height);
+		render_gradient(width, 10, height);
 	}
 	else
 	{
-		colors = render_with_threads(width, height);
+		render_with_threads(width, height);
 	}
 
 	if (img->get_file_name().empty())
 	{
 		char buf[200];
 		GET_PWD(buf, 200);
-		std::string file_name = "picture.ppm";
 		std::cout << buf << std::endl;
 		std::string fn = buf;
 
 
 		LOG(INFO) << "Image will be written to \"" <<
-			fn.substr(0, fn.find_last_of("\\/")).append(OS_SLASH).append(file_name);
+			fn.substr(0, fn.find_last_of("\\/")).append(OS_SLASH).append(
+			img->get_file_name());
 		img->write_image_to_file(colors);
 	}
 	else
@@ -516,5 +517,12 @@ void Renderer::run(RenderMode mode)
 		img->write_image_to_file(colors);
 	}
 }
+
+std::vector<glm::vec3> Renderer::get_colors() const
+{
+	return colors;
+}
+
+
 
 } // namespace rt

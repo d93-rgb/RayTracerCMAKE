@@ -13,25 +13,28 @@ enum class RenderMode {
 class Renderer
 {
 public:
-	Renderer(size_t w, size_t h, const std::string& file, size_t max_depth);
+	Renderer(size_t w, size_t h, const std::string& file, size_t max_depth = 4);
 
+	void render(size_t& width, size_t& height);
 
-	std::vector<glm::vec3> render_with_threads(size_t& width, size_t& height);
+	void render_with_threads(size_t& width, size_t& height);
 
 	// for creating color gradients
-	std::vector<glm::vec3> render_gradient(size_t& width_img, const size_t& width_stripe,
+	void render_gradient(size_t& width_img, const size_t& width_stripe,
 		size_t& height);
-
-	std::vector<glm::vec3> render(size_t& width, size_t& height);
 
 	void run(RenderMode mode);
 
+	std::vector<glm::vec3> get_colors() const;
 
 private:
 	size_t MAX_DEPTH;
-	size_t SPP = 1;
-	size_t GRID_DIM = 3;
-	size_t NUM_THREADS = 4;
+
+	// samples per pixel
+	size_t SPP;
+	
+	size_t GRID_DIM;
+	size_t NUM_THREADS;
 
 	std::vector<glm::vec3> colors;
 	std::unique_ptr<Image> img;
