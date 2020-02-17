@@ -24,7 +24,7 @@ using namespace rt;
 bool RT_EXIT_PROGRAM = false;
 
 
-#ifdef WIN32
+#ifdef NOGLFW
 LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 
 int main(int argc, const char** argv)
@@ -193,106 +193,10 @@ LRESULT CALLBACK WindowProc(
 	return DefWindowProc(hwnd, uMsg, wParam, lParam);
 }
 #else
-int main(int argc, const char** argv)
+
+int main(int argc, char* argv[])
 {
-	// open image with gimp
-	auto owg = false;
-	std::string dest = "";
-	//std::cout << "OpenMP max threads:" << omp_get_max_threads() << std::endl;
 
-	if (argc > 1)
-	{
-		for (int i = 0; i < argc; ++i)
-		{
-			printf("argv[%i] = %s\n", i, argv[i]);
-		}
-		int pos = 1;
-		while (pos < argc)
-		{
-			if (!strcmp(argv[pos], "--destination")
-				|| !strcmp(argv[pos], "-d"))
-			{
-				if (++pos == argc)
-				{
-					printf("Error: USAGE\n");
-					exit(1);
-				}
-				printf("argc = %i, pos == %i\n", argc, pos);
-				dest = argv[pos++];
-			}
-			else if (!strcmp(argv[pos], "--open_with_gimp")
-				|| !strcmp(argv[pos], "-owg"))
-			{
-				++pos;
-				owg = true;
-			}
-			else
-			{
-				printf("Error: USAGE\n");
-				exit(1);
-			}
-		}
-	}
-	//google::InitGoogleLogging(argv[0]);
-	//for (int i = 0; i < 3; ++i)
-/*
-	Gui g = Gui();
-	g.init();
-*/
-
-/*
-ofs.open("debug.txt");
-for (float f : debug_vec)
-{
-	ofs << f << std::endl;
 }
-ofs.close();
-*/
-//getchar();
 
-// launch rendering
-	helper_fun(dest);
-
-	if (owg)
-	{
-	}
-#ifdef OPEN_WITH_GIMP
-	// OPEN FILE IN GIMP
-	std::string gimp_path = "C:\\Program Files\\GIMP 2\\bin\\gimp-2.10.exe";
-	std::string image_path = dest;
-	std::string szCmdline = gimp_path + " " + image_path;
-
-	LOG(INFO) << "Opening image with " << gimp_path;
-
-	// additional information
-	STARTUPINFO si;
-	PROCESS_INFORMATION pi;
-
-	// set the size of the structures
-	ZeroMemory(&si, sizeof(si));
-	si.cb = sizeof(si);
-	ZeroMemory(&pi, sizeof(pi));
-
-	// start the program up
-	if (!CreateProcess(nullptr,   // the path
-		&szCmdline[0],        // Command line
-		NULL,           // Process handle not inheritable
-		NULL,           // Thread handle not inheritable
-		FALSE,          // Set handle inheritance to FALSE
-		0,              // No creation flags
-		NULL,           // Use parent's environment block
-		NULL,           // Use parent's starting directory
-		&si,            // Pointer to STARTUPINFO structure
-		&pi))            // Pointer to PROCESS_INFORMATION structure (removed extra parentheses)
-	{
-		printf("CreateProcess failed (%d).\n%s\n",
-			GetLastError(), szCmdline.c_str());
-	}
-	// Close process and thread handles.
-	CloseHandle(pi.hProcess);
-	CloseHandle(pi.hThread);
-#endif
-	//MessageBox(nullptr, TEXT("Done."), TEXT("Notification"), MB_OK);
-	return 0;
-}
 #endif
