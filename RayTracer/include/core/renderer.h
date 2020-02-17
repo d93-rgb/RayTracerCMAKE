@@ -8,18 +8,18 @@ namespace rt
 class Renderer
 {
 public:
-	Renderer(size_t w, size_t h, size_t max_depth = 4);
+	Renderer(size_t w, size_t h, const std::string& file, size_t max_depth = 4);
 
 
-	std::vector<glm::vec3> render_with_threads(unsigned int& width, unsigned int& height);
+	std::vector<glm::vec3> render_with_threads(size_t& width, size_t& height);
 
 	// for creating color gradients
 	std::vector<glm::vec3> render_gradient(size_t& width_img, const size_t& width_stripe,
 		size_t& height);
 
-	std::vector<glm::vec3> render(unsigned int& width, unsigned int& height);
+	std::vector<glm::vec3> render(size_t& width, size_t& height);
 
-	void run(std::vector<glm::vec3>* colors, std::string& file);
+	void run();
 
 
 private:
@@ -28,6 +28,7 @@ private:
 	size_t GRID_DIM = 3;
 	size_t NUM_THREADS = 4;
 
+	std::vector<glm::vec3> colors;
 	std::unique_ptr<Image> img;
 
 

@@ -73,7 +73,7 @@ int main(int argc, const char** argv)
 		}
 	}
 // launch rendering
-	Renderer renderer;
+	Renderer renderer(800, 600, std::string(""), 4);
 	renderer.run();
 
 	// create window and draw in it

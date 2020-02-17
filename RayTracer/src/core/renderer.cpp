@@ -11,9 +11,11 @@
 namespace rt
 {
 
-Renderer::Renderer(size_t w, size_t h, size_t max_depth = 4) :
+Renderer::Renderer(size_t w, size_t h, 
+	const std::string& file,
+	size_t max_depth = 4) :
 	MAX_DEPTH(max_depth),
-	img(new Image(w, h))
+	img(new Image(w, h, file))
 {}
 
 /*
@@ -245,8 +247,8 @@ std::vector<glm::vec3> Renderer::render_gradient(
 	Starts rendering a scene and returns the color vector.
 */
 std::vector<glm::vec3> Renderer::render(
-	unsigned int& width,
-	unsigned int& height)
+	size_t& width,
+	size_t& height)
 {
 	constexpr float fov = glm::radians(90.f);
 	float fov_tan = tan(fov / 2);
@@ -330,8 +332,8 @@ std::vector<glm::vec3> Renderer::render(
 }
 
 std::vector<glm::vec3> Renderer::render_with_threads(
-	unsigned int& width,
-	unsigned int& height)
+	size_t& width,
+	size_t& height)
 {
 	constexpr float fov = glm::radians(30.f);
 	float fov_tan = tan(fov / 2);
@@ -474,9 +476,7 @@ std::vector<glm::vec3> Renderer::render_with_threads(
 /*
 	Short helper function
 */
-void Renderer::run(
-	std::vector<glm::vec3>* colors,
-	std::string& file)
+void Renderer::run()
 {
 	size_t width, height;
 
@@ -490,7 +490,7 @@ void Renderer::run(
 	* colors = render_gradient(width, 10, height);
 #endif
 
-	if (file.empty())
+	if (img->get_file_name().empty())
 	{
 		char buf[200];
 		GET_PWD(buf, 200);
@@ -501,12 +501,12 @@ void Renderer::run(
 
 		LOG(INFO) << "Image will be written to \"" <<
 			fn.substr(0, fn.find_last_of("\\/")).append(OS_SLASH).append(file_name);
-		img->write_image_to_file(file_name, *colors);
+		img->write_image_to_file(colors);
 	}
 	else
 	{
-		file.append(".ppm");
-		img->write_image_to_file(file, *colors);
+		img->append_to_file_name(".ppm"));
+		img->write_image_to_file(colors);
 	}
 }
 

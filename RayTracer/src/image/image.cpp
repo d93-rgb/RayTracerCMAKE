@@ -4,8 +4,7 @@
 namespace rt
 {
 
-void Image::write_image_to_file(const std::string& file,
-	std::vector<glm::vec3>& col)
+void Image::write_image_to_file(std::vector<glm::vec3>& col)
 {
 #ifdef DEBUG
 	//assert(bin.size() == col.size());
@@ -16,12 +15,12 @@ void Image::write_image_to_file(const std::string& file,
 	/***************************************/
 	// WRITING TO IMAGE FILE
 	/***************************************/
-	ofs.open(file, std::ios::binary);
+	ofs.open(file_name, std::ios::binary);
 
 	if (ofs.fail())
 	{
 		char err_str[75] = { '\0' };
-		std::cout << "Error: Image could not be saved to \"" << file << "\"."
+		std::cout << "Error: Image could not be saved to \"" << file_name << "\"."
 			<< std::endl;
 		// print related error message
 		GET_STRERR(errno, err_str, 75);
@@ -29,7 +28,7 @@ void Image::write_image_to_file(const std::string& file,
 		exit(1);
 	}
 
-	LOG(INFO) << "Writing image to \"" << file << "\"";
+	LOG(INFO) << "Writing image to \"" << file_name << "\"";
 
 	// don't use \n as ending white space, because of Windows
 	ofs << "P6 " << width << " " << height << " 255 ";
@@ -59,7 +58,12 @@ void Image::write_image_to_file(const std::string& file,
 
 	ofs.close();
 
-	LOG(INFO) << "Writing image to \"" << file << "\" finished.";
+	LOG(INFO) << "Writing image to \"" << file_name << "\" finished.";
+}
+
+void Image::append_to_file_name(const std::string& suffix)
+{
+	file_name.append(suffix);
 }
 
 } // namespace rt
