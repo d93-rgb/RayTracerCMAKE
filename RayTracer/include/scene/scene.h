@@ -20,11 +20,6 @@ public:
 
 	Scene();
 
-	/*void emplace_back(std::unique_ptr<Shape> o)
-	{
-		sc.emplace_back(o);
-	}
-*/
 	const std::vector<std::unique_ptr<Shape>>& get_scene() const
 	{
 		return sc;

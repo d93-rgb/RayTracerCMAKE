@@ -13,10 +13,7 @@
 #include "shape/bvh.h"
 
 //#define SHOW_AXIS
-//#define LOAD_TEAPOT
 // DEBUGGING
-// divide the triangle mesh of the teapot to reduce rendering time
-constexpr auto TEAPOTSIZE = 1;
 
 namespace rt
 {
@@ -29,8 +26,8 @@ void GatheringScene::init()
 {
 	cam.reset(new Camera());
 
-	float rot_y = glm::radians(0.f);
-	float radius[] = { 1, 1.5, 3, 2, 4 , 4, 2, 3, 2 };
+	constexpr float rot_y = glm::radians(0.f);
+	constexpr float radius[] = { 1, 1.5, 3, 2, 4 , 4, 2, 3, 2 };
 
 	glm::vec3 translation = glm::vec3(0.f, 3.f, 20.f);
 
@@ -203,9 +200,6 @@ void MixedScene::init()
 	glm::vec3 cube_normal;
 	//	glm::vec3 p1, p2, p3, tr_normal;
 
-	std::string teapot =
-		"C:\\Users\\Dood\\Documents\\ComputerGraphics\\models\\teapot.obj";
-
 	std::vector<glm::vec3> vertices;
 	std::vector<unsigned int> indices;
 
@@ -219,59 +213,6 @@ void MixedScene::init()
 
 	Rectangle *floor;
 	std::unique_ptr<Shape> cube_2[6];
-
-	/////////////////////////////////////
-	// Triangle mesh
-	/////////////////////////////////////
-#ifdef LOAD_TEAPOT
-	std::unique_ptr<TriangleMesh> t_pot{ new TriangleMesh() };
-	glm::vec3 b_min = glm::vec3(INFINITY), b_max = glm::vec3(-INFINITY);
-
-	extractMesh(teapot, vertices, indices);
-
-	std::shared_ptr<Material> teapot_mat =
-		std::shared_ptr<Material>(
-			new Material(glm::vec3(0.02f, 0.f, 0.02f),
-				glm::vec3(0.4f, 0.f, 0.4f),
-				glm::vec3(0.05f, 0.05f, 0.05f)));
-	teapot_mat->setShininess(20.f);
-
-	for (size_t i = 0; i < indices.size() / TEAPOTSIZE; i += 3)
-	{
-		p1 = vertices[indices[i]];
-		p2 = vertices[indices[i + 1]];
-		p3 = vertices[indices[i + 2]];
-		tr_normal = glm::normalize(glm::cross(p2 - p1, p3 - p2));
-
-		// get boundaries of the triangle mesh
-		b_min = glm::min(b_min, glm::min(glm::min(p1, p2), p3));
-		b_max = glm::max(b_max, glm::max(glm::max(p1, p2), p3));
-
-		t_pot->tr_mesh.push_back(std::unique_ptr<Triangle>(new Triangle(p1,
-			p2,
-			p3,
-			tr_normal,
-			teapot_to_world,
-			teapot_mat)));
-	}
-	/////////////////////////////////////
-	// Triangle mesh END
-	/////////////////////////////////////
-
-
-	////////////////////////////////
-	// BOUNDARY FOR THE TEAPOT
-	////////////////////////////////
-	t_pot->boundary.reset(new Bounds3(
-		teapot_to_world * glm::vec4(b_min, 1.f),
-		teapot_to_world * glm::vec4(b_max, 1.f)));
-
-	// put triangle mesh into scene
-	sc.emplace_back(std::move(t_pot));
-	////////////////////////////////
-	// END
-	////////////////////////////////
-#endif
 
 	// material for walls
 	auto wall_bot =
@@ -666,7 +607,7 @@ void TeapotScene::init()
 	teapot_mat->setReflective(glm::vec3(1.0f));
 
 	std::vector<std::shared_ptr<Shape>> t_pot_triangles;
-	for (size_t i = 0; i < indices.size() / TEAPOTSIZE; i += 3)
+	for (size_t i = 0; i < indices.size(); i += 3)
 	{
 		p1 = vertices[indices[i]];
 		p2 = vertices[indices[i + 1]];
