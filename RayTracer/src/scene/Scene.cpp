@@ -596,7 +596,7 @@ void TeapotScene::init()
 	/////////////////////////////////////
 	glm::vec3 b_min = glm::vec3(INFINITY), b_max = glm::vec3(-INFINITY);
 
-	extractMesh(teapot, vertices, normals, indices);
+	auto tr_meshes = extractMesh(teapot);
 
 	std::shared_ptr<Material> teapot_mat =
 		std::shared_ptr<Material>(
@@ -614,9 +614,6 @@ void TeapotScene::init()
 		p3 = vertices[indices[i + 2]];
 		tr_normal = glm::normalize(glm::cross(p2 - p1, p3 - p2));
 
-		// get boundaries of the triangle mesh
-		b_min = glm::min(b_min, glm::min(glm::min(p1, p2), p3));
-		b_max = glm::max(b_max, glm::max(glm::max(p1, p2), p3));
 
 		t_pot_triangles.push_back(std::make_shared<Triangle>(p1,
 			p2,

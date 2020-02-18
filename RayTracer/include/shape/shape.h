@@ -487,6 +487,8 @@ public:
 	std::unique_ptr<Bounds3> boundary;
 	std::vector<std::shared_ptr<Shape>> tr_mesh;
 
+	TriangleMesh() = default;
+
 	TriangleMesh(std::vector<std::shared_ptr<Shape>> tr_mesh, 
 		std::unique_ptr<Bounds3> bounds) :
 		tr_mesh(tr_mesh),

@@ -1,5 +1,6 @@
 #pragma once
 #include "core/rt.h"
+#include "shape/shape.h"
 #include <fstream>
 #include <sstream>
 
@@ -57,10 +58,7 @@ inline bool loadObjFile(const std::string &file,
 	Extract the vertices and face indices stored inside an assimp scene object that imports
 	data from a file.
 */
-void extractMesh(const std::string &file, 
-	std::vector<glm::vec3> &vert,
-	std::vector<glm::vec3>& normals,
-	std::vector<unsigned int> &indices)
+std::vector<TriangleMesh> extractMeshes(const std::string &file)
 {
 	Assimp::Importer imp;
 	const aiScene *a_scene = imp.ReadFile(file, aiProcess_Triangulate);
@@ -72,15 +70,17 @@ void extractMesh(const std::string &file,
 	}
 
 	float x, y, z;
+	std::vector<TriangleMesh> tr_meshes;
 
 	for (size_t mesh_num = 0; mesh_num < a_scene->mNumMeshes; ++mesh_num)
 	{
+		tr_meshes.push_back(TriangleMesh());
 		for (size_t i = 0; i < a_scene->mMeshes[mesh_num]->mNumVertices; ++i)
 		{
 			x = (a_scene->mMeshes[mesh_num]->mVertices[i].x);
 			y = (a_scene->mMeshes[mesh_num]->mVertices[i].y);
 			z = (a_scene->mMeshes[mesh_num]->mVertices[i].z);
-			vert.push_back(glm::vec3(x, y, z));
+			tr_meshes[mesh_num].tr_mesh->push_back(glm::vec3(x, y, z));
 
 			x = a_scene->mMeshes[mesh_num]->mNormals[i].x;
 			y = a_scene->mMeshes[mesh_num]->mNormals[i].y;
