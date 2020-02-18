@@ -13,3 +13,6 @@
 [submodule "RayTracer/ext/imgui"]
 	path = RayTracer/ext/imgui
 	url = https://github.com/ocornut/imgui
+[submodule "RayTracer/ext/glfw"]
+	path = RayTracer/ext/glfw
+	url = https://github.com/glfw/glfw
