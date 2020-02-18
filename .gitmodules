@@ -10,3 +10,6 @@
 	path = RayTracer/ext/glog
 	url = https://github.com/google/glog
     ignore = dirty
+[submodule "RayTracer/ext/imgui"]
+	path = RayTracer/ext/imgui
+	url = https://github.com/ocornut/imgui
