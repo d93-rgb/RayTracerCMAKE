@@ -17,6 +17,10 @@
 #include "image/image.h"
 #include "threads/dispatcher.h"
 
+#include "imgui.h"
+#include "imgui_impl_glfw.h"
+#include "imgui_impl_opengl3.h"
+
 // use for debugging
 #define DEBUG
 #define GAMMA_CORRECTION
@@ -223,6 +227,7 @@ int main(int argc, char* argv[])
 		std::exit(1);
 	}
 
+	const char* glsl_version = "#version 130";
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
@@ -253,26 +258,36 @@ int main(int argc, char* argv[])
 		std::exit(1);
 	}
 
-	
-	unsigned int vertex, fragment;
+	// Setup Dear ImGui context
+	IMGUI_CHECKVERSION();
+	ImGui::CreateContext();
+	ImGuiIO& io = ImGui::GetIO(); (void)io;
+	//io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // Enable Keyboard Controls
+	//io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
+
+	// Setup Dear ImGui style
+	ImGui::StyleColorsDark();
+	//ImGui::StyleColorsClassic();
+
+	// Setup Platform/Renderer bindings
+	ImGui_ImplGlfw_InitForOpenGL(window, true);
+	ImGui_ImplOpenGL3_Init(glsl_version);
+
 	
 	glViewport(0, 0, img_w, img_h);
-	glEnable(GL_DEPTH_TEST);
-
-	unsigned int VAO;
-	glGenVertexArrays(1, &VAO);
-	glBindVertexArray(VAO);
 
 	Renderer renderer(img_w, img_h, std::string("picture.ppm"));
 	renderer.run(RenderMode::THREADS);
 
 	int idx = 0;
-	std::unique_ptr<char[]> img_data(new char[img_w * img_h * 3]);
+	//std::unique_ptr<char[]> img_data(new char[img_w * img_h * 3]);
+	unsigned char* img_data = new unsigned char[img_w * img_h * 3];
+
 	for (const auto& c : renderer.get_colors())
 	{
-		for (int i = 0; i < c.length; ++i)
+		for (int i = 0; i < (int)c.length(); ++i)
 		{
-			img_data[++idx] = c[i];
+			img_data[idx++] = static_cast<unsigned char>(std::roundf(c[i]));
 		}
 	}
 	
@@ -287,20 +302,39 @@ int main(int argc, char* argv[])
 
 	// Upload pixels into texture
 	glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, img_w, img_h, 0, GL_RGBA, GL_UNSIGNED_BYTE, image_data);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, img_w, img_h, 0, GL_RGB, GL_UNSIGNED_BYTE, img_data);
 
 	while (!glfwWindowShouldClose(window)) {
 		glfwWaitEvents();
 
-		glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		// Start the Dear ImGui frame
+		ImGui_ImplOpenGL3_NewFrame();
+		ImGui_ImplGlfw_NewFrame();
+		ImGui::NewFrame();
 
-		glUseProgram(ID);
-		glBindVertexArray(VAO);
-		glDrawArrays(GL_TRIANGLE_STRIP, 0, 3);
+		ImGui::Begin("OpenGL Texture Test");
+		ImGui::Text("pointer = %p", image_texture);
+		ImGui::Text("size = %d x %d", img_w, img_h);
+		ImGui::Image((void*)image_texture, ImVec2(img_w, img_h));
+		ImGui::End();
+
+		ImGui::Render();
+		int display_w, display_h;
+		glfwGetFramebufferSize(window, &display_w, &display_h);
+		glViewport(0, 0, display_w, display_h);
+		glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
+		glClear(GL_COLOR_BUFFER_BIT);
+		ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+
 		glfwSwapBuffers(window);
 	}
 
+	// Cleanup
+	ImGui_ImplOpenGL3_Shutdown();
+	ImGui_ImplGlfw_Shutdown();
+	ImGui::DestroyContext();
+
+	glfwDestroyWindow(window);
 	glfwTerminate();
 
 	return 0;

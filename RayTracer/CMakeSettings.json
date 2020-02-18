@@ -198,6 +198,21 @@
           "name": "GLFW_BUILD_DOCS",
           "value": "False",
           "type": "BOOL"
+        },
+        {
+          "name": "ASSIMP_BUILD_ASSIMP_TOOLS",
+          "value": "False",
+          "type": "BOOL"
+        },
+        {
+          "name": "ASSIMP_BUILD_OBJ_EXPORTER",
+          "value": "False",
+          "type": "BOOL"
+        },
+        {
+          "name": "ASSIMP_BUILD_BLEND_IMPORTER",
+          "value": "False",
+          "type": "BOOL"
         }
       ]
     }

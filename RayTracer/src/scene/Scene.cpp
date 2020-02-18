@@ -693,12 +693,14 @@ void TeapotScene::init()
 	// Triangle mesh END
 	/////////////////////////////////////
 
+	b_min = teapot_to_world * glm::vec4(b_min, 1.f);
+	b_max = teapot_to_world * glm::vec4(b_max, 1.f);
 
 	std::unique_ptr<TriangleMesh> t_pot = std::make_unique<TriangleMesh>(
 		t_pot_triangles,
 		std::make_unique<Bounds3>(
-		teapot_to_world * glm::vec4(b_min, 1.f),
-		teapot_to_world * glm::vec4(b_max, 1.f)));
+		glm::min(b_min, b_max),
+		glm::max(b_min, b_max)));
 
 	// put triangle mesh into scene
 	sc.emplace_back(std::move(t_pot));

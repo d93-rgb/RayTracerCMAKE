@@ -17,7 +17,7 @@ Renderer::Renderer(size_t w, size_t h,
 	MAX_DEPTH(max_depth),
 	img(new Image(w, h, file)),
 	colors(w*h, glm::vec3(0)),
-	SPP(4),
+	SPP(1),
 	GRID_DIM(3),
 	NUM_THREADS(4)
 {}

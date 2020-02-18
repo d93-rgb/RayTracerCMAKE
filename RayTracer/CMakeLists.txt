@@ -89,7 +89,26 @@ include_directories (
 ###########################################################################
 include_directories(ext/gl3w)
 set(GL3W_SOURCES ext/gl3w/GL/gl3w.c)
+###########################################################################
 
+###########################################################################
+# OpenGL
+find_package(OpenGL REQUIRED)
+if( NOT OPENGL_FOUND )
+	message(FATAL_ERROR 
+		"OpenGL library could not be found on this system.")
+endif()
+###########################################################################
+
+# imgui
+###########################################################################
+include_directories(ext/imgui
+	ext/imgui/examples)
+set(IMGUI_SOURCES ext/imgui/imgui.cpp 
+				ext/imgui/imgui_draw.cpp 
+				ext/imgui/imgui_widgets.cpp
+				ext/imgui/examples/imgui_impl_opengl3.cpp
+				ext/imgui/examples/imgui_impl_glfw.cpp)
 ###########################################################################
 
 # save all assembled libraries  here
@@ -98,6 +117,7 @@ set(ALL_RT_LIBRARIES
 	glog
 	assimp
 	glfw
+	OpenGL::GL
 	${SHCORE_LIB})
 link_directories( ${CMAKE_BINARY_DIR}/ext/glm 
     ${CMAKE_BINARY_DIR}/ext/assimp/code
@@ -105,7 +125,7 @@ link_directories( ${CMAKE_BINARY_DIR}/ext/glm
 	${CMAKE_BINARY_DIR}/ext/glfw)
 
 # ray tracer source and headers
-set (RT_MAIN src/main.cpp ${GL3W_SOURCES})
+set (RT_MAIN src/main.cpp ${GL3W_SOURCES} ${IMGUI_SOURCES})
 
 file (GLOB RT_SRC LIST_DIRECTORIES false
 src/camera/*

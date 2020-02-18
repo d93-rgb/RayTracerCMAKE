@@ -12,7 +12,7 @@
 #define WIN32_LEAN_AND_MEAN
 #define UNICODE
 #define _UNICODE
-#include <Windows.h>
+#include <windows.h>
 #include <ShellScalingApi.h>
 #else
 #include <unistd.h>
