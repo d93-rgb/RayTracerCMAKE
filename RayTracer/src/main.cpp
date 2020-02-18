@@ -23,9 +23,6 @@
 
 // use for debugging
 #define DEBUG
-#define GAMMA_CORRECTION
-#define RENDER_SCENE
-//#define NO_THREADS
 //#define BLACK_COLOR_ARRAY_FOR_DEBUGGING
 
 using namespace rt;
@@ -213,8 +210,8 @@ LRESULT CALLBACK WindowProc(
 
 int main(int argc, char* argv[])
 {
-	int img_w = 800;
-	int img_h = 600;
+	int screen_width = 800;
+	int screen_height = 600;
 
 	int error_code;
 	const char* error_description;
@@ -232,10 +229,11 @@ int main(int argc, char* argv[])
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 	glfwWindowHint(GLFW_RESIZABLE, GL_FALSE);
+	glfwWindowHint(GLFW_VISIBLE, GL_FALSE);
 
 	GLFWwindow* window = glfwCreateWindow(
-		img_w,
-		img_h,
+		screen_width,
+		screen_height,
 		"RayTracer",
 		nullptr,
 		nullptr);
@@ -247,8 +245,29 @@ int main(int argc, char* argv[])
 		glfwTerminate();
 		std::exit(1);
 	}
+	const GLFWvidmode* mode = glfwGetVideoMode(glfwGetPrimaryMonitor());
+
+	if (!mode)
+	{
+		error_code = glfwGetError(&error_description);
+
+		std::cout << error_description << std::endl;
+		glfwTerminate();
+		std::exit(1);
+	}
+	// center window
+	int monitorX, monitorY;
+	glfwGetMonitorPos(glfwGetPrimaryMonitor(), &monitorX, &monitorY);
+
+	int windowWidth, windowHeight;
+	glfwGetWindowSize(window, &windowWidth, &windowHeight);
+
+	glfwSetWindowPos(window,
+		monitorX + (mode->width - windowWidth) / 2,
+		monitorY + (mode->height - windowHeight) / 2);
 
 	glfwMakeContextCurrent(window);
+	
 
 	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
 	glfwSetKeyCallback(window, key_callback);
@@ -273,16 +292,15 @@ int main(int argc, char* argv[])
 	ImGui_ImplGlfw_InitForOpenGL(window, true);
 	ImGui_ImplOpenGL3_Init(glsl_version);
 
+	size_t render_w = 800;
+	size_t render_h = 600;
+	glViewport(0, 0, render_w, render_h);
 	
-	glViewport(0, 0, img_w, img_h);
-
-	Renderer renderer(img_w, img_h, std::string("picture.ppm"));
+	Renderer renderer(render_w, render_h, std::string("picture.ppm"));
 	renderer.run(RenderMode::THREADS);
 
 	int idx = 0;
-	//std::unique_ptr<char[]> img_data(new char[img_w * img_h * 3]);
-	unsigned char* img_data = new unsigned char[img_w * img_h * 3];
-
+	std::unique_ptr<char[]> img_data(new char[render_w * render_h * 3]);
 	for (const auto& c : renderer.get_colors())
 	{
 		for (int i = 0; i < (int)c.length(); ++i)
@@ -302,8 +320,13 @@ int main(int argc, char* argv[])
 
 	// Upload pixels into texture
 	glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, img_w, img_h, 0, GL_RGB, GL_UNSIGNED_BYTE, img_data);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, render_w, render_h, 0, GL_RGB, 
+		GL_UNSIGNED_BYTE, 
+		img_data.get());
 
+	glfwShowWindow(window);
+
+	ImVec2 winSize;
 	while (!glfwWindowShouldClose(window)) {
 		glfwWaitEvents();
 
@@ -312,10 +335,19 @@ int main(int argc, char* argv[])
 		ImGui_ImplGlfw_NewFrame();
 		ImGui::NewFrame();
 
-		ImGui::Begin("OpenGL Texture Test");
-		ImGui::Text("pointer = %p", image_texture);
-		ImGui::Text("size = %d x %d", img_w, img_h);
-		ImGui::Image((void*)image_texture, ImVec2(img_w, img_h));
+		ImGui::SetNextWindowPos(ImVec2(0, 0));
+		ImGui::Begin("OpenGL Texture Test", 
+			0, 
+			ImGuiWindowFlags_NoResize | 
+			ImGuiWindowFlags_NoMove | 
+			ImGuiWindowFlags_NoCollapse | 
+			ImGuiWindowFlags_NoSavedSettings |
+			ImGuiWindowFlags_NoTitleBar | 
+			ImGuiWindowFlags_NoScrollbar | 
+			ImGuiWindowFlags_NoScrollWithMouse);
+		//ImGui::Text("size = %d x %d", render_w, render_h);
+		ImGui::Image((void*)image_texture, ImVec2(render_w, render_h));
+		winSize = ImGui::GetWindowSize();
 		ImGui::End();
 
 		ImGui::Render();
