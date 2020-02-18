@@ -606,10 +606,8 @@ void TeapotScene::init()
 	glm::vec3 cam_up = glm::vec3(0.f, 1.f, 0.f);
 	glm::vec3 p1, p2, p3, tr_normal;
 
-	//std::string teapot =
-	//	"C:\\Users\\Damian\\Documents\\ComputerGraphics\\models\\teapot.obj";
 	std::string teapot =
-		"C:\\Users\\Damian\\Documents\\ComputerGraphics\\models\\newell_teaset\\newell_teaset\\teapot.obj";
+		"..\\..\\..\\resources\\models\\teapot.obj";
 	std::vector<glm::vec3> vertices;
 	std::vector<glm::vec3> normals;
 	std::vector<unsigned int> indices;
@@ -618,7 +616,7 @@ void TeapotScene::init()
 		glm::scale(
 			//glm::mat4(1.f),
 			glm::translate(glm::mat4(1.f), glm::vec3(0.f, 0.f, 15.f)),
-			glm::vec3(0.9f)),
+			glm::vec3(1.0f)),
 		glm::radians(90.f),
 		glm::vec3(0.f, 1.f, 0.f));
 

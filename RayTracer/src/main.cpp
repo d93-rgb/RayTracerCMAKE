@@ -341,7 +341,6 @@ int main(int argc, char* argv[])
 
 	glfwShowWindow(window);
 
-	ImVec2 winSize;
 	while (!glfwWindowShouldClose(window)) {
 		glfwWaitEvents();
 
@@ -362,7 +361,6 @@ int main(int argc, char* argv[])
 			ImGuiWindowFlags_NoScrollWithMouse);
 		//ImGui::Text("size = %d x %d", render_w, render_h);
 		ImGui::Image((void*)image_texture, ImVec2(render_w, render_h));
-		winSize = ImGui::GetWindowSize();
 		ImGui::End();
 
 		ImGui::Render();
