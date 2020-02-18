@@ -38,6 +38,34 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 	}
 }
 
+void center_glfw_window(GLFWwindow* window, GLFWmonitor* monitor)
+{
+	int error_code;
+	const char* error_description;
+	const GLFWvidmode* mode = glfwGetVideoMode(glfwGetPrimaryMonitor());
+
+	if (!mode)
+	{
+		error_code = glfwGetError(&error_description);
+
+		std::cout << error_description << std::endl;
+		glfwTerminate();
+		std::exit(1);
+	}
+
+	// center window
+	int monitorX, monitorY;
+	glfwGetMonitorPos(monitor, &monitorX, &monitorY);
+
+	int windowWidth, windowHeight;
+	glfwGetWindowSize(window, &windowWidth, &windowHeight);
+
+	glfwSetWindowPos(window,
+		monitorX + (mode->width - windowWidth) / 2,
+		monitorY + (mode->height - windowHeight) / 2);
+
+}
+
 #ifdef NOGLFW
 LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 
@@ -245,26 +273,8 @@ int main(int argc, char* argv[])
 		glfwTerminate();
 		std::exit(1);
 	}
-	const GLFWvidmode* mode = glfwGetVideoMode(glfwGetPrimaryMonitor());
-
-	if (!mode)
-	{
-		error_code = glfwGetError(&error_description);
-
-		std::cout << error_description << std::endl;
-		glfwTerminate();
-		std::exit(1);
-	}
-	// center window
-	int monitorX, monitorY;
-	glfwGetMonitorPos(glfwGetPrimaryMonitor(), &monitorX, &monitorY);
-
-	int windowWidth, windowHeight;
-	glfwGetWindowSize(window, &windowWidth, &windowHeight);
-
-	glfwSetWindowPos(window,
-		monitorX + (mode->width - windowWidth) / 2,
-		monitorY + (mode->height - windowHeight) / 2);
+	
+	center_glfw_window(window, glfwGetPrimaryMonitor());
 
 	glfwMakeContextCurrent(window);
 	
@@ -285,6 +295,11 @@ int main(int argc, char* argv[])
 	//io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
 
 	// Setup Dear ImGui style
+	ImGuiStyle* imgui_style = &ImGui::GetStyle();
+	imgui_style->WindowPadding = ImVec2(0, 0);
+	imgui_style->WindowRounding = 0.0f;
+	imgui_style->FrameRounding = 0.0f;
+	imgui_style->DisplaySafeAreaPadding = ImVec2(0, 0);
 	ImGui::StyleColorsDark();
 	//ImGui::StyleColorsClassic();
 

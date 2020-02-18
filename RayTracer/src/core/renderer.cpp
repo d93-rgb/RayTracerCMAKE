@@ -513,7 +513,7 @@ void Renderer::run(RenderMode mode)
 	}
 	else
 	{
-		img->append_to_file_name(".ppm");
+		//img->append_to_file_name(".ppm");
 		img->write_image_to_file(colors);
 	}
 }
