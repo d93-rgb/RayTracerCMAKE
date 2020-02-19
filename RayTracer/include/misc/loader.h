@@ -10,9 +10,9 @@ namespace rt
 	Read an .obj file and store the vertices and normals into two seperate containers.
 	Return true, if everything went succesfully, false if file could not be read.
 */
-inline bool loadObjFile(const std::string &file,
-	std::vector<float> *vertices,
-	std::vector<int> *indices)
+inline bool loadObjFile(const std::string& file,
+	std::vector<float>* vertices,
+	std::vector<int>* indices)
 {
 	std::ifstream ifs{ file };
 	std::istringstream iss;
@@ -58,11 +58,11 @@ inline bool loadObjFile(const std::string &file,
 	Extract the vertices and face indices stored inside an assimp scene object that imports
 	data from a file.
 */
-std::vector<TriangleMesh> extractMeshes(const std::string &file)
+std::vector<TriangleMesh> extractMeshes(const std::string& file)
 {
 	Assimp::Importer imp;
-	const aiScene *a_scene = imp.ReadFile(file, aiProcess_Triangulate);
-	
+	const aiScene* a_scene = imp.ReadFile(file, aiProcess_Triangulate);
+
 	if (!a_scene || (a_scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE))
 	{
 		std::cerr << "Assimp ERROR: " << imp.GetErrorString() << std::endl;
@@ -70,39 +70,56 @@ std::vector<TriangleMesh> extractMeshes(const std::string &file)
 	}
 
 	float x, y, z;
+	float nx = 0;
+	float ny = 0;
+	float nz = 0;
+
 	std::vector<TriangleMesh> tr_meshes;
-
 	for (size_t mesh_num = 0; mesh_num < a_scene->mNumMeshes; ++mesh_num)
 	{
-		tr_meshes.push_back(TriangleMesh());
-		for (size_t i = 0; i < a_scene->mMeshes[mesh_num]->mNumVertices; ++i)
-		{
-			x = (a_scene->mMeshes[mesh_num]->mVertices[i].x);
-			y = (a_scene->mMeshes[mesh_num]->mVertices[i].y);
-			z = (a_scene->mMeshes[mesh_num]->mVertices[i].z);
-			tr_meshes[mesh_num].tr_mesh->push_back(glm::vec3(x, y, z));
+		std::vector<std::shared_ptr<Shape>> triangles;
 
-			x = a_scene->mMeshes[mesh_num]->mNormals[i].x;
-			y = a_scene->mMeshes[mesh_num]->mNormals[i].y;
-			z = a_scene->mMeshes[mesh_num]->mNormals[i].z;
-			normals.push_back(glm::vec3(x, y, z));
-		}
-	}
-
-	int j;
-
-	for (size_t mesh_num = 0; mesh_num < a_scene->mNumMeshes; ++mesh_num)
-	{
+		int j = 0;
 		for (size_t i = 0; i < a_scene->mMeshes[mesh_num]->mNumFaces; ++i)
 		{
+			std::vector<glm::vec3> points;
+			std::vector<glm::vec3> normals;
 			for (size_t n = 0; n < a_scene->mMeshes[mesh_num]->mFaces[i].mNumIndices; ++n)
 			{
 				j = a_scene->mMeshes[mesh_num]->mFaces[i].mIndices[n];
-				indices.push_back(j);
+
+				x = (a_scene->mMeshes[mesh_num]->mVertices[j].x);
+				y = (a_scene->mMeshes[mesh_num]->mVertices[j].y);
+				z = (a_scene->mMeshes[mesh_num]->mVertices[j].z);
+
+				if (a_scene->mMeshes[mesh_num]->mNormals != nullptr)
+				{
+					nx = a_scene->mMeshes[mesh_num]->mNormals[j].x;
+					ny = a_scene->mMeshes[mesh_num]->mNormals[j].y;
+					nz = a_scene->mMeshes[mesh_num]->mNormals[j].z;
+				}
+
+				points.push_back(glm::vec3(x, y, z));
+				normals.push_back(glm::vec3(nx, ny, nz));
 			}
+
+			triangles.push_back(std::make_shared<Triangle>(
+				points[0],
+				points[1],
+				points[2],
+				normals[0],
+				normals[1],
+				normals[2],
+				glm::normalize(glm::cross(points[1] - points[0], points[2] - points[1])),
+				glm::mat4(1.0), //TODO: can't be set to unity matrix... look at constructor of Triangle
+				nullptr));
 		}
+
+		tr_meshes.push_back(TriangleMesh(triangles));
 	}
+
 	std::cout << "Loading obj file finished." << std::endl;
+	return tr_meshes;
 }
 
 }

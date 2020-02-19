@@ -545,13 +545,9 @@ void TeapotScene::init()
 	glm::vec3 translation = glm::vec3(0.f, 2.5f, 25.f);
 	glm::vec3 look_pos = glm::vec3(-1.0f, 0.f, -10.f);
 	glm::vec3 cam_up = glm::vec3(0.f, 1.f, 0.f);
-	glm::vec3 p1, p2, p3, tr_normal;
 
 	std::string teapot =
 		"..\\..\\..\\resources\\models\\teapot.obj";
-	std::vector<glm::vec3> vertices;
-	std::vector<glm::vec3> normals;
-	std::vector<unsigned int> indices;
 
 	glm::mat4 teapot_to_world = glm::rotate(
 		glm::scale(
@@ -594,9 +590,8 @@ void TeapotScene::init()
 	/////////////////////////////////////
 	// Triangle mesh
 	/////////////////////////////////////
-	glm::vec3 b_min = glm::vec3(INFINITY), b_max = glm::vec3(-INFINITY);
 
-	auto tr_meshes = extractMesh(teapot);
+	auto tr_meshes = extractMeshes(teapot);
 
 	std::shared_ptr<Material> teapot_mat =
 		std::shared_ptr<Material>(
@@ -606,43 +601,24 @@ void TeapotScene::init()
 	teapot_mat->setShininess(1.f);
 	teapot_mat->setReflective(glm::vec3(1.0f));
 
-	std::vector<std::shared_ptr<Shape>> t_pot_triangles;
-	for (size_t i = 0; i < indices.size(); i += 3)
+	for (auto& tm : tr_meshes)
 	{
-		p1 = vertices[indices[i]];
-		p2 = vertices[indices[i + 1]];
-		p3 = vertices[indices[i + 2]];
-		tr_normal = glm::normalize(glm::cross(p2 - p1, p3 - p2));
-
-
-		t_pot_triangles.push_back(std::make_shared<Triangle>(p1,
-			p2,
-			p3,
-			normals[indices[i]],
-			normals[indices[i + 1]],
-			normals[indices[i + 2]],
-			tr_normal,
-			teapot_to_world,
-			teapot_mat));
+		for (auto& tr : tm.tr_mesh)
+		{
+			dynamic_cast<Triangle*>(tr.get())->set_objToWorld(teapot_to_world);
+			dynamic_cast<Triangle*>(tr.get())->set_material(teapot_mat);
+		}
 	}
+
+	// put triangle mesh into scene
+	for (auto& tm : tr_meshes)
+	{
+		sc.emplace_back(std::make_unique<TriangleMesh>(tm.tr_mesh));
+	}
+
 	/////////////////////////////////////
 	// Triangle mesh END
 	/////////////////////////////////////
-
-	b_min = teapot_to_world * glm::vec4(b_min, 1.f);
-	b_max = teapot_to_world * glm::vec4(b_max, 1.f);
-
-	std::unique_ptr<TriangleMesh> t_pot = std::make_unique<TriangleMesh>(
-		t_pot_triangles,
-		std::make_unique<Bounds3>(
-		glm::min(b_min, b_max),
-		glm::max(b_min, b_max)));
-
-	// put triangle mesh into scene
-	sc.emplace_back(std::move(t_pot));
-	////////////////////////////////
-	// END
-	////////////////////////////////
 
 	lights.emplace_back(std::make_unique<PointLight>(glm::vec3(5.f, 5.f, 25.f),
 		glm::vec3(-2, -4, -2),
@@ -653,8 +629,6 @@ void TeapotScene::init()
 		glm::vec3(80.f)));
 
 	cam.reset(new Camera());
-	/*cam->setCamToWorld(glm::rotate(glm::translate(glm::mat4(1.f), translation),
-		rot_x, glm::vec3(0.f, 1.f, 0.f)));*/
 	cam->setCamToWorld(translation, look_pos, cam_up);
 	cam->update();
 }

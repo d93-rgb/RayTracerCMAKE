@@ -412,6 +412,7 @@ private:
 class Triangle : public Shape
 {
 public:
+
 	Triangle(glm::vec3 p1,
 		glm::vec3 p2,
 		glm::vec3 p3,
@@ -443,7 +444,6 @@ public:
 		// base transformation to barycentric coordinates
 		// see: https://de.wikipedia.org/wiki/Basiswechsel_(Vektorraum)
 		this->m_inv = glm::inverse(glm::mat3(this->p1, this->p2, this->p3));
-
 	}
 
 	float intersect(const Ray &ray, SurfaceInteraction *isect);
@@ -455,6 +455,34 @@ public:
 		glm::vec3 barycentric_coord = m_inv * p;
 		return glm::normalize(barycentric_coord.x * n1 + barycentric_coord.y * n2 + 
 			barycentric_coord.z * n3);
+	}
+
+	void set_objToWorld(const glm::mat4& objToWorld)
+	{
+		this->objToWorld = objToWorld;
+
+		p1 = objToWorld * glm::vec4(p1, 1.f);
+		p2 = objToWorld * glm::vec4(p2, 1.f);
+		p3 = objToWorld * glm::vec4(p3, 1.f);
+
+		//construct surrounding aabb
+		bounding_box = std::make_unique<Bounds3>(glm::vec3(glm::min(glm::min(p1, p2), p3)),
+			glm::vec3(glm::max(glm::max(p1, p2), p3)));
+
+		n1 = glm::transpose(glm::inverse(objToWorld)) * glm::vec4(n1, 0.f);
+		n2 = glm::transpose(glm::inverse(objToWorld)) * glm::vec4(n2, 0.f);
+		n3 = glm::transpose(glm::inverse(objToWorld)) * glm::vec4(n3, 0.f);
+
+		plane_normal = glm::transpose(glm::inverse(objToWorld)) * glm::vec4(plane_normal, 0.f);
+
+		// base transformation to barycentric coordinates
+		// see: https://de.wikipedia.org/wiki/Basiswechsel_(Vektorraum)
+		this->m_inv = glm::inverse(glm::mat3(p1, p2, p3));
+	}
+
+	void set_material(std::shared_ptr<Material> mat)
+	{
+		this->mat = std::move(mat);
 	}
 
 	//deprecated, replace with get_normal(glm::vec3)
@@ -487,14 +515,10 @@ public:
 	std::unique_ptr<Bounds3> boundary;
 	std::vector<std::shared_ptr<Shape>> tr_mesh;
 
-	TriangleMesh() = default;
-
-	TriangleMesh(std::vector<std::shared_ptr<Shape>> tr_mesh, 
-		std::unique_ptr<Bounds3> bounds) :
-		tr_mesh(tr_mesh),
-		boundary(std::move(bounds))
+	TriangleMesh(std::vector<std::shared_ptr<Shape>> tr_mesh) :
+		tr_mesh(tr_mesh)
 	{
-		bvh = std::make_unique<BVH>(tr_mesh, boundary.get());
+		bvh = std::make_unique<BVH>(tr_mesh);
 	}
 
 	float intersect(const Ray& ray, SurfaceInteraction* isect);
