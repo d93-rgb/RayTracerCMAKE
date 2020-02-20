@@ -9,5 +9,5 @@ The ray tracer is partially based on the "pbrt" described in the book "Physicall
 # Example scene 1 (Utah teapot, two point light sources)
 <img src="RayTracer/resources/reflecting_teapot_with_two_lightsources.png" title="Utah teapot example scene" width="600">
 
-# Example scene 2 (glass objects and textured floor)
+# Example scene 2 (glass objects, teaspoon and textured floor)
 <img src="RayTracer/resources/glass_objects_scene.png" title="glass objects scene" width="600">
