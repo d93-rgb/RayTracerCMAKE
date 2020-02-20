@@ -89,7 +89,7 @@ void GatheringScene::init()
 		glm::vec3(150, 0, 0), glm::vec3(0, 150, -150), wall_bot));
 
 	// get pointer to the floor
-	Rectangle *floor = dynamic_cast<Rectangle*>(sc.back().get());
+	Rectangle* floor = dynamic_cast<Rectangle*>(sc.back().get());
 
 	//front
 	//sc.emplace_back(std::unique_ptr<Shape>(new Rectangle(glm::vec3(-4, 11, -27),
@@ -164,11 +164,11 @@ void GatheringScene::init()
 	// END
 	////////////////////////////////
 
-	for (std::unique_ptr<Shape> &p : cube_1)
+	for (std::unique_ptr<Shape>& p : cube_1)
 	{
 		sc.emplace_back(std::move(p));
 	}
-	for (std::unique_ptr<Shape> &p : cube_2)
+	for (std::unique_ptr<Shape>& p : cube_2)
 	{
 		sc.emplace_back(std::move(p));
 	}
@@ -211,7 +211,7 @@ void MixedScene::init()
 		glm::radians(30.f),
 		glm::vec3(0.f, 1.f, 0.f));
 
-	Rectangle *floor;
+	Rectangle* floor;
 	std::unique_ptr<Shape> cube_2[6];
 
 	// material for walls
@@ -254,7 +254,7 @@ void MixedScene::init()
 		cube_2,
 		cube_mat_2);
 
-	for (std::unique_ptr<Shape> &p : cube_2)
+	for (std::unique_ptr<Shape>& p : cube_2)
 	{
 		sc.emplace_back(std::move(p));
 	}
@@ -527,7 +527,7 @@ void MixedScene::init()
 
 /////////////////////////////////////
 // Camera
-/////////////////////////////////////
+/////////////////////////////////////		
 	cam.reset(new Camera());
 	/*cam->setCamToWorld(glm::rotate(glm::translate(glm::mat4(1.f), translation),
 		rot_x, glm::vec3(0.f, 1.f, 0.f)));*/
@@ -548,14 +548,31 @@ void TeapotScene::init()
 
 	std::string teapot =
 		"..\\..\\..\\resources\\models\\teapot.obj";
+	std::string teaspoon =
+		"..\\..\\..\\resources\\models\\spoon.obj";
 
 	glm::mat4 teapot_to_world = glm::rotate(
 		glm::scale(
 			//glm::mat4(1.f),
-			glm::translate(glm::mat4(1.f), glm::vec3(0.f, 0.f, 15.f)),
+			glm::translate(glm::mat4(1.f), glm::vec3(-3.5f, 0.f, 11.f)),
 			glm::vec3(1.0f)),
-		glm::radians(90.f),
+		glm::radians(-90.f),
 		glm::vec3(0.f, 1.f, 0.f));
+
+	glm::mat4 teaspoon_to_world =
+		glm::rotate(
+			glm::rotate(
+				glm::rotate(
+					glm::scale(
+						//glm::mat4(1.f),
+						glm::translate(glm::mat4(1.f), glm::vec3(-2.5f, 0.98f, 19.f)),
+						glm::vec3(1.2f)),
+					glm::radians(10.f),
+					glm::vec3(1.f, 0.f, 0.f)),
+				glm::radians(-90.f),
+				glm::vec3(0.0f, 1.0f, 0.0f)),
+		glm::radians(5.f),
+		glm::vec3(1.0f, 0.0f, 0.0f));
 
 	// material for walls
 	auto wall_bot =
@@ -563,7 +580,23 @@ void TeapotScene::init()
 			glm::vec3(0.02, 0.02, 0.02),
 			glm::vec3(0.4, 0.4, 0.4),
 			glm::vec3(0.0, 0.0, 0.0));
-	wall_bot->setReflective(glm::vec3(0.1f));
+	auto sphere_texture = std::make_shared<CheckerBoardTexture>(
+		/*std::make_shared<PlanarMapping>(
+			glm::vec3(-7.f, -4.f, -7.f),
+			glm::vec3(4.f, 0.f, 0.f),
+			glm::vec3(0.f, 4.f, 0.f)),*/
+		std::make_shared<PlanarMapping>(
+			glm::vec3(-40.f, 0.f, -18.f),
+			glm::vec3(5, 0, 0),
+			glm::vec3(0, 0, 5)
+			),
+		glm::vec3(1.f),
+		ImageWrap::REPEAT);
+	wall_bot->setTexture(sphere_texture);
+
+
+	//wall_bot->setReflective(glm::vec3(0.1f));
+
 	auto wall_left =
 		std::make_shared<Material>(
 			glm::vec3(0.02, 0.02, 0.02),
@@ -571,35 +604,41 @@ void TeapotScene::init()
 			glm::vec3(0.0, 0.0, 0.0));
 	wall_left->setReflective(glm::vec3(1.0f));
 
+
 	//bottom
 	sc.emplace_back(std::make_unique<Rectangle>(glm::vec3(-4, 0, -18),
 		glm::vec3(150, 0, 0), glm::vec3(0, 0, -150), wall_bot));
 	//front
-	sc.emplace_back(std::make_unique<Rectangle>(glm::vec3(-4, 0, -18-75),
-		glm::vec3(300, 0, 0), glm::vec3(0, 300, 0), wall_bot));
-	//back
+	/*sc.emplace_back(std::make_unique<Rectangle>(glm::vec3(-4, 0, -18-75),
+		glm::vec3(300, 0, 0), glm::vec3(0, 300, 0), wall_left));
+	back
 	sc.emplace_back(std::make_unique<Rectangle>(glm::vec3(-4, 0, -18+75),
 		glm::vec3(300, 0, 0), glm::vec3(0, 300, 0), wall_bot));
-	//left
+	left
 	sc.emplace_back(std::make_unique<Rectangle>(glm::vec3(-4, 0, -18),
 		glm::vec3(0, 300, 0), glm::vec3(0, 0, -300), wall_left));
-	//right
+	right
 	sc.emplace_back(std::make_unique<Rectangle>(glm::vec3(-4+75, 0, -18),
-		glm::vec3(0, 300, 0), glm::vec3(0, 0, -300), wall_bot));
+		glm::vec3(0, 300, 0), glm::vec3(0, 0, -300), wall_left));*/
 
 	/////////////////////////////////////
-	// Triangle mesh
+	// Teapot mesh
 	/////////////////////////////////////
 
 	auto tr_meshes = extractMeshes(teapot);
 
 	std::shared_ptr<Material> teapot_mat =
 		std::shared_ptr<Material>(
-			new Material(glm::vec3(0.01f, 0.01f, 0.01f),
-				glm::vec3(0.1f, 0.1f, 0.1f),
-				glm::vec3(0.2f, 0.2f, 0.2f)));
-	teapot_mat->setShininess(1.f);
-	teapot_mat->setReflective(glm::vec3(1.0f));
+			new Material(glm::vec3(0.00f, 0.00f, 0.00f),
+				glm::vec3(0.0f, 0.0f, 0.0f),
+				glm::vec3(0.0f, 0.0f, 0.0f)));
+	//teapot_mat->setShininess(1.f);
+	//teapot_mat->setReflective(glm::vec3(1.0f));
+
+	//glass
+	teapot_mat->setTransparent(glm::vec3(1.f));
+	teapot_mat->setRefractiveIdx(1.5f);
+
 
 	for (auto& tm : tr_meshes)
 	{
@@ -617,16 +656,112 @@ void TeapotScene::init()
 	}
 
 	/////////////////////////////////////
-	// Triangle mesh END
+	// Teapot mesh END
+	/////////////////////////////////////
+
+	/////////////////////////////////////
+	// Teaspoon mesh
+	/////////////////////////////////////
+
+	tr_meshes = extractMeshes(teaspoon);
+
+	std::shared_ptr<Material> teaspoon_mat =
+		std::shared_ptr<Material>(
+			new Material(glm::vec3(0.00f, 0.00f, 0.00f),
+				glm::vec3(0.0f, 0.0f, 0.0f),
+				glm::vec3(0.4f, 0.4f, 0.4f)));
+	//teapot_mat->setShininess(1.f);
+	//teapot_mat->setReflective(glm::vec3(1.0f));
+
+	//glass
+	teaspoon_mat->setShininess(30.0f);
+
+
+	for (auto& tm : tr_meshes)
+	{
+		for (auto& tr : tm.tr_mesh)
+		{
+			dynamic_cast<Triangle*>(tr.get())->set_objToWorld(teaspoon_to_world);
+			dynamic_cast<Triangle*>(tr.get())->set_material(teaspoon_mat);
+		}
+	}
+
+	// put triangle mesh into scene
+	for (auto& tm : tr_meshes)
+	{
+		sc.emplace_back(std::make_unique<TriangleMesh>(tm.tr_mesh));
+	}
+
+	/////////////////////////////////////
+	// Teapot mesh END
+	/////////////////////////////////////
+
+	/////////////////////////////////////
+	// Glass sphere
+	/////////////////////////////////////
+	float radius = 0.25;
+	auto sphere_mat =
+		std::make_shared<Material>();
+	sphere_mat->setTransparent(glm::vec3(1.0f));
+	teapot_mat->setRefractiveIdx(1.5f);
+
+
+	for (int i = 0; i < 4; ++i)
+	{
+		for (int j = 0; j < 4; ++j)
+		{
+			for (int k = 0; k < 4; ++k)
+			{
+				sc.emplace_back(std::make_unique<Sphere>(
+					glm::vec3(0.5f + i * 4.0f * radius, 
+						0.5f + j * 4.0f * radius, 
+						16.f + k * 4.0f * radius),
+					radius,
+					glm::vec3(1.f),
+					sphere_mat));
+			}
+		}
+	}
+	/////////////////////////////////////
+	// Glass sphere END
+	/////////////////////////////////////
+
+	/////////////////////////////////////
+	// Cube
+	/////////////////////////////////////
+	auto cube_mat = std::shared_ptr<Material>(new Material(
+		glm::vec3(0.0f, 0.0f, 0.0f),
+		glm::vec3(0.1f, 0.1f, 0.1f),
+		glm::vec3(0.7f, 0.7f, 0.7f)));
+	cube_mat->setShininess(50.f);
+
+	sc.emplace_back(std::make_unique<Cube>(
+		glm::vec3(1.0f),
+		cube_mat));
+
+	sc.back()->obj_to_world = glm::rotate(
+		glm::scale(
+			//glm::mat4(1.f),
+			glm::translate(glm::mat4(1.f), glm::vec3(-3.f, 0.5f, 19.f)),
+			glm::vec3(2.0f, 1.0f, 1.4f)),
+		glm::radians(0.f),
+		glm::vec3(0.f, 1.f, 0.f));
+	sc.back()->world_to_obj = glm::inverse(sc.back()->obj_to_world);
+	/////////////////////////////////////
+	// Glass sphere END
 	/////////////////////////////////////
 
 	lights.emplace_back(std::make_unique<PointLight>(glm::vec3(5.f, 5.f, 25.f),
 		glm::vec3(-2, -4, -2),
 		glm::vec3(120.f)));
-	
-	lights.emplace_back(std::make_unique<PointLight>(glm::vec3(-5.f, 5.f, 25.f),
+
+	lights.emplace_back(std::make_unique<PointLight>(glm::vec3(-5.f, 5.f, 10.f),
 		glm::vec3(-2, -4, -2),
-		glm::vec3(80.f)));
+		glm::vec3(190.f)));
+
+	lights.emplace_back(std::make_unique<PointLight>(glm::vec3(-3.f, 1.5f, 19.f),
+		glm::vec3(0.0f, -1.0f, 0.0f),
+		glm::vec3(1.f)));
 
 	cam.reset(new Camera());
 	cam->setCamToWorld(translation, look_pos, cam_up);
@@ -666,8 +801,6 @@ void SingleTriangleScene::init()
 		glm::vec3(110.f)));
 
 	cam.reset(new Camera());
-	/*cam->setCamToWorld(glm::rotate(glm::translate(glm::mat4(1.f), translation),
-		rot_x, glm::vec3(0.f, 1.f, 0.f)));*/
 	cam->setCamToWorld(translation, look_pos, cam_up);
 	cam->update();
 }

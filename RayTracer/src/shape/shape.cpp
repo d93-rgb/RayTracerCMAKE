@@ -279,6 +279,10 @@ float Triangle::intersect(const Ray& ray, SurfaceInteraction* isect)
 
 	// intersect without updating nearest intersection parameter
 	t_plane = plane.intersect(ray);
+	if(t_plane == INFINITY)
+	{
+		return INFINITY;
+	}
 
 	glm::vec3 t_vec = m_inv * (ray.ro + t_plane * ray.rd);
 
