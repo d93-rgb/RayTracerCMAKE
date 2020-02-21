@@ -693,7 +693,7 @@ void TeapotScene::init()
 	}
 
 	/////////////////////////////////////
-	// Teapot mesh END
+	// Teaspoon mesh END
 	/////////////////////////////////////
 
 	/////////////////////////////////////
@@ -748,7 +748,7 @@ void TeapotScene::init()
 		glm::vec3(0.f, 1.f, 0.f));
 	sc.back()->world_to_obj = glm::inverse(sc.back()->obj_to_world);
 	/////////////////////////////////////
-	// Glass sphere END
+	// Cube END
 	/////////////////////////////////////
 
 	lights.emplace_back(std::make_unique<PointLight>(glm::vec3(5.f, 5.f, 25.f),
@@ -805,4 +805,119 @@ void SingleTriangleScene::init()
 	cam->update();
 }
 
+void DragonScene::init()
+{
+	//camera position
+	glm::vec3 translation = glm::vec3(0.f, 2.5f, 25.f);
+	glm::vec3 look_pos = glm::vec3(-1.0f, 0.f, -10.f);
+	glm::vec3 cam_up = glm::vec3(0.f, 1.f, 0.f);
+
+	std::vector<std::string> dragon_files = { 
+	"C:\\Users\\Damian\\Downloads\\dragon_side.tar\\dragon_side\\dragonSideRight_0.ply",
+	"C:\\Users\\Damian\\Downloads\\dragon_side.tar\\dragon_side\\dragonSideRight_24.ply",
+	"C:\\Users\\Damian\\Downloads\\dragon_side.tar\\dragon_side\\dragonSideRight_48.ply",
+	"C:\\Users\\Damian\\Downloads\\dragon_side.tar\\dragon_side\\dragonSideRight_72.ply",
+	"C:\\Users\\Damian\\Downloads\\dragon_side.tar\\dragon_side\\dragonSideRight_96.ply",
+	"C:\\Users\\Damian\\Downloads\\dragon_side.tar\\dragon_side\\dragonSideRight_120.ply",
+	"C:\\Users\\Damian\\Downloads\\dragon_side.tar\\dragon_side\\dragonSideRight_144.ply",
+	"C:\\Users\\Damian\\Downloads\\dragon_side.tar\\dragon_side\\dragonSideRight_168.ply",
+	"C:\\Users\\Damian\\Downloads\\dragon_side.tar\\dragon_side\\dragonSideRight_192.ply",
+	"C:\\Users\\Damian\\Downloads\\dragon_side.tar\\dragon_side\\dragonSideRight_216.ply",
+	"C:\\Users\\Damian\\Downloads\\dragon_side.tar\\dragon_side\\dragonSideRight_240.ply",
+	"C:\\Users\\Damian\\Downloads\\dragon_side.tar\\dragon_side\\dragonSideRight_264.ply",
+	"C:\\Users\\Damian\\Downloads\\dragon_side.tar\\dragon_side\\dragonSideRight_288.ply",
+	"C:\\Users\\Damian\\Downloads\\dragon_side.tar\\dragon_side\\dragonSideRight_312.ply",
+	"C:\\Users\\Damian\\Downloads\\dragon_side.tar\\dragon_side\\dragonSideRight_336.ply",
+
+	};
+
+	glm::mat4 dr_to_world = glm::rotate(
+		glm::scale(
+			//glm::mat4(1.f),
+			glm::translate(glm::mat4(1.f), glm::vec3(-3.5f, 0.f, 11.f)),
+			glm::vec3(1.0f)),
+		glm::radians(-90.f),
+		glm::vec3(0.f, 1.f, 0.f));
+
+	// material for walls
+	auto wall_bot =
+		std::make_shared<Material>(
+			glm::vec3(0.02, 0.02, 0.02),
+			glm::vec3(0.4, 0.4, 0.4),
+			glm::vec3(0.0, 0.0, 0.0));
+	wall_bot->setReflective(glm::vec3(0.1f));
+
+	auto wall_left =
+		std::make_shared<Material>(
+			glm::vec3(0.02, 0.02, 0.02),
+			glm::vec3(0.4, 0.4, 0.4),
+			glm::vec3(0.0, 0.0, 0.0));
+	wall_left->setReflective(glm::vec3(1.0f));
+
+
+	//bottom
+	sc.emplace_back(std::make_unique<Rectangle>(glm::vec3(-4, 0, -18),
+		glm::vec3(150, 0, 0), glm::vec3(0, 0, -150), wall_bot));
+	//front
+	/*sc.emplace_back(std::make_unique<Rectangle>(glm::vec3(-4, 0, -18-75),
+		glm::vec3(300, 0, 0), glm::vec3(0, 300, 0), wall_left));
+	back
+	sc.emplace_back(std::make_unique<Rectangle>(glm::vec3(-4, 0, -18+75),
+		glm::vec3(300, 0, 0), glm::vec3(0, 300, 0), wall_bot));
+	left
+	sc.emplace_back(std::make_unique<Rectangle>(glm::vec3(-4, 0, -18),
+		glm::vec3(0, 300, 0), glm::vec3(0, 0, -300), wall_left));
+	right
+	sc.emplace_back(std::make_unique<Rectangle>(glm::vec3(-4+75, 0, -18),
+		glm::vec3(0, 300, 0), glm::vec3(0, 0, -300), wall_left));*/
+
+	/////////////////////////////////////
+	// Teapot mesh
+	/////////////////////////////////////
+
+	for (const auto& dr_file : dragon_files)
+	{
+		auto tr_meshes = extractMeshes(dr_file);
+
+		std::shared_ptr<Material> teapot_mat =
+			std::shared_ptr<Material>(
+				new Material(glm::vec3(0.00f, 0.00f, 0.00f),
+					glm::vec3(0.0f, 0.0f, 0.0f),
+					glm::vec3(0.0f, 0.0f, 0.0f)));
+		//teapot_mat->setShininess(1.f);
+		//teapot_mat->setReflective(glm::vec3(1.0f));
+
+		//glass
+		teapot_mat->setTransparent(glm::vec3(1.f));
+		teapot_mat->setRefractiveIdx(1.5f);
+
+		for (auto& tm : tr_meshes)
+		{
+			for (auto& tr : tm.tr_mesh)
+			{
+				dynamic_cast<Triangle*>(tr.get())->set_objToWorld(dr_to_world);
+				dynamic_cast<Triangle*>(tr.get())->set_material(teapot_mat);
+			}
+		}
+
+		// put triangle mesh into scene
+		for (auto& tm : tr_meshes)
+		{
+			sc.emplace_back(std::make_unique<TriangleMesh>(tm.tr_mesh));
+		}
+	}
+
+	lights.emplace_back(std::make_unique<PointLight>(glm::vec3(5.f, 5.f, 25.f),
+		glm::vec3(-2, -4, -2),
+		glm::vec3(120.f)));
+
+	lights.emplace_back(std::make_unique<PointLight>(glm::vec3(-5.f, 5.f, 10.f),
+		glm::vec3(-2, -4, -2),
+		glm::vec3(190.f)));
+
+	cam.reset(new Camera());
+	cam->setCamToWorld(translation, look_pos, cam_up);
+	cam->update();
 }
+
+} // namespace rt

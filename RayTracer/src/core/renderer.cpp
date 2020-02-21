@@ -373,7 +373,7 @@ void Renderer::render_with_threads(
 	/***************************************/
 	//GatheringScene sc;
 	//MixedScene sc;
-	std::unique_ptr<Scene> sc = std::make_unique<TeapotScene>();
+	std::unique_ptr<Scene> sc = std::make_unique<DragonScene>();
 
 	//	// enclose with braces for destructor of ProgressReporter at the end of rendering
 	{

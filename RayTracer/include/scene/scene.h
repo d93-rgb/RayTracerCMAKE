@@ -74,4 +74,16 @@ public:
 
 	void init();
 };
-}
+
+class DragonScene : public Scene
+{
+public:
+	DragonScene()
+	{
+		init();
+	}
+
+	void init();
+};
+
+} // namespace rt
