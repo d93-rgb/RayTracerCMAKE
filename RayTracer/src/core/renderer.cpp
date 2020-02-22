@@ -74,18 +74,18 @@ bool Renderer::refract(glm::dvec3 V, glm::dvec3 N, double refr_idx, glm::dvec3 *
 double Renderer::fresnel(double rel_eta, double c)
 {
 
-	if (c < 0.f)
+	if (c < 0.0)
 	{
 		c = -c;
-		rel_eta = 1.f / rel_eta;
+		rel_eta = 1.0 / rel_eta;
 	}
 	// using Schlick's approximation
-	double r0 = (rel_eta - 1.f) / (rel_eta + 1.f);
+	double r0 = (rel_eta - 1.0) / (rel_eta + 1.0);
 	r0 = r0 * r0;
 
-	c = 1.f - c;
+	c = 1.0 - c;
 
-	return r0 + (1.f - r0) * powf(c, 5);
+	return r0 + (1.0 - r0) * pow(c, 5);
 }
 
 glm::dvec3 Renderer::handle_reflection(const Scene &s,
@@ -336,16 +336,16 @@ void Renderer::render_with_threads(
 	size_t& width,
 	size_t& height)
 {
-	constexpr double fov = glm::radians(30.f);
+	constexpr double fov = glm::radians(30.0);
 	double fov_tan = tan(fov / 2);
-	double u = 0.f, v = 0.f;
+	double u = 0.0, v = 0.0;
 	// distance to view plane
-	double foc_len = 0.5f * 1.0f / fov_tan;
+	double foc_len = 0.5 * 1.0 / fov_tan;
 	double inv_spp;
 	double inv_grid_dim = 1.f / (GRID_DIM * GRID_DIM);
 
-	double crop_min_x = 0.f, crop_max_x = 1.f;
-	double crop_min_y = 0.f, crop_max_y = 1.f;
+	double crop_min_x = 0.0, crop_max_x = 1.0;
+	double crop_min_y = 0.0, crop_max_y = 1.0;
 
 	assert(crop_min_x <= crop_max_x && crop_min_y <= crop_max_y);
 
@@ -366,9 +366,9 @@ void Renderer::render_with_threads(
 #endif
 
 	StratifiedSampler2D sampler{ width, height, GRID_DIM };
-	unsigned int array_size = GRID_DIM * GRID_DIM;
+	size_t array_size = GRID_DIM * GRID_DIM;
 	const glm::dvec2* samplingArray;
-	inv_spp = 1.0f / SPP;
+	inv_spp = 1.0 / SPP;
 	/***************************************/
 	// CREATING SCENE
 	/***************************************/
@@ -440,13 +440,13 @@ void Renderer::render_with_threads(
 
 							for (int s = 0; s < SPP; ++s)
 							{
-								for (unsigned int n = 0; n < array_size; ++n)
+								for (size_t n = 0; n < array_size; ++n)
 								{
 									SurfaceInteraction isect;
 
 									// map pixel coordinates to[-1, 1]x[-1, 1]
-									double u = (2.f * (slice.pairs[idx].first + j + samplingArray[n].x) - img->get_width()) / img->get_height();
-									double v = (-2.f * (slice.pairs[idx].second + i + samplingArray[n].y) + img->get_height()) / img->get_height();
+									double u = (2.0 * (slice.pairs[idx].first + j + samplingArray[n].x) - img->get_width()) / img->get_height();
+									double v = (-2.0 * (slice.pairs[idx].second + i + samplingArray[n].y) + img->get_height()) / img->get_height();
 
 									/*double u = (x + samplingArray[idx].x) - WIDTH * 0.5f;
 									double v = -((y + samplingArray[idx].y) - HEIGHT * 0.5f);

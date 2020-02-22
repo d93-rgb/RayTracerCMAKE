@@ -307,20 +307,20 @@ int main(int argc, char* argv[])
 	ImGui_ImplGlfw_InitForOpenGL(window, true);
 	ImGui_ImplOpenGL3_Init(glsl_version);
 
-	size_t render_w = 800;
-	size_t render_h = 600;
+	GLsizei render_w = 800;
+	GLsizei render_h = 600;
 	glViewport(0, 0, render_w, render_h);
 	
 	Renderer renderer(render_w, render_h, std::string("picture.ppm"));
 	renderer.run(RenderMode::THREADS);
 
 	int idx = 0;
-	std::unique_ptr<char[]> img_data(new char[render_w * render_h * 3]);
+	std::unique_ptr<char[]> img_data(new char[static_cast<size_t>(render_w) * static_cast<size_t>(render_h) * 3]);
 	for (const auto& c : renderer.get_colors())
 	{
 		for (int i = 0; i < (int)c.length(); ++i)
 		{
-			img_data[idx++] = static_cast<unsigned char>(std::roundf(c[i]));
+			img_data[idx++] = static_cast<unsigned char>(std::round(c[i]));
 		}
 	}
 	
@@ -360,7 +360,7 @@ int main(int argc, char* argv[])
 			ImGuiWindowFlags_NoScrollbar | 
 			ImGuiWindowFlags_NoScrollWithMouse);
 		//ImGui::Text("size = %d x %d", render_w, render_h);
-		ImGui::Image((void*)image_texture, ImVec2(render_w, render_h));
+		ImGui::Image((void*)image_texture, ImVec2(static_cast<float>(render_w), static_cast<float>(render_h)));
 		ImGui::End();
 
 		ImGui::Render();

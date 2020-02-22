@@ -6,7 +6,7 @@ glm::dvec3 Material::getAmbient(glm::dvec3 pos)
 {
 	if (tex)
 	{
-		return 0.001f * tex->getTexel(pos);
+		return 0.001 * tex->getTexel(pos);
 	}
 	return ambient;
 }

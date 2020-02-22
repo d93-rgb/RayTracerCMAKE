@@ -222,7 +222,7 @@ void MixedScene::init()
 			glm::dvec3(0.02, 0.02, 0.02),
 			glm::dvec3(0.4, 0.4, 0.4),
 			glm::dvec3(0.0, 0.0, 0.0));
-	wall_bot->setReflective(glm::dvec3(0.2f));
+	wall_bot->setReflective(glm::dvec3(0.2));
 
 	//bottom
 	sc.emplace_back(std::make_unique<Rectangle>(glm::dvec3(-4, 2, -18),
@@ -230,29 +230,29 @@ void MixedScene::init()
 
 	// get pointer to the floor
 	floor = dynamic_cast<Rectangle*>(sc.back().get());
-	cube_position = floor->getRectPos(1.5f, -27.f, 'y');
+	cube_position = floor->getRectPos(1.5, -27.0, 'y');
 	cube_normal = floor->get_normal();
 
 	auto triangle_mat_1 =
 		std::make_shared<Material>(
-			glm::dvec3(0.f, 0.f, 0.f),
-			glm::dvec3(0.f, 0.f, 0.f),
-			glm::dvec3(0.f, 0.f, 0.f));
+			glm::dvec3(0.0, 0.0, 0.0),
+			glm::dvec3(0.0, 0.0, 0.0),
+			glm::dvec3(0.0, 0.0, 0.0));
 	auto cube_mat_2 =
 		std::make_shared<Material>(
 			glm::dvec3(0.02, 0.02, 0.0),
-			glm::dvec3(0.9, 0.2, 0.0f),
+			glm::dvec3(0.9, 0.2, 0.0),
 			glm::dvec3(0.6, 0.0, 0.6));
-	cube_mat_2->setShininess(10.f);
+	cube_mat_2->setShininess(10.0);
 
-	create_cube(cube_position + glm::dvec4((3.f * cube_normal), 1.f),
+	create_cube(cube_position + glm::dvec4((3.0 * cube_normal), 1.0),
 		//glm::rotate(glm::dmat4(1), -30.f, glm::dvec3(1.f, 0.f, 0.f)) *
 		//glm::dvec4(0.f, 0.f, 1.f, 1.f),
 		cube_normal,
 		/*glm::rotate(glm::dmat4(1), -30.f, glm::dvec3(1.f, 0.f, 0.f)) *
 		glm::dvec4(1.f, 0.f, 0.f, 1.f),*/
-		glm::perp(glm::dvec3(1.f, 1.f, 0.f), cube_normal),
-		6.f,
+		glm::perp(glm::dvec3(1.0, 1.0, 0.0), cube_normal),
+		6.0,
 		cube_2,
 		cube_mat_2);
 

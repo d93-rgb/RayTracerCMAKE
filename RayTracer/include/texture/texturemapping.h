@@ -22,8 +22,8 @@ public:
 	{
 		glm::dvec3 pos_shift = glm::normalize(pos - center);
 		//double radius = glm::length(pos_shift);
-		double u = (1 + atan2f(pos_shift.z, pos_shift.x) / (double)M_PI) * 0.5f;
-		double v = acosf(pos_shift.y) / (double)M_PI;
+		double u = (1.0 + atan2(pos_shift.z, pos_shift.x) / M_PI) * 0.5;
+		double v = acos(pos_shift.y) / M_PI;
 
 		return glm::dvec2(u, v);
 	}

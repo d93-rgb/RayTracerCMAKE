@@ -68,13 +68,13 @@ public:
 			break;
 		}
 
-		return ((fmodf(uv.x, NUM) < GAP) ^ (fmodf(uv.y, NUM) < GAP)) * color;
+		return ((fmod(uv.x, NUM) < GAP) ^ (fmod(uv.y, NUM) < GAP)) * color;
 	}
 
 	glm::dvec3 getTexel(glm::dvec3 pos, glm::dvec3 color_1, glm::dvec3 color_2) const
 	{
 		glm::dvec2 uv = tm->getTextureCoordinates(pos);
-		return ((fmodf(uv.x, NUM) < GAP) ^ (fmodf(uv.y, NUM) < GAP)) ? color_1 : color_2;
+		return ((fmod(uv.x, NUM) < GAP) ^ (fmod(uv.y, NUM) < GAP)) ? color_1 : color_2;
 	}
 
 };

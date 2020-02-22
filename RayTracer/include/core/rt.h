@@ -9,9 +9,15 @@
 
 #if defined(WIN32) || \
     defined(_WIN32) || defined(__WIN32) && !defined(__CYGWIN__)
+
+#ifndef WIN32_LEAN_AND_MEAN
 #define WIN32_LEAN_AND_MEAN
-#define UNICODE
+#endif
+
+#ifndef UNICODE
 #define _UNICODE
+#endif
+
 #include <windows.h>
 #include <ShellScalingApi.h>
 #else
