@@ -10,7 +10,7 @@
 
 namespace rt
 {
-#define DEBUG_NORMALS
+//#define DEBUG_NORMALS
 
 Renderer::Renderer(size_t w, size_t h,
 	const std::string& file,
@@ -374,7 +374,7 @@ void Renderer::render_with_threads(
 	/***************************************/
 	//GatheringScene sc;
 	//MixedScene sc;
-	std::unique_ptr<Scene> sc = std::make_unique<DragonScene>();
+	std::unique_ptr<Scene> sc = std::make_unique<TeapotScene>();
 
 	//	// enclose with braces for destructor of ProgressReporter at the end of rendering
 	{

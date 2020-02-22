@@ -284,16 +284,22 @@ float Triangle::intersect(const Ray& ray, SurfaceInteraction* isect)
 		return INFINITY;
 	}
 
-	glm::vec3 t_vec = m_inv * (ray.ro + t_plane * ray.rd);
+	//glm::vec3 t_vec = m_inv * (ray.ro + t_plane * ray.rd);
+	glm::vec3 p_isect = (ray.ro + t_plane * ray.rd);
+	glm::vec2 t_vec;
+	t_vec.x = p1.y*p3.x - p1.x*p3.y + (p3.y - p1.y)*p_isect.x + (p1.x - p3.x)*p_isect.y;
+	t_vec.y = p1.x * p2.y - p1.y * p2.x + (p1.y - p2.y) * p_isect.x + (p2.x - p1.x) * p_isect.y;
 
-	if (t_vec.y + t_vec.z <= 1 &&
-		t_vec.y >= 0 &&
-		t_vec.z >= 0)
+	t_vec /= (-p2.y * p3.x + p1.y * (-p2.x + p3.x) + p1.x * (p2.y - p3.y) + p2.x * p3.y);
+
+	if (((t_vec.y + t_vec.x) <= 1.0f) &&
+		(t_vec.x >= 0) &&
+		(t_vec.y >= 0))
 	{
 		if (t_plane < ray.tNearest)
 		{
 			ray.tNearest = t_plane;
-			isect->p = ray.ro + ray.rd * t_plane;
+			isect->p = p_isect;
 			isect->normal = get_normal(isect->p);
 			isect->mat = mat;
 		}

@@ -439,7 +439,7 @@ public:
 		this->n2 = glm::transpose(worldToObj) * glm::vec4(n2, 0.f);
 		this->n3 = glm::transpose(worldToObj) * glm::vec4(n3, 0.f);
 
-		this->plane_normal = glm::transpose(worldToObj) * glm::vec4(n, 0.f);
+		this->plane_normal = glm::normalize(glm::transpose(worldToObj) * glm::vec4(n, 0.f));
 
 		// base transformation to barycentric coordinates
 		// see: https://de.wikipedia.org/wiki/Basiswechsel_(Vektorraum)
@@ -453,6 +453,8 @@ public:
 		// flat shading
 		//return plane_normal;
 		glm::vec3 barycentric_coord = m_inv * p;
+		assert(glm::all(glm::lessThanEqual(barycentric_coord, glm::vec3(1))));
+
 		return glm::normalize(barycentric_coord.x * n1 + barycentric_coord.y * n2 + 
 			barycentric_coord.z * n3);
 	}
@@ -474,7 +476,7 @@ public:
 		n2 = glm::transpose(worldToObj) * glm::vec4(n2, 0.f);
 		n3 = glm::transpose(worldToObj) * glm::vec4(n3, 0.f);
 
-		plane_normal = glm::transpose(worldToObj) * glm::vec4(plane_normal, 0.f);
+		plane_normal = glm::normalize(glm::transpose(worldToObj) * glm::vec4(plane_normal, 0.f));
 
 		// base transformation to barycentric coordinates
 		// see: https://de.wikipedia.org/wiki/Basiswechsel_(Vektorraum)

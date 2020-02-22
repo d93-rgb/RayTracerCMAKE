@@ -61,10 +61,10 @@ inline bool loadObjFile(const std::string& file,
 std::vector<TriangleMesh> extractMeshes(const std::string& file)
 {
 	Assimp::Importer imp;
-	const aiScene* a_scene = imp.ReadFile(file, 
-		aiProcess_Triangulate | //| 
+	const aiScene* a_scene = imp.ReadFile(file,
+		aiProcess_Triangulate);// | //| 
 		//aiProcess_GenNormals | 
-		aiProcess_FixInfacingNormals);
+		//aiProcess_FixInfacingNormals);
 
 	if (!a_scene || (a_scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE))
 	{
@@ -113,7 +113,7 @@ std::vector<TriangleMesh> extractMeshes(const std::string& file)
 				normals[0],
 				normals[1],
 				normals[2],
-				glm::normalize(glm::cross(points[1] - points[0], points[2] - points[1])),
+				glm::normalize(glm::cross(points[1] - points[0], points[2] - points[0])),
 				glm::mat4(1.0), //TODO: can't be set to unity matrix... look at constructor of Triangle
 				nullptr));
 		}

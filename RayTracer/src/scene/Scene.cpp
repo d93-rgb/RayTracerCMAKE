@@ -708,22 +708,22 @@ void TeapotScene::init()
 	teapot_mat->setRefractiveIdx(1.5f);
 
 
-	for (int i = 0; i < 4; ++i)
-	{
-		for (int j = 0; j < 4; ++j)
-		{
-			for (int k = 0; k < 4; ++k)
-			{
-				sc.emplace_back(std::make_unique<Sphere>(
-					glm::vec3(0.5f + i * 4.0f * radius,
-						0.5f + j * 4.0f * radius,
-						16.f + k * 4.0f * radius),
-					radius,
-					glm::vec3(1.f),
-					sphere_mat));
-			}
-		}
-	}
+	//for (int i = 0; i < 4; ++i)
+	//{
+	//	for (int j = 0; j < 4; ++j)
+	//	{
+	//		for (int k = 0; k < 4; ++k)
+	//		{
+	//			sc.emplace_back(std::make_unique<Sphere>(
+	//				glm::vec3(0.5f + i * 4.0f * radius,
+	//					0.5f + j * 4.0f * radius,
+	//					16.f + k * 4.0f * radius),
+	//				radius,
+	//				glm::vec3(1.f),
+	//				sphere_mat));
+	//		}
+	//	}
+	//}
 	/////////////////////////////////////
 	// Glass sphere END
 	/////////////////////////////////////
@@ -784,9 +784,10 @@ void SingleTriangleScene::init()
 
 	// single triangle
 	triangle_mat_1 = std::make_shared<Material>();
-	sc.emplace_back(std::make_unique<Triangle>(glm::vec3(0.f, 0.f, -4.f),
-		glm::vec3(4.f, 0.f, -4.f),
+	sc.emplace_back(std::make_unique<Triangle>(
 		glm::vec3(4.f, 4.f, -4.f),
+		glm::vec3(0.f, 0.f, -4.f),
+		glm::vec3(4.f, 0.f, -4.f),
 		glm::vec3(0.f, 0.f, 1.f),
 		glm::vec3(0.f, 0.f, 1.f),
 		glm::vec3(0.f, 0.f, 1.f),
@@ -889,11 +890,11 @@ void DragonScene::init()
 		// put triangle mesh into scene
 		for (auto& tm : tr_meshes)
 		{
-			/*tm.tr_mesh.erase(std::remove_if(tm.tr_mesh.begin(), tm.tr_mesh.end(), [](std::shared_ptr<Shape> s) {
-				return (dynamic_cast<Triangle*>(s.get())->bounding_box->centroid.y < 7.0f ||
-					dynamic_cast<Triangle*>(s.get())->bounding_box->centroid.z < 20.0f);
+			tm.tr_mesh.erase(std::remove_if(tm.tr_mesh.begin(), tm.tr_mesh.end(), [](std::shared_ptr<Shape> s) {
+				return (dynamic_cast<Triangle*>(s.get())->bounding_box->centroid.y < 8.0f ||
+					dynamic_cast<Triangle*>(s.get())->bounding_box->centroid.z < 21.0f);
 				}),
-				tm.tr_mesh.end());*/
+				tm.tr_mesh.end());
 			sc.emplace_back(std::make_unique<TriangleMesh>(tm.tr_mesh));
 		}
 	}
