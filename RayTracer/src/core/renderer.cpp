@@ -10,6 +10,7 @@
 
 namespace rt
 {
+#define DEBUG_NORMALS
 
 Renderer::Renderer(size_t w, size_t h,
 	const std::string& file,

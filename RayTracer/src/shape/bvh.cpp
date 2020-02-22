@@ -11,8 +11,8 @@ BVH::BVH(const std::vector<std::shared_ptr<Shape>>& scene_objects,
 	MAX_TRIANGLE_COUNT(max_triangle_count),
 	MAX_DEPTH(max_depth)
 {
-	glm::vec3 b_min;
-	glm::vec3 b_max;
+	glm::vec3 b_min(INFINITY);
+	glm::vec3 b_max(-INFINITY);
 
 	for (const auto& s : scene_objects)
 	{

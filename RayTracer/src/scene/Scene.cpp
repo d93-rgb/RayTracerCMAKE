@@ -3,6 +3,8 @@
 #include <assimp/scene.h>           // Output data structure
 #include <assimp/postprocess.h>     // Post processing flags
 
+#include <algorithm>
+
 #include "scene/scene.h"
 #include "camera/camera.h"
 #include "misc/loader.h"
@@ -571,8 +573,8 @@ void TeapotScene::init()
 					glm::vec3(1.f, 0.f, 0.f)),
 				glm::radians(-90.f),
 				glm::vec3(0.0f, 1.0f, 0.0f)),
-		glm::radians(5.f),
-		glm::vec3(1.0f, 0.0f, 0.0f));
+			glm::radians(5.f),
+			glm::vec3(1.0f, 0.0f, 0.0f));
 
 	// material for walls
 	auto wall_bot =
@@ -621,9 +623,9 @@ void TeapotScene::init()
 	sc.emplace_back(std::make_unique<Rectangle>(glm::vec3(-4+75, 0, -18),
 		glm::vec3(0, 300, 0), glm::vec3(0, 0, -300), wall_left));*/
 
-	/////////////////////////////////////
-	// Teapot mesh
-	/////////////////////////////////////
+		/////////////////////////////////////
+		// Teapot mesh
+		/////////////////////////////////////
 
 	auto tr_meshes = extractMeshes(teapot);
 
@@ -713,8 +715,8 @@ void TeapotScene::init()
 			for (int k = 0; k < 4; ++k)
 			{
 				sc.emplace_back(std::make_unique<Sphere>(
-					glm::vec3(0.5f + i * 4.0f * radius, 
-						0.5f + j * 4.0f * radius, 
+					glm::vec3(0.5f + i * 4.0f * radius,
+						0.5f + j * 4.0f * radius,
 						16.f + k * 4.0f * radius),
 					radius,
 					glm::vec3(1.f),
@@ -808,36 +810,23 @@ void SingleTriangleScene::init()
 void DragonScene::init()
 {
 	//camera position
-	glm::vec3 translation = glm::vec3(0.f, 2.5f, 25.f);
-	glm::vec3 look_pos = glm::vec3(-1.0f, 0.f, -10.f);
+	glm::vec3 translation = glm::vec3(0.f, 5.5f, 28.f);
+	glm::vec3 look_pos = glm::vec3(-1.0f, 7.f, -1.0f);
 	glm::vec3 cam_up = glm::vec3(0.f, 1.f, 0.f);
 
-	std::vector<std::string> dragon_files = { 
-	"C:\\Users\\Damian\\Downloads\\dragon_side.tar\\dragon_side\\dragonSideRight_0.ply",
-	"C:\\Users\\Damian\\Downloads\\dragon_side.tar\\dragon_side\\dragonSideRight_24.ply",
-	"C:\\Users\\Damian\\Downloads\\dragon_side.tar\\dragon_side\\dragonSideRight_48.ply",
-	"C:\\Users\\Damian\\Downloads\\dragon_side.tar\\dragon_side\\dragonSideRight_72.ply",
-	"C:\\Users\\Damian\\Downloads\\dragon_side.tar\\dragon_side\\dragonSideRight_96.ply",
-	"C:\\Users\\Damian\\Downloads\\dragon_side.tar\\dragon_side\\dragonSideRight_120.ply",
-	"C:\\Users\\Damian\\Downloads\\dragon_side.tar\\dragon_side\\dragonSideRight_144.ply",
-	"C:\\Users\\Damian\\Downloads\\dragon_side.tar\\dragon_side\\dragonSideRight_168.ply",
-	"C:\\Users\\Damian\\Downloads\\dragon_side.tar\\dragon_side\\dragonSideRight_192.ply",
-	"C:\\Users\\Damian\\Downloads\\dragon_side.tar\\dragon_side\\dragonSideRight_216.ply",
-	"C:\\Users\\Damian\\Downloads\\dragon_side.tar\\dragon_side\\dragonSideRight_240.ply",
-	"C:\\Users\\Damian\\Downloads\\dragon_side.tar\\dragon_side\\dragonSideRight_264.ply",
-	"C:\\Users\\Damian\\Downloads\\dragon_side.tar\\dragon_side\\dragonSideRight_288.ply",
-	"C:\\Users\\Damian\\Downloads\\dragon_side.tar\\dragon_side\\dragonSideRight_312.ply",
-	"C:\\Users\\Damian\\Downloads\\dragon_side.tar\\dragon_side\\dragonSideRight_336.ply",
-
+	std::vector<std::string> dragon_files = {
+	//"C:\\Users\\Damian\\Downloads\\stanford-dragon-vrip\\source\\stanford_dragon.ply"
+	"C:\\Users\\Damian\\Downloads\\dragon\\dragon.obj"
 	};
 
-	glm::mat4 dr_to_world = glm::rotate(
-		glm::scale(
-			//glm::mat4(1.f),
-			glm::translate(glm::mat4(1.f), glm::vec3(-3.5f, 0.f, 11.f)),
-			glm::vec3(1.0f)),
-		glm::radians(-90.f),
-		glm::vec3(0.f, 1.f, 0.f));
+	glm::mat4 dr_to_world =
+		glm::rotate(
+			glm::scale(
+				//glm::mat4(1.f),
+				glm::translate(glm::mat4(1.f), glm::vec3(0.5f, 5.0f, 14.0f)),
+				glm::vec3(22.0f)),
+			glm::radians(150.0f),
+			glm::vec3(0.0, 1.0f, 0.0f));
 
 	// material for walls
 	auto wall_bot =
@@ -871,45 +860,47 @@ void DragonScene::init()
 	sc.emplace_back(std::make_unique<Rectangle>(glm::vec3(-4+75, 0, -18),
 		glm::vec3(0, 300, 0), glm::vec3(0, 0, -300), wall_left));*/
 
-	/////////////////////////////////////
-	// Teapot mesh
-	/////////////////////////////////////
+		/////////////////////////////////////
+		// Teapot mesh
+		/////////////////////////////////////
 
 	for (const auto& dr_file : dragon_files)
 	{
 		auto tr_meshes = extractMeshes(dr_file);
 
-		std::shared_ptr<Material> teapot_mat =
+		std::shared_ptr<Material> dragon_mat =
 			std::shared_ptr<Material>(
-				new Material(glm::vec3(0.00f, 0.00f, 0.00f),
-					glm::vec3(0.0f, 0.0f, 0.0f),
-					glm::vec3(0.0f, 0.0f, 0.0f)));
-		//teapot_mat->setShininess(1.f);
-		//teapot_mat->setReflective(glm::vec3(1.0f));
-
-		//glass
-		teapot_mat->setTransparent(glm::vec3(1.f));
-		teapot_mat->setRefractiveIdx(1.5f);
+				new Material(glm::vec3(0.1f, 0.1f, 0.0f),
+					glm::vec3(0.1f, 0.1f, 0.1f),
+					glm::vec3(0.f, 0.f, 0.f)));
+		//dragon_mat->setShininess(30.f);
+		//dragon_mat->setTransparent(glm::vec3(1.0f));
+		//dragon_mat->setRefractiveIdx(1.5f);
 
 		for (auto& tm : tr_meshes)
 		{
 			for (auto& tr : tm.tr_mesh)
 			{
 				dynamic_cast<Triangle*>(tr.get())->set_objToWorld(dr_to_world);
-				dynamic_cast<Triangle*>(tr.get())->set_material(teapot_mat);
+				dynamic_cast<Triangle*>(tr.get())->set_material(dragon_mat);
 			}
 		}
 
 		// put triangle mesh into scene
 		for (auto& tm : tr_meshes)
 		{
+			/*tm.tr_mesh.erase(std::remove_if(tm.tr_mesh.begin(), tm.tr_mesh.end(), [](std::shared_ptr<Shape> s) {
+				return (dynamic_cast<Triangle*>(s.get())->bounding_box->centroid.y < 7.0f ||
+					dynamic_cast<Triangle*>(s.get())->bounding_box->centroid.z < 20.0f);
+				}),
+				tm.tr_mesh.end());*/
 			sc.emplace_back(std::make_unique<TriangleMesh>(tm.tr_mesh));
 		}
 	}
 
-	lights.emplace_back(std::make_unique<PointLight>(glm::vec3(5.f, 5.f, 25.f),
-		glm::vec3(-2, -4, -2),
-		glm::vec3(120.f)));
+	lights.emplace_back(std::make_unique<PointLight>(glm::vec3(0.f, 5.f, 25.f),
+		glm::vec3(-1.0, 0.0f, -1.0f),
+		glm::vec3(190.f)));
 
 	lights.emplace_back(std::make_unique<PointLight>(glm::vec3(-5.f, 5.f, 10.f),
 		glm::vec3(-2, -4, -2),

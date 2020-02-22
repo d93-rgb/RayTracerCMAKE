@@ -61,7 +61,10 @@ inline bool loadObjFile(const std::string& file,
 std::vector<TriangleMesh> extractMeshes(const std::string& file)
 {
 	Assimp::Importer imp;
-	const aiScene* a_scene = imp.ReadFile(file, aiProcess_Triangulate);
+	const aiScene* a_scene = imp.ReadFile(file, 
+		aiProcess_Triangulate | //| 
+		//aiProcess_GenNormals | 
+		aiProcess_FixInfacingNormals);
 
 	if (!a_scene || (a_scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE))
 	{
@@ -118,7 +121,7 @@ std::vector<TriangleMesh> extractMeshes(const std::string& file)
 		tr_meshes.push_back(TriangleMesh(triangles));
 	}
 
-	std::cout << "Loading obj file finished." << std::endl;
+	std::cout << "Loading mesh file finished." << std::endl;
 	return tr_meshes;
 }
 

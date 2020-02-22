@@ -27,8 +27,8 @@ class BVH
 {
 public:
 	BVH(const std::vector<std::shared_ptr<Shape>>& scene_objects,
-		size_t max_triangle_count = 5,
-		size_t max_depth = 25);
+		size_t max_triangle_count = 3,
+		size_t max_depth = 40);
 
 	bool build_bvh();
 	float traverse_bvh(const Ray& ray, SurfaceInteraction* isect);

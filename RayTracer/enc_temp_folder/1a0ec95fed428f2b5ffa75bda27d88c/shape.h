@@ -435,11 +435,11 @@ public:
 		this->bounding_box = std::make_unique<Bounds3>(glm::vec3(glm::min(glm::min(this->p1, this->p2), this->p3)),
 			glm::vec3(glm::max(glm::max(this->p1, this->p2), this->p3)));
 
-		this->n1 = glm::transpose(worldToObj) * glm::vec4(n1, 0.f);
-		this->n2 = glm::transpose(worldToObj) * glm::vec4(n2, 0.f);
-		this->n3 = glm::transpose(worldToObj) * glm::vec4(n3, 0.f);
+		this->n1 = glm::transpose(glm::inverse(objToWorld)) * glm::vec4(n1, 0.f);
+		this->n2 = glm::transpose(glm::inverse(objToWorld)) * glm::vec4(n2, 0.f);
+		this->n3 = glm::transpose(glm::inverse(objToWorld)) * glm::vec4(n3, 0.f);
 
-		this->plane_normal = glm::transpose(worldToObj) * glm::vec4(n, 0.f);
+		this->plane_normal = glm::transpose(glm::inverse(objToWorld)) * glm::vec4(n, 0.f);
 
 		// base transformation to barycentric coordinates
 		// see: https://de.wikipedia.org/wiki/Basiswechsel_(Vektorraum)
@@ -470,11 +470,11 @@ public:
 		bounding_box = std::make_unique<Bounds3>(glm::vec3(glm::min(glm::min(p1, p2), p3)),
 			glm::vec3(glm::max(glm::max(p1, p2), p3)));
 
-		n1 = glm::transpose(worldToObj) * glm::vec4(n1, 0.f);
-		n2 = glm::transpose(worldToObj) * glm::vec4(n2, 0.f);
-		n3 = glm::transpose(worldToObj) * glm::vec4(n3, 0.f);
+		n1 = glm::transpose(glm::inverse(objToWorld)) * glm::vec4(n1, 0.f);
+		n2 = glm::transpose(glm::inverse(objToWorld)) * glm::vec4(n2, 0.f);
+		n3 = glm::transpose(glm::inverse(objToWorld)) * glm::vec4(n3, 0.f);
 
-		plane_normal = glm::transpose(worldToObj) * glm::vec4(plane_normal, 0.f);
+		plane_normal = glm::transpose(glm::inverse(objToWorld)) * glm::vec4(plane_normal, 0.f);
 
 		// base transformation to barycentric coordinates
 		// see: https://de.wikipedia.org/wiki/Basiswechsel_(Vektorraum)
