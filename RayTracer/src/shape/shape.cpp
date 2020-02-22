@@ -272,41 +272,131 @@ float Cube::intersect(const Ray& ray)
 	return isec_t;
 }
 
+//float Triangle::intersect(const Ray& ray, SurfaceInteraction* isect)
+//{
+//	float t_plane = INFINITY;
+//	Plane plane{ p1, plane_normal };
+//
+//	// intersect without updating nearest intersection parameter
+//	t_plane = plane.intersect(ray);
+//	if(t_plane == INFINITY)
+//	{
+//		return INFINITY;
+//	}
+//	glm::vec3 p_isect = (ray.ro + t_plane * ray.rd);
+//
+//	//glm::vec3 t_vec = m_inv * p_isect;
+//	glm::vec2 t_vec;
+//	t_vec.x = p1.y*p3.x - p1.x*p3.y + (p3.y - p1.y)*p_isect.x + (p1.x - p3.x)*p_isect.y;
+//	t_vec.y = p1.x * p2.y - p1.y * p2.x + (p1.y - p2.y) * p_isect.x + (p2.x - p1.x) * p_isect.y;
+//
+//	t_vec /= (-p2.y * p3.x + p1.y * (-p2.x + p3.x) + p1.x * (p2.y - p3.y) + p2.x * p3.y);
+//
+//	if (((t_vec.y + t_vec.x) <= 1.0f) &&
+//		(t_vec.x >= 0) &&
+//		(t_vec.y >= 0))
+//	{
+//		if (t_plane < ray.tNearest)
+//		{
+//			ray.tNearest = t_plane;
+//			isect->p = p_isect;
+//			isect->normal = get_normal(isect->p);
+//			isect->mat = mat;
+//		}
+//
+//		return t_plane;
+//	}
+//	return INFINITY;
+//}
+
+int MaxDimension(const glm::vec3& v) {
+	return (v.x > v.y) ? ((v.x > v.z) ? 0 : 2) : ((v.y > v.z) ? 1 : 2);
+}
+
+glm::vec3 Permute(const glm::vec3& v, int x, int y, int z) {
+	return glm::vec3(v[x], v[y], v[z]);
+}
+
 float Triangle::intersect(const Ray& ray, SurfaceInteraction* isect)
 {
-	float t_plane = INFINITY;
-	Plane plane{ p1, plane_normal };
+	// Get triangle vertices in _p0_, _p1_, and _p2_
 
-	// intersect without updating nearest intersection parameter
-	t_plane = plane.intersect(ray);
-	if(t_plane == INFINITY)
-	{
+	// Perform ray--triangle intersection test
+
+	// Transform triangle vertices to ray coordinate space
+
+	// Translate vertices based on ray origin
+	glm::vec3 p0t = p1 - ray.ro;
+	glm::vec3 p1t = p2 - ray.ro;
+	glm::vec3 p2t = p3 - ray.ro;
+
+	// Permute components of triangle vertices and ray direction
+	int kz = MaxDimension(glm::abs(ray.rd));
+	int kx = kz + 1;
+	if (kx == 3) kx = 0;
+	int ky = kx + 1;
+	if (ky == 3) ky = 0;
+	glm::vec3 d = Permute(ray.rd, kx, ky, kz);
+	p0t = Permute(p0t, kx, ky, kz);
+	p1t = Permute(p1t, kx, ky, kz);
+	p2t = Permute(p2t, kx, ky, kz);
+
+	// Apply shear transformation to translated vertex positions
+	float Sx = -d.x / d.z;
+	float Sy = -d.y / d.z;
+	float Sz = 1.f / d.z;
+	p0t.x += Sx * p0t.z;
+	p0t.y += Sy * p0t.z;
+	p1t.x += Sx * p1t.z;
+	p1t.y += Sy * p1t.z;
+	p2t.x += Sx * p2t.z;
+	p2t.y += Sy * p2t.z;
+
+	// Compute edge function coefficients _e0_, _e1_, and _e2_
+	float e0 = p1t.x * p2t.y - p1t.y * p2t.x;
+	float e1 = p2t.x * p0t.y - p2t.y * p0t.x;
+	float e2 = p0t.x * p1t.y - p0t.y * p1t.x;
+
+	// Fall back to double precision test at triangle edges
+	if ((e0 == 0.0f || e1 == 0.0f || e2 == 0.0f)) {
+		double p2txp1ty = (double)p2t.x * (double)p1t.y;
+		double p2typ1tx = (double)p2t.y * (double)p1t.x;
+		e0 = (float)(p2typ1tx - p2txp1ty);
+		double p0txp2ty = (double)p0t.x * (double)p2t.y;
+		double p0typ2tx = (double)p0t.y * (double)p2t.x;
+		e1 = (float)(p0typ2tx - p0txp2ty);
+		double p1txp0ty = (double)p1t.x * (double)p0t.y;
+		double p1typ0tx = (double)p1t.y * (double)p0t.x;
+		e2 = (float)(p1typ0tx - p1txp0ty);
+	}
+
+	// Perform triangle edge and determinant tests
+	if ((e0 < 0 || e1 < 0 || e2 < 0) && (e0 > 0 || e1 > 0 || e2 > 0))
 		return INFINITY;
-	}
+	float det = e0 + e1 + e2;
+	if (det == 0) return INFINITY;
 
-	//glm::vec3 t_vec = m_inv * (ray.ro + t_plane * ray.rd);
-	glm::vec3 p_isect = (ray.ro + t_plane * ray.rd);
-	glm::vec2 t_vec;
-	t_vec.x = p1.y*p3.x - p1.x*p3.y + (p3.y - p1.y)*p_isect.x + (p1.x - p3.x)*p_isect.y;
-	t_vec.y = p1.x * p2.y - p1.y * p2.x + (p1.y - p2.y) * p_isect.x + (p2.x - p1.x) * p_isect.y;
+	// Compute scaled hit distance to triangle and test against ray $t$ range
+	p0t.z *= Sz;
+	p1t.z *= Sz;
+	p2t.z *= Sz;
+	float tScaled = e0 * p0t.z + e1 * p1t.z + e2 * p2t.z;
+	if (det < 0 && (tScaled >= 0 || tScaled < ray.tNearest * det))
+		return INFINITY;
+	else if (det > 0 && (tScaled <= 0 || tScaled > ray.tNearest* det))
+		return INFINITY;
 
-	t_vec /= (-p2.y * p3.x + p1.y * (-p2.x + p3.x) + p1.x * (p2.y - p3.y) + p2.x * p3.y);
+	float invDet = 1 / det;
+	float t = tScaled * invDet;
 
-	if (((t_vec.y + t_vec.x) <= 1.0f) &&
-		(t_vec.x >= 0) &&
-		(t_vec.y >= 0))
+	if (t < ray.tNearest)
 	{
-		if (t_plane < ray.tNearest)
-		{
-			ray.tNearest = t_plane;
-			isect->p = p_isect;
-			isect->normal = get_normal(isect->p);
-			isect->mat = mat;
-		}
-
-		return t_plane;
+		ray.tNearest = t;
+		isect->p = ray.ro + t * ray.rd;
+		isect->normal = get_normal(isect->p);
+		isect->mat = mat;
 	}
-	return INFINITY;
+	return t;
 }
 
 float UnitCube::intersect(const Ray& ray, SurfaceInteraction* isect)

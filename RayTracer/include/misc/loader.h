@@ -62,9 +62,9 @@ std::vector<TriangleMesh> extractMeshes(const std::string& file)
 {
 	Assimp::Importer imp;
 	const aiScene* a_scene = imp.ReadFile(file,
-		aiProcess_Triangulate);// | //| 
+		aiProcess_Triangulate | 
 		//aiProcess_GenNormals | 
-		//aiProcess_FixInfacingNormals);
+		aiProcess_FixInfacingNormals);
 
 	if (!a_scene || (a_scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE))
 	{

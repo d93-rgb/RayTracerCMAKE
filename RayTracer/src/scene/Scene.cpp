@@ -811,8 +811,8 @@ void SingleTriangleScene::init()
 void DragonScene::init()
 {
 	//camera position
-	glm::vec3 translation = glm::vec3(0.f, 5.5f, 28.f);
-	glm::vec3 look_pos = glm::vec3(-1.0f, 7.f, -1.0f);
+	glm::vec3 translation = glm::vec3(0.f, 5.5f, 30.f);
+	glm::vec3 look_pos = glm::vec3(-1.0f, 20.f, -1.0f);
 	glm::vec3 cam_up = glm::vec3(0.f, 1.f, 0.f);
 
 	std::vector<std::string> dragon_files = {
@@ -890,11 +890,11 @@ void DragonScene::init()
 		// put triangle mesh into scene
 		for (auto& tm : tr_meshes)
 		{
-			tm.tr_mesh.erase(std::remove_if(tm.tr_mesh.begin(), tm.tr_mesh.end(), [](std::shared_ptr<Shape> s) {
+			/*tm.tr_mesh.erase(std::remove_if(tm.tr_mesh.begin(), tm.tr_mesh.end(), [](std::shared_ptr<Shape> s) {
 				return (dynamic_cast<Triangle*>(s.get())->bounding_box->centroid.y < 8.0f ||
 					dynamic_cast<Triangle*>(s.get())->bounding_box->centroid.z < 21.0f);
 				}),
-				tm.tr_mesh.end());
+				tm.tr_mesh.end());*/
 			sc.emplace_back(std::make_unique<TriangleMesh>(tm.tr_mesh));
 		}
 	}
@@ -905,7 +905,7 @@ void DragonScene::init()
 
 	lights.emplace_back(std::make_unique<PointLight>(glm::vec3(-5.f, 5.f, 10.f),
 		glm::vec3(-2, -4, -2),
-		glm::vec3(190.f)));
+		glm::vec3(0.3f)));
 
 	cam.reset(new Camera());
 	cam->setCamToWorld(translation, look_pos, cam_up);
