@@ -11,8 +11,8 @@ BVH::BVH(const std::vector<std::shared_ptr<Shape>>& scene_objects,
 	MAX_TRIANGLE_COUNT(max_triangle_count),
 	MAX_DEPTH(max_depth)
 {
-	glm::vec3 b_min(INFINITY);
-	glm::vec3 b_max(-INFINITY);
+	glm::dvec3 b_min(INFINITY);
+	glm::dvec3 b_max(-INFINITY);
 
 	for (const auto& s : scene_objects)
 	{
@@ -27,12 +27,12 @@ BVH::BVH(const std::vector<std::shared_ptr<Shape>>& scene_objects,
 	build_bvh();
 }
 
-float BVH_Node::intersect(const Ray& ray, SurfaceInteraction* isect)
+double BVH_Node::intersect(const Ray& ray, SurfaceInteraction* isect)
 {
 	if (!left_node && !right_node)
 	{
-		float t_min = INFINITY;
-		float t_tmp;
+		double t_min = INFINITY;
+		double t_tmp;
 
 		for (const auto& object : shapes)
 		{
@@ -44,8 +44,8 @@ float BVH_Node::intersect(const Ray& ray, SurfaceInteraction* isect)
 		}
 		return t_min;
 	}
-	float t0 = INFINITY;
-	float t1 = INFINITY;
+	double t0 = INFINITY;
+	double t1 = INFINITY;
 
 	if(left_node)
 		t0 = left_node->box->intersect(ray);
@@ -58,8 +58,8 @@ float BVH_Node::intersect(const Ray& ray, SurfaceInteraction* isect)
 		return INFINITY;
 	}
 	
-	//float t0_left = INFINITY;
-	//float t1_right = INFINITY;
+	//double t0_left = INFINITY;
+	//double t1_right = INFINITY;
 	if (t0 < INFINITY)
 	{
 		t0= left_node->intersect(ray, isect);
@@ -71,9 +71,9 @@ float BVH_Node::intersect(const Ray& ray, SurfaceInteraction* isect)
 	return std::min(t0, t1);
 }
 
-float BVH_Tree::intersect(const Ray& ray, SurfaceInteraction* isect)
+double BVH_Tree::intersect(const Ray& ray, SurfaceInteraction* isect)
 {
-	float t_min = INFINITY;
+	double t_min = INFINITY;
 
 	t_min = bvh_node->intersect(ray, isect);
 
@@ -89,7 +89,7 @@ bool BVH::build_bvh(BVH_Node* current_node, int depth)
 	}
 
 	// middle point
-	float m;
+	double m;
 	int n = depth % 3;
 
 	current_node->left_node.reset(new BVH_Node());
@@ -105,10 +105,10 @@ bool BVH::build_bvh(BVH_Node* current_node, int depth)
 	// the split axis which divides the triangles into two groups
 	m = 0.5f * (current_node->box->boundaries[0][n] + current_node->box->boundaries[1][n]);
 	
-	glm::vec3 left_min_bound(INFINITY);
-	glm::vec3 left_max_bound(-INFINITY);
-	glm::vec3 right_min_bound(INFINITY);
-	glm::vec3 right_max_bound(-INFINITY);
+	glm::dvec3 left_min_bound(INFINITY);
+	glm::dvec3 left_max_bound(-INFINITY);
+	glm::dvec3 right_min_bound(INFINITY);
+	glm::dvec3 right_max_bound(-INFINITY);
 
 	for (const auto& triangle : current_node->shapes)
 	{
@@ -150,7 +150,7 @@ bool BVH::build_bvh()
 	return true;
 }
 
-float BVH::traverse_bvh(const Ray& ray, SurfaceInteraction *isect)
+double BVH::traverse_bvh(const Ray& ray, SurfaceInteraction *isect)
 {
 	return this->bvh_tree.intersect(ray, isect);
 }

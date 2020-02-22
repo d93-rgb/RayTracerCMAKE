@@ -11,7 +11,7 @@ namespace rt
 	Return true, if everything went succesfully, false if file could not be read.
 */
 inline bool loadObjFile(const std::string& file,
-	std::vector<float>* vertices,
+	std::vector<double>* vertices,
 	std::vector<int>* indices)
 {
 	std::ifstream ifs{ file };
@@ -72,10 +72,10 @@ std::vector<TriangleMesh> extractMeshes(const std::string& file)
 		std::exit(1);
 	}
 
-	float x, y, z;
-	float nx = 0;
-	float ny = 0;
-	float nz = 0;
+	double x, y, z;
+	double nx = 0;
+	double ny = 0;
+	double nz = 0;
 
 	std::vector<TriangleMesh> tr_meshes;
 	for (size_t mesh_num = 0; mesh_num < a_scene->mNumMeshes; ++mesh_num)
@@ -85,8 +85,8 @@ std::vector<TriangleMesh> extractMeshes(const std::string& file)
 		int j = 0;
 		for (size_t i = 0; i < a_scene->mMeshes[mesh_num]->mNumFaces; ++i)
 		{
-			std::vector<glm::vec3> points;
-			std::vector<glm::vec3> normals;
+			std::vector<glm::dvec3> points;
+			std::vector<glm::dvec3> normals;
 			for (size_t n = 0; n < a_scene->mMeshes[mesh_num]->mFaces[i].mNumIndices; ++n)
 			{
 				j = a_scene->mMeshes[mesh_num]->mFaces[i].mIndices[n];
@@ -102,8 +102,8 @@ std::vector<TriangleMesh> extractMeshes(const std::string& file)
 					nz = a_scene->mMeshes[mesh_num]->mNormals[j].z;
 				}
 
-				points.push_back(glm::vec3(x, y, z));
-				normals.push_back(glm::vec3(nx, ny, nz));
+				points.push_back(glm::dvec3(x, y, z));
+				normals.push_back(glm::dvec3(nx, ny, nz));
 			}
 
 			triangles.push_back(std::make_shared<Triangle>(
@@ -114,7 +114,7 @@ std::vector<TriangleMesh> extractMeshes(const std::string& file)
 				normals[1],
 				normals[2],
 				glm::normalize(glm::cross(points[1] - points[0], points[2] - points[0])),
-				glm::mat4(1.0), //TODO: can't be set to unity matrix... look at constructor of Triangle
+				glm::dmat4(1.0), //TODO: can't be set to unity matrix... look at constructor of Triangle
 				nullptr));
 		}
 

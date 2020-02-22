@@ -7,38 +7,38 @@ namespace rt
 class Camera
 {
 public:
-	Camera() : origin(glm::vec4(0.f, 0.f, 0.f, 1.f)),
-		right(glm::vec4(1.f, 0.f, 0.f, 0.f)),
-		up(glm::vec4(0.f, 1.f, 0.f, 0.f)),
-		front(glm::vec4(0.f, 0.f, 1.f, 0.f)),
-		camToWorld(1.f)
+	Camera() : origin(glm::dvec4(0.0, 0.0, 0.0, 1.0)),
+		right(glm::dvec4(1.0, 0.0, 0.0, 0.0)),
+		up(glm::dvec4(0.0, 1.0, 0.0, 0.0)),
+		front(glm::dvec4(0.0, 0.0, 1.0, 0.0)),
+		camToWorld(1.0)
 	{
 	}
 
-	Camera(glm::vec4 o, glm::vec4 up, glm::vec4 right, glm::vec4 front) :
+	Camera(glm::dvec4 o, glm::dvec4 up, glm::dvec4 right, glm::dvec4 front) :
 		origin(o),
 		up(glm::normalize(up)),
 		right(glm::normalize(right)),
 		front(glm::normalize(front)),
-		camToWorld(1.f)
+		camToWorld(1.0)
 	{
 	}
 
 	~Camera();
 	
-	void setCamToWorld(glm::vec3 eyePosition, glm::vec3 gazePoint, glm::vec3 upVector);
+	void setCamToWorld(glm::dvec3 eyePosition, glm::dvec3 gazePoint, glm::dvec3 upVector);
 
-	virtual Ray getPrimaryRay(float u, float v, float d)
+	virtual Ray getPrimaryRay(double u, double v, double d)
 	{
 		return Ray(origin, glm::normalize(u * right + v * up - d * front));
 	}
 
-	glm::vec4 getOrigin()
+	glm::dvec4 getOrigin()
 	{
 		return origin;
 	}
 
-	glm::vec4 getUpVec()
+	glm::dvec4 getUpVec()
 	{
 		return up;
 	}
@@ -46,34 +46,34 @@ public:
 	void update();
 
 protected:
-	glm::vec4 origin;
-	glm::vec4 up, right, front;
-	glm::mat4 camToWorld;
+	glm::dvec4 origin;
+	glm::dvec4 up, right, front;
+	glm::dmat4 camToWorld;
 };
 
 // orthographic projection camera
 class OrthographicCamera : public Camera
 {
 public:
-	OrthographicCamera() : origin(glm::vec4(0.f, 0.f, 0.f, 1.f)),
-		right(glm::vec4(1.f, 0.f, 0.f, 0.f)),
-		up(glm::vec4(0.f, 1.f, 0.f, 0.f)),
-		front(glm::vec4(0.f, 0.f, 1.f, 0.f)),
-		camToWorld(1.f)
+	OrthographicCamera() : origin(glm::dvec4(0.0, 0.0, 0.0, 1.0)),
+		right(glm::dvec4(1.0, 0.0, 0.0, 0.0)),
+		up(glm::dvec4(0.0, 1.0, 0.0, 0.0)),
+		front(glm::dvec4(0.0, 0.0, 1.0, 0.0)),
+		camToWorld(1.0)
 	{
 	};
 
-	Ray getPrimaryRay(float u, float v, float d) override
+	Ray getPrimaryRay(double u, double v, double d) override
 	{
-		return Ray(15.f*u * right + 15.f*v * up, -front);
+		return Ray(15.0*u * right + 15.0*v * up, -front);
 	}
 
-	glm::vec4 getOrigin()
+	glm::dvec4 getOrigin()
 	{
 		return origin;
 	}
 
-	glm::vec4 getUpVec()
+	glm::dvec4 getUpVec()
 	{
 		return up;
 	}
@@ -81,8 +81,8 @@ public:
 	void update();
 
 protected:
-	glm::vec4 origin;
-	glm::vec4 up, right, front;
-	glm::mat4 camToWorld;
+	glm::dvec4 origin;
+	glm::dvec4 up, right, front;
+	glm::dmat4 camToWorld;
 };
 }

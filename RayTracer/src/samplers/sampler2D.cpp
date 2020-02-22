@@ -3,7 +3,7 @@
 namespace rt
 {
 
-const glm::vec2* StratifiedSampler2D::get2DArray()
+const glm::dvec2* StratifiedSampler2D::get2DArray()
 {
 	if (currentPixel == sampler2Darray.size())
 	{

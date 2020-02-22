@@ -18,7 +18,7 @@ struct Material
 	{
 	}
 
-	Material(glm::vec3 amb, glm::vec3 dif, glm::vec3 spe, std::shared_ptr<Texture> tex = nullptr)
+	Material(glm::dvec3 amb, glm::dvec3 dif, glm::dvec3 spe, std::shared_ptr<Texture> tex = nullptr)
 		:
 		ambient(amb),
 		diffuse(dif),
@@ -31,51 +31,51 @@ struct Material
 		this->tex = tex;
 	}
 
-	glm::vec3 getAmbient(glm::vec3 pos);
+	glm::dvec3 getAmbient(glm::dvec3 pos);
 
-	glm::vec3 getDiffuse(glm::vec3 pos);
+	glm::dvec3 getDiffuse(glm::dvec3 pos);
 
-	glm::vec3 getSpecular()
+	glm::dvec3 getSpecular()
 	{
 		return specular;
 	}
 
-	void setShininess(float exp)
+	void setShininess(double exp)
 	{
 		n = exp;
 	}
 
-	float getShininess() const
+	double getShininess() const
 	{
 		return n;
 	}
 
-	void setReflective(glm::vec3 r)
+	void setReflective(glm::dvec3 r)
 	{
 		reflective = r;
 	}
 
-	glm::vec3 getReflective()
+	glm::dvec3 getReflective()
 	{
 		return reflective ;
 	}
 
-	void setTransparent(glm::vec3 t)
+	void setTransparent(glm::dvec3 t)
 	{
 		transparent = t;
 	}
 
-	glm::vec3 getTransparent()
+	glm::dvec3 getTransparent()
 	{
 		return transparent;
 	}
 
-	void setRefractiveIdx(float f)
+	void setRefractiveIdx(double f)
 	{
 		this->refr_indx = f;
 	}
 
-	float getRefractiveIdx()
+	double getRefractiveIdx()
 	{
 		return refr_indx;
 	}
@@ -87,9 +87,9 @@ struct Material
 
 protected:
 	// specular exponent
-	float n;
-	glm::vec3 ambient, diffuse, specular, reflective, transparent;
-	float refr_indx;
+	double n;
+	glm::dvec3 ambient, diffuse, specular, reflective, transparent;
+	double refr_indx;
 
 	std::shared_ptr<Texture> tex;
 };

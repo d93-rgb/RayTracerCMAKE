@@ -4,22 +4,22 @@ namespace rt
 {
 
 // TODO: implement function for solving a quadratic equation
-bool Quadric::solveQuadraticEq(float* t, float a, float b, float c)
+bool Quadric::solveQuadraticEq(double* t, double a, double b, double c)
 {
-	float disc = sqrt(b * b - 4 * a * c);
+	double disc = sqrt(b * b - 4 * a * c);
 
 	if (disc < 0.0f)
 	{
 		return false;
 	}
 
-	float t0;
-	float t1;
-	float q;
+	double t0;
+	double t1;
+	double q;
 
 	// numerically unstable, if difference |b-disc| is small
-	//float t0 = (-b + disc) / a * 0.5;
-	//float t1 = (-b - disc) / a * 0.5;
+	//double t0 = (-b + disc) / a * 0.5;
+	//double t1 = (-b - disc) / a * 0.5;
 
 	if (b < 0)
 	{
@@ -41,16 +41,16 @@ bool Quadric::solveQuadraticEq(float* t, float a, float b, float c)
 	return *t < INFINITY;
 }
 
-float Sphere::intersect(const Ray& ray, SurfaceInteraction* isect)
+double Sphere::intersect(const Ray& ray, SurfaceInteraction* isect)
 {
-	float t1 = INFINITY, t2 = t1;
-	float tmp;
+	double t1 = INFINITY, t2 = t1;
+	double tmp;
 
-	float term_1 = glm::dot(ray.rd, ray.rd);
-	float term_2 = 2 * glm::dot(ray.rd, ray.ro - origin);
-	float term_3 = glm::dot(ray.ro - origin, ray.ro - origin) - r * r;
+	double term_1 = glm::dot(ray.rd, ray.rd);
+	double term_2 = 2 * glm::dot(ray.rd, ray.ro - origin);
+	double term_3 = glm::dot(ray.ro - origin, ray.ro - origin) - r * r;
 	/*
-	float disc = term_2 * term_2 - 4 * term_1 * term_3;
+	double disc = term_2 * term_2 - 4 * term_1 * term_3;
 
 	if (disc < 0)
 	{
@@ -78,21 +78,21 @@ float Sphere::intersect(const Ray& ray, SurfaceInteraction* isect)
 	return tmp;
 }
 
-float Cylinder::intersect(const Ray& ray, SurfaceInteraction* isect)
+double Cylinder::intersect(const Ray& ray, SurfaceInteraction* isect)
 {
-	Ray transformed_ray{ worldToObj * glm::vec4(ray.ro, 1.f),
-		worldToObj * glm::vec4(ray.rd, 0.f) };
-	glm::vec2 t_ro = glm::vec2(transformed_ray.ro.x, transformed_ray.ro.z);
-	glm::vec2 t_rd = glm::vec2(transformed_ray.rd.x, transformed_ray.rd.z);
+	Ray transformed_ray{ worldToObj * glm::dvec4(ray.ro, 1.f),
+		worldToObj * glm::dvec4(ray.rd, 0.f) };
+	glm::dvec2 t_ro = glm::dvec2(transformed_ray.ro.x, transformed_ray.ro.z);
+	glm::dvec2 t_rd = glm::dvec2(transformed_ray.rd.x, transformed_ray.rd.z);
 
-	glm::vec3 isect_p1 = glm::vec3(INFINITY), isect_p2 = glm::vec3(INFINITY);
-	float x1, x2, tmp1 = INFINITY, tmp2 = INFINITY;
-	float a = glm::dot(t_rd, t_rd);
-	float b = 2 * glm::dot(t_ro, t_rd);
-	float c = glm::dot(t_ro, t_ro) - radius * radius;
+	glm::dvec3 isect_p1 = glm::dvec3(INFINITY), isect_p2 = glm::dvec3(INFINITY);
+	double x1, x2, tmp1 = INFINITY, tmp2 = INFINITY;
+	double a = glm::dot(t_rd, t_rd);
+	double b = 2 * glm::dot(t_ro, t_rd);
+	double c = glm::dot(t_ro, t_ro) - radius * radius;
 	int surf_hit = 0;
 
-	float discr = b * b - 4 * a * c;
+	double discr = b * b - 4 * a * c;
 
 	if (discr < 0)
 	{
@@ -115,7 +115,7 @@ float Cylinder::intersect(const Ray& ray, SurfaceInteraction* isect)
 	}
 
 	// no intersection found check
-	if ((isect_p1 == glm::vec3(INFINITY)) && (isect_p2 == glm::vec3(INFINITY)))
+	if ((isect_p1 == glm::dvec3(INFINITY)) && (isect_p2 == glm::dvec3(INFINITY)))
 	{
 		return INFINITY;
 	}

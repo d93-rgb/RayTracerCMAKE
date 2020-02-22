@@ -5,17 +5,17 @@ namespace rt
 {
 struct Ray
 {
-	glm::vec3 ro;
-	glm::vec3 rd;
-	mutable float tNearest;
+	glm::dvec3 ro;
+	glm::dvec3 rd;
+	mutable double tNearest;
 
 	Ray() : ro(0), rd(0), tNearest(INFINITY) {}
 
-	Ray(glm::vec3 ro, glm::vec3 rd) :
+	Ray(glm::dvec3 ro, glm::dvec3 rd) :
 		ro(ro), rd(rd), tNearest(INFINITY)
 	{
 	}
-	Ray(glm::vec3 ro, glm::vec3 rd, float tNearest) :
+	Ray(glm::dvec3 ro, glm::dvec3 rd, double tNearest) :
 		ro(ro), rd(rd), tNearest(tNearest)
 	{
 	}

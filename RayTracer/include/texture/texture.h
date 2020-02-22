@@ -9,9 +9,9 @@ static constexpr auto GAP = NUM / 2.f;
 
 namespace rt
 {
-inline glm::vec3 operator*(int n, const glm::vec3 &v)
+inline glm::dvec3 operator*(int n, const glm::dvec3 &v)
 {
-	return glm::vec3(n * v.x, n * v.y, n * v.z);
+	return glm::dvec3(n * v.x, n * v.y, n * v.z);
 }
 
 enum class ImageWrap
@@ -23,27 +23,27 @@ class Texture
 {
 public:
 	Texture() = default;
-	virtual glm::vec3 getTexel(const glm::vec3 &pos) const = 0;
+	virtual glm::dvec3 getTexel(const glm::dvec3 &pos) const = 0;
 };
 
 class CheckerBoardTexture : public Texture
 {
 	std::shared_ptr<TextureMapping> tm;
-	glm::vec3 color;
+	glm::dvec3 color;
 	ImageWrap mode;
 
 public:
 
 	CheckerBoardTexture() = default;
 	CheckerBoardTexture(std::shared_ptr<TextureMapping> texMap,
-		glm::vec3 color = glm::vec3(1.f),
+		glm::dvec3 color = glm::dvec3(1.f),
 		ImageWrap mode = ImageWrap::BLACK) : tm(texMap), color(color), mode(mode)
 	{
 	}
 
-	glm::vec3 getTexel(const glm::vec3 &pos) const
+	glm::dvec3 getTexel(const glm::dvec3 &pos) const
 	{
-		glm::vec2 uv = tm->getTextureCoordinates(pos);
+		glm::dvec2 uv = tm->getTextureCoordinates(pos);
 		
 		switch (mode)
 		{
@@ -71,9 +71,9 @@ public:
 		return ((fmodf(uv.x, NUM) < GAP) ^ (fmodf(uv.y, NUM) < GAP)) * color;
 	}
 
-	glm::vec3 getTexel(glm::vec3 pos, glm::vec3 color_1, glm::vec3 color_2) const
+	glm::dvec3 getTexel(glm::dvec3 pos, glm::dvec3 color_1, glm::dvec3 color_2) const
 	{
-		glm::vec2 uv = tm->getTextureCoordinates(pos);
+		glm::dvec2 uv = tm->getTextureCoordinates(pos);
 		return ((fmodf(uv.x, NUM) < GAP) ^ (fmodf(uv.y, NUM) < GAP)) ? color_1 : color_2;
 	}
 
@@ -87,7 +87,7 @@ public:
 	{
 	}
 
-	glm::vec3 getTexel(const glm::vec3 &pos) const;
+	glm::dvec3 getTexel(const glm::dvec3 &pos) const;
 
 private:
 	// this class is non owning of the following classes, so normal pointers are used instead
@@ -109,7 +109,7 @@ public:
 	{
 	}
 
-	glm::vec3 getTexel(const glm::vec3 &pos) const;
+	glm::dvec3 getTexel(const glm::dvec3 &pos) const;
 
 private:
 	// this class is non owning of the following classes, so normal pointers are used instead

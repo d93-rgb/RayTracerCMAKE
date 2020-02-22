@@ -6,7 +6,7 @@ namespace rt
 
 #define GAMMA_CORRECTION
 
-void Image::write_image_to_file(std::vector<glm::vec3>& col)
+void Image::write_image_to_file(std::vector<glm::dvec3>& col)
 {
 #ifdef DEBUG
 	//assert(bin.size() == col.size());
@@ -40,10 +40,10 @@ void Image::write_image_to_file(std::vector<glm::vec3>& col)
 	{
 #ifdef GAMMA_CORRECTION
 		// gamma correction and mapping to [0;255]
-		col[i] = glm::pow(glm::min(glm::vec3(1), col[i]),
-			glm::vec3(1 / 2.2f)) * 255.f;
+		col[i] = glm::pow(glm::min(glm::dvec3(1), col[i]),
+			glm::dvec3(1 / 2.2f)) * 255.0;
 #else
-		col[i] = glm::min(glm::vec3(1), col[i]) * 255.f;
+		col[i] = glm::min(glm::dvec3(1), col[i]) * 255.f;
 #endif
 
 #ifdef DEBUG

@@ -112,5 +112,5 @@ enum class ImageWrap;
 
 static constexpr bool QUIET = false;
 
-static constexpr float shadowEpsilon = 1e-3f;
+static constexpr double shadowEpsilon = 1e-3f;
 }

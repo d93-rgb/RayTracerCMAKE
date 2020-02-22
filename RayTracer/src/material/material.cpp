@@ -2,7 +2,7 @@
 
 namespace rt
 {
-glm::vec3 Material::getAmbient(glm::vec3 pos)
+glm::dvec3 Material::getAmbient(glm::dvec3 pos)
 {
 	if (tex)
 	{
@@ -11,7 +11,7 @@ glm::vec3 Material::getAmbient(glm::vec3 pos)
 	return ambient;
 }
 
-glm::vec3 Material::getDiffuse(glm::vec3 pos)
+glm::dvec3 Material::getDiffuse(glm::dvec3 pos)
 {
 	if (tex)
 	{

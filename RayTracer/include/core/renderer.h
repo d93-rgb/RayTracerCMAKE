@@ -25,7 +25,7 @@ public:
 
 	void run(RenderMode mode);
 
-	std::vector<glm::vec3> get_colors() const;
+	std::vector<glm::dvec3> get_colors() const;
 
 private:
 	size_t MAX_DEPTH;
@@ -36,32 +36,32 @@ private:
 	size_t GRID_DIM;
 	size_t NUM_THREADS;
 
-	std::vector<glm::vec3> colors;
+	std::vector<glm::dvec3> colors;
 	std::unique_ptr<Image> img;
 
 
-	float fresnel(float rel_eta, float c);
+	double fresnel(double rel_eta, double c);
 	
-	bool refract(glm::vec3 V, glm::vec3 N, float refr_idx, glm::vec3* refracted);
+	bool refract(glm::dvec3 V, glm::dvec3 N, double refr_idx, glm::dvec3* refracted);
 	
-	glm::vec3 reflect(glm::vec3 dir, glm::vec3 N);
+	glm::dvec3 reflect(glm::dvec3 dir, glm::dvec3 N);
 	
-	float shoot_ray(const Scene& s, const Ray& ray, SurfaceInteraction* isect);
+	double shoot_ray(const Scene& s, const Ray& ray, SurfaceInteraction* isect);
 	
-	glm::vec3 shoot_recursively(const Scene& s,
+	glm::dvec3 shoot_recursively(const Scene& s,
 		const Ray& ray,
 		SurfaceInteraction* isect,
 		int depth);
 	
-	glm::vec3 handle_transmission(const Scene& s,
+	glm::dvec3 handle_transmission(const Scene& s,
 		const Ray& ray,
-		const glm::vec3& isect_p,
+		const glm::dvec3& isect_p,
 		SurfaceInteraction* isect,
 		int depth);
 	
-	glm::vec3 handle_reflection(const Scene& s,
+	glm::dvec3 handle_reflection(const Scene& s,
 		const Ray& ray,
-		const glm::vec3& isect_p,
+		const glm::dvec3& isect_p,
 		SurfaceInteraction* isect,
 		int depth);
 };

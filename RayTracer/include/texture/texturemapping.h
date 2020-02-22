@@ -6,26 +6,26 @@ namespace rt
 class TextureMapping
 {
 public:
-	virtual glm::vec2 getTextureCoordinates(const glm::vec3 &pos) const = 0;
+	virtual glm::dvec2 getTextureCoordinates(const glm::dvec3 &pos) const = 0;
 
 };
 
 class SphericalMapping : public TextureMapping
 {
-	glm::vec3 center;
+	glm::dvec3 center;
 public:
-	SphericalMapping(glm::vec3 center) : center(center)
+	SphericalMapping(glm::dvec3 center) : center(center)
 	{
 	}
 
-	glm::vec2 getTextureCoordinates(const glm::vec3 &pos) const
+	glm::dvec2 getTextureCoordinates(const glm::dvec3 &pos) const
 	{
-		glm::vec3 pos_shift = glm::normalize(pos - center);
-		//float radius = glm::length(pos_shift);
-		float u = (1 + atan2f(pos_shift.z, pos_shift.x) / (float)M_PI) * 0.5f;
-		float v = acosf(pos_shift.y) / (float)M_PI;
+		glm::dvec3 pos_shift = glm::normalize(pos - center);
+		//double radius = glm::length(pos_shift);
+		double u = (1 + atan2f(pos_shift.z, pos_shift.x) / (double)M_PI) * 0.5f;
+		double v = acosf(pos_shift.y) / (double)M_PI;
 
-		return glm::vec2(u, v);
+		return glm::dvec2(u, v);
 	}
 };
 
@@ -37,7 +37,7 @@ public:
 		vs: spanning vector
 		vt: (non parallel to vs) spanning vector
 	*/
-	PlanarMapping(glm::vec3 pos, glm::vec3 vs, glm::vec3 vt) : 
+	PlanarMapping(glm::dvec3 pos, glm::dvec3 vs, glm::dvec3 vt) : 
 		pos(pos), 
 		vs(glm::normalize(vs)), 
 		vt(glm::normalize(vt)),
@@ -45,17 +45,17 @@ public:
 		vtl(glm::length(vt))
 	{}
 
-	glm::vec2 getTextureCoordinates(const glm::vec3 &pos) const
+	glm::dvec2 getTextureCoordinates(const glm::dvec3 &pos) const
 	{
-		float u = glm::dot(pos - this->pos, vs) / vsl;
-		float v = glm::dot(pos - this->pos, vt) / vtl;
+		double u = glm::dot(pos - this->pos, vs) / vsl;
+		double v = glm::dot(pos - this->pos, vt) / vtl;
 
-		return glm::vec2(u, v);
+		return glm::dvec2(u, v);
 	}
 
 private:
-	glm::vec3 pos, vs, vt;
-	float vsl, vtl;
+	glm::dvec3 pos, vs, vt;
+	double vsl, vtl;
 };
 
 } // namespace rt

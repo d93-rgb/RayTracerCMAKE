@@ -18,7 +18,7 @@ public:
 		file_name(file_name)
 	{}
 
-	void write_image_to_file(std::vector<glm::vec3>& col);
+	void write_image_to_file(std::vector<glm::dvec3>& col);
 
 	size_t get_width() const
 	{
@@ -41,12 +41,12 @@ private:
 	size_t width;
 	size_t height;
 
-	float fov = 0.f;
-	float fov_tan_half = 0.f;
-	float u = 0.f, v = 0.f;
+	double fov = 0.f;
+	double fov_tan_half = 0.f;
+	double u = 0.f, v = 0.f;
 	
 	// distance to view plane
-	float foc_len;
+	double foc_len;
 
 	int cropped_x_start;
 	int cropped_y_start;

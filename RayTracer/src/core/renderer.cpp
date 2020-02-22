@@ -17,7 +17,7 @@ Renderer::Renderer(size_t w, size_t h,
 	size_t max_depth) :
 	MAX_DEPTH(max_depth),
 	img(new Image(w, h, file)),
-	colors(w*h, glm::vec3(0)),
+	colors(w*h, glm::dvec3(0)),
 	SPP(1),
 	GRID_DIM(3),
 	NUM_THREADS(4)
@@ -28,7 +28,7 @@ Renderer::Renderer(size_t w, size_t h,
 	dir	: the incident ray
 	N	: the normalized normal vector of a surface
 */
-glm::vec3 Renderer::reflect(glm::vec3 dir, glm::vec3 N)
+glm::dvec3 Renderer::reflect(glm::dvec3 dir, glm::dvec3 N)
 {
 	return glm::normalize(dir - 2 * glm::dot(N, dir) * N);
 }
@@ -38,27 +38,27 @@ glm::vec3 Renderer::reflect(glm::vec3 dir, glm::vec3 N)
 	V	: the view direction
 	N	: the normalized normal vector of a surface
 */
-bool Renderer::refract(glm::vec3 V, glm::vec3 N, float refr_idx, glm::vec3 *refracted)
+bool Renderer::refract(glm::dvec3 V, glm::dvec3 N, double refr_idx, glm::dvec3 *refracted)
 {
-	float cos_alpha = glm::dot(-V, N);
+	double cos_alpha = glm::dot(-V, N);
 
 	// TODO: calculate refracted ray when coming from a medium other than air
 	// refractive index of air = 1.f
-	float eta = 1.f / refr_idx;
+	double eta = 1.0 / refr_idx;
 
 	if (cos_alpha < 0.f)
 	{
-		eta = 1.f / eta;
+		eta = 1.0 / eta;
 		cos_alpha *= -1;
 		N = -N;
 	}
 
-	float radicand = 1.f - eta * eta * (1.f - cos_alpha * cos_alpha);
+	double radicand = 1.0 - eta * eta * (1.0 - cos_alpha * cos_alpha);
 
 	// check for total internal reflection
-	if (radicand < 0.f)
+	if (radicand < 0.0)
 	{
-		*refracted = glm::vec3(0.f);
+		*refracted = glm::dvec3(0.0);
 		return false;
 	}
 
@@ -71,7 +71,7 @@ bool Renderer::refract(glm::vec3 V, glm::vec3 N, float refr_idx, glm::vec3 *refr
 	rel_eta: the relative refractive coefficient
 	c: the cosine of the angle between incident and normal ray
 */
-float Renderer::fresnel(float rel_eta, float c)
+double Renderer::fresnel(double rel_eta, double c)
 {
 
 	if (c < 0.f)
@@ -80,7 +80,7 @@ float Renderer::fresnel(float rel_eta, float c)
 		rel_eta = 1.f / rel_eta;
 	}
 	// using Schlick's approximation
-	float r0 = (rel_eta - 1.f) / (rel_eta + 1.f);
+	double r0 = (rel_eta - 1.f) / (rel_eta + 1.f);
 	r0 = r0 * r0;
 
 	c = 1.f - c;
@@ -88,13 +88,13 @@ float Renderer::fresnel(float rel_eta, float c)
 	return r0 + (1.f - r0) * powf(c, 5);
 }
 
-glm::vec3 Renderer::handle_reflection(const Scene &s,
+glm::dvec3 Renderer::handle_reflection(const Scene &s,
 	const Ray &ray,
-	const glm::vec3 &isect_p,
+	const glm::dvec3 &isect_p,
 	SurfaceInteraction *isect,
 	int depth)
 {
-	glm::vec3 reflected = reflect(ray.rd, isect->normal);
+	glm::dvec3 reflected = reflect(ray.rd, isect->normal);
 
 	return shoot_recursively(s, 
 		Ray(isect_p + shadowEpsilon * reflected, reflected), 
@@ -102,14 +102,14 @@ glm::vec3 Renderer::handle_reflection(const Scene &s,
 		++depth);
 }
 
-glm::vec3 Renderer::handle_transmission(const Scene &s,
+glm::dvec3 Renderer::handle_transmission(const Scene &s,
 	const Ray &ray,
-	const glm::vec3 &isect_p,
+	const glm::dvec3 &isect_p,
 	SurfaceInteraction *isect,
 	int depth)
 {
-	glm::vec3 reflected, refracted;
-	float f;
+	glm::dvec3 reflected, refracted;
+	double f;
 
 	reflected = reflect(ray.rd, isect->normal);
 
@@ -145,10 +145,10 @@ glm::vec3 Renderer::handle_transmission(const Scene &s,
 	ray: the next ray to trace
 	o: the object that was hit
 */
-float Renderer::shoot_ray(const Scene &s, const Ray &ray, SurfaceInteraction *isect)
+double Renderer::shoot_ray(const Scene &s, const Ray &ray, SurfaceInteraction *isect)
 {
-	float t_int = INFINITY;
-	float tmp = INFINITY;
+	double t_int = INFINITY;
+	double tmp = INFINITY;
 
 	// get nearest intersection point
 	for (auto &objs : s.get_scene())
@@ -166,26 +166,26 @@ float Renderer::shoot_ray(const Scene &s, const Ray &ray, SurfaceInteraction *is
 	return ray.tNearest;
 }
 
-glm::vec3 Renderer::shoot_recursively(const Scene &s,
+glm::dvec3 Renderer::shoot_recursively(const Scene &s,
 	const Ray &ray,
 	SurfaceInteraction *isect,
 	int depth)
 {
 	if (depth == MAX_DEPTH)
 	{
-		return glm::vec3(0);
+		return glm::dvec3(0);
 	}
 
-	float distance;
-	glm::vec3 contribution = glm::vec3(0);
-	glm::vec3 isect_p;
+	double distance;
+	glm::dvec3 contribution = glm::dvec3(0);
+	glm::dvec3 isect_p;
 
 	distance = shoot_ray(s, ray, isect);
 
 	// check for no intersection
 	if (distance < 0 || distance == INFINITY)
 	{
-		return glm::vec3(0.0f);
+		return glm::dvec3(0.0f);
 	}
 
 	isect_p = ray.ro + distance * ray.rd;
@@ -195,7 +195,7 @@ glm::vec3 Renderer::shoot_recursively(const Scene &s,
 
 	// map direction of normals to a color for debugging
 #ifdef DEBUG_NORMALS
-	return contribution = (glm::vec3(1.f) + isect->normal) * 0.5f;
+	return contribution = (glm::dvec3(1.f) + isect->normal) * 0.5f;
 #endif
 
 	for (auto &l : s.lights)
@@ -208,13 +208,13 @@ glm::vec3 Renderer::shoot_recursively(const Scene &s,
 
 	if (glm::length(isect->mat->getReflective()) > 0)
 	{
-		glm::vec3 reflective = isect->mat->getReflective();
+		glm::dvec3 reflective = isect->mat->getReflective();
 		contribution += reflective * handle_reflection(s, ray, isect_p, isect, depth);
 	}
 
 	if (glm::length(isect->mat->getTransparent()) > 0)
 	{
-		glm::vec3 transparent = isect->mat->getTransparent();
+		glm::dvec3 transparent = isect->mat->getTransparent();
 		contribution += transparent * handle_transmission(s, ray, isect_p, isect, depth);
 	}
 
@@ -241,7 +241,7 @@ void Renderer::render_gradient(
 		{
 			for (unsigned int j = 0; j < width_stripe; ++j)
 			{
-				colors[i * width_img + j + k * width_stripe] = glm::vec3(float(k) / 255.0f);
+				colors[i * width_img + j + k * width_stripe] = glm::dvec3(double(k) / 255.0f);
 			}
 		}
 	}
@@ -254,16 +254,16 @@ void Renderer::render(
 	size_t& width,
 	size_t& height)
 {
-	constexpr float fov = glm::radians(90.f);
-	float fov_tan = tan(fov / 2);
-	float u = 0.f, v = 0.f;
+	constexpr double fov = glm::radians(90.f);
+	double fov_tan = tan(fov / 2);
+	double u = 0.f, v = 0.f;
 	// distance to view plane
-	float d = 1.f;
-	float inv_spp;
-	float inv_grid_dim = 1.f / (GRID_DIM * GRID_DIM);
+	double d = 1.f;
+	double inv_spp;
+	double inv_grid_dim = 1.f / (GRID_DIM * GRID_DIM);
 
-	float crop_min_x = 0.f, crop_max_x = 1.f;
-	float crop_min_y = 0.f, crop_max_y = 1.f;
+	double crop_min_x = 0.f, crop_max_x = 1.f;
+	double crop_min_y = 0.f, crop_max_y = 1.f;
 
 	assert(crop_min_x <= crop_max_x && crop_min_y <= crop_max_y);
 
@@ -281,7 +281,7 @@ void Renderer::render(
 
 	StratifiedSampler2D sampler{ width, height, GRID_DIM };
 	size_t array_size = GRID_DIM * GRID_DIM;
-	const glm::vec2* samplingArray;
+	const glm::dvec2* samplingArray;
 	inv_spp = 1.f; // sampler.samplesPerPixel;
 	/***************************************/
 	// CREATING SCENE
@@ -317,8 +317,8 @@ void Renderer::render(
 					SurfaceInteraction isect;
 
 					// map pixel coordinates to[-1, 1]x[-1, 1]
-					float u = (2.f * (x + samplingArray[idx].x) - img->get_width()) / img->get_height() * fov_tan;
-					float v = (-2.f * (y + samplingArray[idx].y) + img->get_height()) / img->get_height() * fov_tan;
+					double u = (2.f * (x + samplingArray[idx].x) - img->get_width()) / img->get_height() * fov_tan;
+					double v = (-2.f * (y + samplingArray[idx].y) + img->get_height()) / img->get_height() * fov_tan;
 
 					// this can not be split up and needs to be in one line, otherwise
 					// omp will not take the
@@ -336,16 +336,16 @@ void Renderer::render_with_threads(
 	size_t& width,
 	size_t& height)
 {
-	constexpr float fov = glm::radians(30.f);
-	float fov_tan = tan(fov / 2);
-	float u = 0.f, v = 0.f;
+	constexpr double fov = glm::radians(30.f);
+	double fov_tan = tan(fov / 2);
+	double u = 0.f, v = 0.f;
 	// distance to view plane
-	float foc_len = 0.5f * 1.0f / fov_tan;
-	float inv_spp;
-	float inv_grid_dim = 1.f / (GRID_DIM * GRID_DIM);
+	double foc_len = 0.5f * 1.0f / fov_tan;
+	double inv_spp;
+	double inv_grid_dim = 1.f / (GRID_DIM * GRID_DIM);
 
-	float crop_min_x = 0.f, crop_max_x = 1.f;
-	float crop_min_y = 0.f, crop_max_y = 1.f;
+	double crop_min_x = 0.f, crop_max_x = 1.f;
+	double crop_min_y = 0.f, crop_max_y = 1.f;
 
 	assert(crop_min_x <= crop_max_x && crop_min_y <= crop_max_y);
 
@@ -367,7 +367,7 @@ void Renderer::render_with_threads(
 
 	StratifiedSampler2D sampler{ width, height, GRID_DIM };
 	unsigned int array_size = GRID_DIM * GRID_DIM;
-	const glm::vec2* samplingArray;
+	const glm::dvec2* samplingArray;
 	inv_spp = 1.0f / SPP;
 	/***************************************/
 	// CREATING SCENE
@@ -445,11 +445,11 @@ void Renderer::render_with_threads(
 									SurfaceInteraction isect;
 
 									// map pixel coordinates to[-1, 1]x[-1, 1]
-									float u = (2.f * (slice.pairs[idx].first + j + samplingArray[n].x) - img->get_width()) / img->get_height();
-									float v = (-2.f * (slice.pairs[idx].second + i + samplingArray[n].y) + img->get_height()) / img->get_height();
+									double u = (2.f * (slice.pairs[idx].first + j + samplingArray[n].x) - img->get_width()) / img->get_height();
+									double v = (-2.f * (slice.pairs[idx].second + i + samplingArray[n].y) + img->get_height()) / img->get_height();
 
-									/*float u = (x + samplingArray[idx].x) - WIDTH * 0.5f;
-									float v = -((y + samplingArray[idx].y) - HEIGHT * 0.5f);
+									/*double u = (x + samplingArray[idx].x) - WIDTH * 0.5f;
+									double v = -((y + samplingArray[idx].y) - HEIGHT * 0.5f);
 							*/
 									colors[(slice.pairs[idx].second + i) * slice.img_width + slice.pairs[idx].first + j] +=
 										clamp(shoot_recursively(
@@ -519,7 +519,7 @@ void Renderer::run(RenderMode mode)
 	}
 }
 
-std::vector<glm::vec3> Renderer::get_colors() const
+std::vector<glm::dvec3> Renderer::get_colors() const
 {
 	return colors;
 }

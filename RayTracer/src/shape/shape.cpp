@@ -3,15 +3,15 @@
 
 namespace rt
 {
-float Plane::intersect(const Ray& ray, SurfaceInteraction* isect)
+double Plane::intersect(const Ray& ray, SurfaceInteraction* isect)
 {
-	float denom = glm::dot(normal, ray.rd);
+	double denom = glm::dot(normal, ray.rd);
 
 	if (abs(denom) < 1e-6) return INFINITY;
 
-	float num = k - glm::dot(normal, ray.ro);
+	double num = k - glm::dot(normal, ray.ro);
 
-	float t = num / denom;
+	double t = num / denom;
 
 	//if(t >= 0) std::cout << t << std::endl;
 	t = t >= 0 ? t : INFINITY;
@@ -30,35 +30,35 @@ float Plane::intersect(const Ray& ray, SurfaceInteraction* isect)
 	return t;
 }
 
-float Plane::intersect(const Ray& ray)
+double Plane::intersect(const Ray& ray)
 {
-	float denom = glm::dot(normal, ray.rd);
+	double denom = glm::dot(normal, ray.rd);
 
 	if (abs(denom) < 1e-6) return INFINITY;
 
-	float num = k - glm::dot(normal, ray.ro);
+	double num = k - glm::dot(normal, ray.ro);
 
-	float t = num / denom;
+	double t = num / denom;
 
 	return t >= 0 ? t : INFINITY;
 }
 
-float Rectangle::intersect(const Ray& ray, SurfaceInteraction* isect)
+double Rectangle::intersect(const Ray& ray, SurfaceInteraction* isect)
 {
-	float denom = glm::dot(ray.rd, normal);
+	double denom = glm::dot(ray.rd, normal);
 
 	if (abs(denom) < 1e-6) return INFINITY;
 
-	float num = glm::dot(normal, center - ray.ro);
+	double num = glm::dot(normal, center - ray.ro);
 
-	float t = num / denom;
+	double t = num / denom;
 
 	if (t < 0) return INFINITY;
 
-	glm::vec3 isec_p = ray.ro + t * ray.rd;
+	glm::dvec3 isec_p = ray.ro + t * ray.rd;
 
-	float inside_1 = glm::dot(isec_p - center, v1) / v1_dot;
-	float inside_2 = glm::dot(isec_p - center, v2) / v2_dot;
+	double inside_1 = glm::dot(isec_p - center, v1) / v1_dot;
+	double inside_2 = glm::dot(isec_p - center, v2) / v2_dot;
 
 	bool test = (0 <= inside_1) && (inside_1 <= 1) &&
 		(0 <= inside_2) && (inside_2 <= 1);
@@ -77,28 +77,28 @@ float Rectangle::intersect(const Ray& ray, SurfaceInteraction* isect)
 
 }
 
-float Cube::intersect(const Ray& ray, SurfaceInteraction* isect)
+double Cube::intersect(const Ray& ray, SurfaceInteraction* isect)
 {
 	assert(abs(length(ray.rd)) > 0);
 
-	Ray transformed_ray{ world_to_obj * glm::vec4(ray.ro, 1.f),
-		world_to_obj * glm::vec4(ray.rd, 0.f) };
+	Ray transformed_ray{ world_to_obj * glm::dvec4(ray.ro, 1.f),
+		world_to_obj * glm::dvec4(ray.rd, 0.f) };
 
 	int nearest = 0;
 	int tmp = 0;
-	float isec_t = INFINITY;
-	float inside_1;
-	float inside_2;
+	double isec_t = INFINITY;
+	double inside_1;
+	double inside_2;
 	bool tests[6] = { false };
-	glm::vec3 t[2] = { glm::vec3(INFINITY), glm::vec3(INFINITY) };
-	glm::vec3 isec_p;
+	glm::dvec3 t[2] = { glm::dvec3(INFINITY), glm::dvec3(INFINITY) };
+	glm::dvec3 isec_p;
 
 
 	// calculate the 6 transformed_ray-plane intersections
 	t[0] = (boundaries - transformed_ray.ro);
 	t[1] = -(boundaries + transformed_ray.ro);
 
-	// not regarding IEEE floating point arithmetics here, see Bounds3 for a better variant
+	// not regarding IEEE doubleing point arithmetics here, see Bounds3 for a better variant
 	if (transformed_ray.rd.x != 0)
 	{
 		t[0].x /= transformed_ray.rd.x;
@@ -183,21 +183,21 @@ float Cube::intersect(const Ray& ray, SurfaceInteraction* isect)
 	return isec_t;
 }
 
-float Cube::intersect(const Ray& ray)
+double Cube::intersect(const Ray& ray)
 {
 	assert(abs(length(ray.rd)) > 0);
 
-	Ray transformed_ray{ world_to_obj * glm::vec4(ray.ro, 1.f),
-		world_to_obj * glm::vec4(ray.rd, 0.f) };
+	Ray transformed_ray{ world_to_obj * glm::dvec4(ray.ro, 1.f),
+		world_to_obj * glm::dvec4(ray.rd, 0.f) };
 
 	int nearest = 0;
 	int tmp = 0;
-	float isec_t = INFINITY;
-	float inside_1;
-	float inside_2;
+	double isec_t = INFINITY;
+	double inside_1;
+	double inside_2;
 	bool tests[6] = { false };
-	glm::vec3 t[2] = { glm::vec3(INFINITY), glm::vec3(INFINITY) };
-	glm::vec3 isec_p;
+	glm::dvec3 t[2] = { glm::dvec3(INFINITY), glm::dvec3(INFINITY) };
+	glm::dvec3 isec_p;
 
 
 	// calculate the 6 transformed_ray-plane intersections
@@ -272,9 +272,9 @@ float Cube::intersect(const Ray& ray)
 	return isec_t;
 }
 
-//float Triangle::intersect(const Ray& ray, SurfaceInteraction* isect)
+//double Triangle::intersect(const Ray& ray, SurfaceInteraction* isect)
 //{
-//	float t_plane = INFINITY;
+//	double t_plane = INFINITY;
 //	Plane plane{ p1, plane_normal };
 //
 //	// intersect without updating nearest intersection parameter
@@ -283,10 +283,10 @@ float Cube::intersect(const Ray& ray)
 //	{
 //		return INFINITY;
 //	}
-//	glm::vec3 p_isect = (ray.ro + t_plane * ray.rd);
+//	glm::dvec3 p_isect = (ray.ro + t_plane * ray.rd);
 //
-//	//glm::vec3 t_vec = m_inv * p_isect;
-//	glm::vec2 t_vec;
+//	//glm::dvec3 t_vec = m_inv * p_isect;
+//	glm::dvec2 t_vec;
 //	t_vec.x = p1.y*p3.x - p1.x*p3.y + (p3.y - p1.y)*p_isect.x + (p1.x - p3.x)*p_isect.y;
 //	t_vec.y = p1.x * p2.y - p1.y * p2.x + (p1.y - p2.y) * p_isect.x + (p2.x - p1.x) * p_isect.y;
 //
@@ -309,15 +309,15 @@ float Cube::intersect(const Ray& ray)
 //	return INFINITY;
 //}
 
-int MaxDimension(const glm::vec3& v) {
+int MaxDimension(const glm::dvec3& v) {
 	return (v.x > v.y) ? ((v.x > v.z) ? 0 : 2) : ((v.y > v.z) ? 1 : 2);
 }
 
-glm::vec3 Permute(const glm::vec3& v, int x, int y, int z) {
-	return glm::vec3(v[x], v[y], v[z]);
+glm::dvec3 Permute(const glm::dvec3& v, int x, int y, int z) {
+	return glm::dvec3(v[x], v[y], v[z]);
 }
 
-float Triangle::intersect(const Ray& ray, SurfaceInteraction* isect)
+double Triangle::intersect(const Ray& ray, SurfaceInteraction* isect)
 {
 	// Get triangle vertices in _p0_, _p1_, and _p2_
 
@@ -326,9 +326,9 @@ float Triangle::intersect(const Ray& ray, SurfaceInteraction* isect)
 	// Transform triangle vertices to ray coordinate space
 
 	// Translate vertices based on ray origin
-	glm::vec3 p0t = p1 - ray.ro;
-	glm::vec3 p1t = p2 - ray.ro;
-	glm::vec3 p2t = p3 - ray.ro;
+	glm::dvec3 p0t = p1 - ray.ro;
+	glm::dvec3 p1t = p2 - ray.ro;
+	glm::dvec3 p2t = p3 - ray.ro;
 
 	// Permute components of triangle vertices and ray direction
 	int kz = MaxDimension(glm::abs(ray.rd));
@@ -336,15 +336,15 @@ float Triangle::intersect(const Ray& ray, SurfaceInteraction* isect)
 	if (kx == 3) kx = 0;
 	int ky = kx + 1;
 	if (ky == 3) ky = 0;
-	glm::vec3 d = Permute(ray.rd, kx, ky, kz);
+	glm::dvec3 d = Permute(ray.rd, kx, ky, kz);
 	p0t = Permute(p0t, kx, ky, kz);
 	p1t = Permute(p1t, kx, ky, kz);
 	p2t = Permute(p2t, kx, ky, kz);
 
 	// Apply shear transformation to translated vertex positions
-	float Sx = -d.x / d.z;
-	float Sy = -d.y / d.z;
-	float Sz = 1.f / d.z;
+	double Sx = -d.x / d.z;
+	double Sy = -d.y / d.z;
+	double Sz = 1.f / d.z;
 	p0t.x += Sx * p0t.z;
 	p0t.y += Sy * p0t.z;
 	p1t.x += Sx * p1t.z;
@@ -353,41 +353,41 @@ float Triangle::intersect(const Ray& ray, SurfaceInteraction* isect)
 	p2t.y += Sy * p2t.z;
 
 	// Compute edge function coefficients _e0_, _e1_, and _e2_
-	float e0 = p1t.x * p2t.y - p1t.y * p2t.x;
-	float e1 = p2t.x * p0t.y - p2t.y * p0t.x;
-	float e2 = p0t.x * p1t.y - p0t.y * p1t.x;
+	double e0 = p1t.x * p2t.y - p1t.y * p2t.x;
+	double e1 = p2t.x * p0t.y - p2t.y * p0t.x;
+	double e2 = p0t.x * p1t.y - p0t.y * p1t.x;
 
 	// Fall back to double precision test at triangle edges
 	if ((e0 == 0.0f || e1 == 0.0f || e2 == 0.0f)) {
 		double p2txp1ty = (double)p2t.x * (double)p1t.y;
 		double p2typ1tx = (double)p2t.y * (double)p1t.x;
-		e0 = (float)(p2typ1tx - p2txp1ty);
+		e0 = (double)(p2typ1tx - p2txp1ty);
 		double p0txp2ty = (double)p0t.x * (double)p2t.y;
 		double p0typ2tx = (double)p0t.y * (double)p2t.x;
-		e1 = (float)(p0typ2tx - p0txp2ty);
+		e1 = (double)(p0typ2tx - p0txp2ty);
 		double p1txp0ty = (double)p1t.x * (double)p0t.y;
 		double p1typ0tx = (double)p1t.y * (double)p0t.x;
-		e2 = (float)(p1typ0tx - p1txp0ty);
+		e2 = (double)(p1typ0tx - p1txp0ty);
 	}
 
 	// Perform triangle edge and determinant tests
 	if ((e0 < 0 || e1 < 0 || e2 < 0) && (e0 > 0 || e1 > 0 || e2 > 0))
 		return INFINITY;
-	float det = e0 + e1 + e2;
+	double det = e0 + e1 + e2;
 	if (det == 0) return INFINITY;
 
 	// Compute scaled hit distance to triangle and test against ray $t$ range
 	p0t.z *= Sz;
 	p1t.z *= Sz;
 	p2t.z *= Sz;
-	float tScaled = e0 * p0t.z + e1 * p1t.z + e2 * p2t.z;
+	double tScaled = e0 * p0t.z + e1 * p1t.z + e2 * p2t.z;
 	if (det < 0 && (tScaled >= 0 || tScaled < ray.tNearest * det))
 		return INFINITY;
 	else if (det > 0 && (tScaled <= 0 || tScaled > ray.tNearest* det))
 		return INFINITY;
 
-	float invDet = 1 / det;
-	float t = tScaled * invDet;
+	double invDet = 1 / det;
+	double t = tScaled * invDet;
 
 	if (t < ray.tNearest)
 	{
@@ -399,19 +399,19 @@ float Triangle::intersect(const Ray& ray, SurfaceInteraction* isect)
 	return t;
 }
 
-float UnitCube::intersect(const Ray& ray, SurfaceInteraction* isect)
+double UnitCube::intersect(const Ray& ray, SurfaceInteraction* isect)
 {
 	assert(abs(length(ray.rd)) > 0);
 
-	Ray transformed_ray{ world_to_obj * glm::vec4(ray.ro, 1.f),
-		world_to_obj * glm::vec4(ray.rd, 0.f) };
+	Ray transformed_ray{ world_to_obj * glm::dvec4(ray.ro, 1.0),
+		world_to_obj * glm::dvec4(ray.rd, 0.0) };
 
 
-	// no need for checking division by zero, floating point arithmetic is helping here
-	glm::vec3 inv_rd = 1.f / transformed_ray.rd;
-	glm::vec3 t[2] = { glm::vec3(INFINITY), glm::vec3(INFINITY) };
+	// no need for checking division by zero, doubleing point arithmetic is helping here
+	glm::dvec3 inv_rd = 1.0 / transformed_ray.rd;
+	glm::dvec3 t[2] = { glm::dvec3(INFINITY), glm::dvec3(INFINITY) };
 	// interval of intersection
-	float t0 = 0.f, t1 = INFINITY;
+	double t0 = 0.0, t1 = INFINITY;
 
 	// the case where the ray is parallel to the plane is handled correctly by these two
 	// calculations => if the ray is outside the slabs, the values will both be -/+ inf,
@@ -457,10 +457,10 @@ float UnitCube::intersect(const Ray& ray, SurfaceInteraction* isect)
 	return t0;
 }
 
-float TriangleMesh::intersect(const Ray& ray, SurfaceInteraction* isect)
+double TriangleMesh::intersect(const Ray& ray, SurfaceInteraction* isect)
 {
-	float t_int = INFINITY;
-	float tmp = INFINITY;
+	double t_int = INFINITY;
+	double tmp = INFINITY;
 	bool hit = false;
 
 	return bvh->traverse_bvh(ray, isect);

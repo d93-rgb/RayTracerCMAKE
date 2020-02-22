@@ -15,18 +15,18 @@ public:
 	{
 		for (unsigned int i = 0; i < x * y; ++i)
 		{
-			sampler2Darray.push_back(std::vector<glm::vec2>(spp));
+			sampler2Darray.push_back(std::vector<glm::dvec2>(spp));
 		}
 	}
 
 	~Sampler2D() = default;
 
-	virtual const glm::vec2* get2DArray() = 0;
+	virtual const glm::dvec2* get2DArray() = 0;
 
 	const unsigned int samplesPerPixel;
 protected:
 	unsigned int currentPixel = 0;
-	std::vector<std::vector<glm::vec2>> sampler2Darray;
+	std::vector<std::vector<glm::dvec2>> sampler2Darray;
 };
 
 class StratifiedSampler2D : public Sampler2D
@@ -50,11 +50,11 @@ public:
 				{
 					for (int m = 0; m < grid_dim; ++m)
 					{
-						float u_rnd = float(dist(eng));
-						float v_rnd = float(dist(eng));
+						double u_rnd = double(dist(eng));
+						double v_rnd = double(dist(eng));
 
 						sampler2Darray[i * width + j][k * grid_dim + m] =
-							glm::vec2((k + u_rnd) / grid_dim,
+							glm::dvec2((k + u_rnd) / grid_dim,
 							(m + v_rnd) / grid_dim);
 					}
 				}
@@ -62,7 +62,7 @@ public:
 		}
 	}
 
-	const glm::vec2 * get2DArray();
+	const glm::dvec2 * get2DArray();
 
 private:
 	int grid_dim;

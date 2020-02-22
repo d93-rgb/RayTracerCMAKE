@@ -40,8 +40,8 @@ public:
 		img_width = img.get_width();
 		img_height = img.get_height();
 
-		/*dx = int(std::ceil(img_width / float(w)));
-		dy = int(std::ceil(img_height / float(h)));
+		/*dx = int(std::ceil(img_width / double(w)));
+		dy = int(std::ceil(img_height / double(h)));
 */
 		dx = img_width / w + (img_width % w == 0 ? 0 : 1);
 		dy = img_height / h + (img_height % h == 0 ? 0 : 1);

@@ -12,14 +12,14 @@ public:
 	std::unique_ptr<Bounds3> box;
 	std::vector<std::shared_ptr<Shape>> shapes;
 
-	float intersect(const Ray& ray, SurfaceInteraction* isect);
+	double intersect(const Ray& ray, SurfaceInteraction* isect);
 };
 
 class BVH_Tree
 {
 public:
 	std::unique_ptr<BVH_Node> bvh_node;
-	float intersect(const Ray& ray, SurfaceInteraction* isect);
+	double intersect(const Ray& ray, SurfaceInteraction* isect);
 };
 
 
@@ -31,7 +31,7 @@ public:
 		size_t max_depth = 40);
 
 	bool build_bvh();
-	float traverse_bvh(const Ray& ray, SurfaceInteraction* isect);
+	double traverse_bvh(const Ray& ray, SurfaceInteraction* isect);
 
 private:
 	bool build_bvh(BVH_Node* current_node, int depth);
