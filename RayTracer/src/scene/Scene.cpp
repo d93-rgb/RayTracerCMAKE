@@ -15,7 +15,6 @@
 #include "shape/bvh.h"
 
 //#define SHOW_AXIS
-// DEBUGGING
 
 namespace rt
 {
@@ -811,9 +810,9 @@ void SingleTriangleScene::init()
 void DragonScene::init()
 {
 	//camera position
-	glm::dvec3 translation = glm::dvec3(0.f, 5.5f, 30.f);
-	glm::dvec3 look_pos = glm::dvec3(-1.0f, 20.f, -1.0f);
-	glm::dvec3 cam_up = glm::dvec3(0.f, 1.f, 0.f);
+	glm::dvec3 translation = glm::dvec3(0.0, 10.5, 45.0);
+	glm::dvec3 look_pos = glm::dvec3(-1.0, -0.5, -1.0);
+	glm::dvec3 cam_up = glm::dvec3(0.0, 1.0, 0.0);
 
 	std::vector<std::string> dragon_files = {
 	//"C:\\Users\\Damian\\Downloads\\stanford-dragon-vrip\\source\\stanford_dragon.ply"
@@ -824,9 +823,9 @@ void DragonScene::init()
 		glm::rotate(
 			glm::scale(
 				//glm::dmat4(1.f),
-				glm::translate(glm::dmat4(1.0), glm::dvec3(0.5, 5.0, 14.0)),
-				glm::dvec3(22.0)),
-			glm::radians(150.0),
+				glm::translate(glm::dmat4(1.0), glm::dvec3(0.5, 4.2, 20.0)),
+				glm::dvec3(15.0)),
+			glm::radians(100.0),
 			glm::dvec3(0.0, 1.0, 0.0));
 
 	// material for walls
@@ -835,35 +834,51 @@ void DragonScene::init()
 			glm::dvec3(0.02, 0.02, 0.02),
 			glm::dvec3(0.4, 0.4, 0.4),
 			glm::dvec3(0.0, 0.0, 0.0));
-	wall_bot->setReflective(glm::dvec3(0.1f));
+	wall_bot->setReflective(glm::dvec3(0.2f));
 
 	auto wall_left =
 		std::make_shared<Material>(
 			glm::dvec3(0.02, 0.02, 0.02),
-			glm::dvec3(0.4, 0.4, 0.4),
+			glm::dvec3(0.2, 0.2, 0.2),
 			glm::dvec3(0.0, 0.0, 0.0));
 	wall_left->setReflective(glm::dvec3(1.0f));
 
+	auto wall_diffuse =
+		std::make_shared<Material>(
+			glm::dvec3(0.01, 0.01, 0.01),
+			glm::dvec3(0.3, 0.3, 0.3),
+			glm::dvec3(0.5, 0.5, 0.5));
 
 	//bottom
 	sc.emplace_back(std::make_unique<Rectangle>(glm::dvec3(-4, 0, -18),
 		glm::dvec3(150, 0, 0), glm::dvec3(0, 0, -150), wall_bot));
 	//front
-	/*sc.emplace_back(std::make_unique<Rectangle>(glm::dvec3(-4, 0, -18-75),
-		glm::dvec3(300, 0, 0), glm::dvec3(0, 300, 0), wall_left));
-	back
+	sc.emplace_back(std::make_unique<Rectangle>(glm::dvec3(-4, 0, -18-10),
+		glm::dvec3(150, 0, 0), glm::dvec3(0, 150, 0), wall_diffuse));
+	//back
 	sc.emplace_back(std::make_unique<Rectangle>(glm::dvec3(-4, 0, -18+75),
-		glm::dvec3(300, 0, 0), glm::dvec3(0, 300, 0), wall_bot));
-	left
-	sc.emplace_back(std::make_unique<Rectangle>(glm::dvec3(-4, 0, -18),
-		glm::dvec3(0, 300, 0), glm::dvec3(0, 0, -300), wall_left));
-	right
-	sc.emplace_back(std::make_unique<Rectangle>(glm::dvec3(-4+75, 0, -18),
-		glm::dvec3(0, 300, 0), glm::dvec3(0, 0, -300), wall_left));*/
+		glm::dvec3(500, 0, 0), glm::dvec3(0, 500, 0), wall_diffuse));
+	//left
+	sc.emplace_back(std::make_unique<Rectangle>(glm::dvec3(-4-7, 0, -18),
+		glm::dvec3(0, 150, 0), glm::dvec3(0, 0, -150), wall_left));
+	//right
+	sc.emplace_back(std::make_unique<Rectangle>(glm::dvec3(-4+15, 0, -18),
+		glm::dvec3(0, 150, 0), glm::dvec3(0, 0, -150), wall_left));
 
-		/////////////////////////////////////
-		// Teapot mesh
-		/////////////////////////////////////
+	//	// mirror
+	//auto sphere_mat =
+	//	std::make_shared<Material>();
+	////sphere_mat->setReflective(glm::dvec3(1.f));
+
+	//sc.emplace_back(std::make_unique<Sphere>(
+	//	glm::dvec3(-4.0, 0.0, 18.0),
+	//	3.0,
+	//	glm::dvec3(1.0),
+	//	sphere_mat));
+
+	/////////////////////////////////////
+	// Dragon mesh
+	/////////////////////////////////////
 
 	for (const auto& dr_file : dragon_files)
 	{
@@ -871,12 +886,12 @@ void DragonScene::init()
 
 		std::shared_ptr<Material> dragon_mat =
 			std::shared_ptr<Material>(
-				new Material(glm::dvec3(0.1f, 0.1f, 0.0f),
-					glm::dvec3(0.1f, 0.1f, 0.1f),
-					glm::dvec3(0.f, 0.f, 0.f)));
+				new Material(glm::dvec3(0.0, 0.0, 0.0),
+					glm::dvec3(0.0, 0.0, 0.0),
+					glm::dvec3(0.0, 0.0, 0.0)));
 		//dragon_mat->setShininess(30.f);
-		//dragon_mat->setTransparent(glm::dvec3(1.0f));
-		//dragon_mat->setRefractiveIdx(1.5f);
+		dragon_mat->setTransparent(glm::dvec3(1.0));
+		dragon_mat->setRefractiveIdx(1.5);
 
 		for (auto& tm : tr_meshes)
 		{
@@ -899,13 +914,53 @@ void DragonScene::init()
 		}
 	}
 
-	lights.emplace_back(std::make_unique<PointLight>(glm::dvec3(0.f, 5.f, 25.f),
-		glm::dvec3(-1.0, 0.0f, -1.0f),
-		glm::dvec3(190.f)));
+#ifdef SHOW_AXIS
+	double cyl_rad = 0.1f;
+	auto cylinder_mat_1 =
+		std::make_shared<Material>(
+			glm::dvec3(1.f, 0.f, 0.f),
+			glm::dvec3(1.f, 0.f, 0.0f),
+			glm::dvec3(0.0f, 0.0f, 0.0f));
 
-	lights.emplace_back(std::make_unique<PointLight>(glm::dvec3(-5.f, 5.f, 10.f),
-		glm::dvec3(-2, -4, -2),
-		glm::dvec3(0.3f)));
+	sc.emplace_back(std::make_unique<Cylinder>(
+		glm::dvec3(0.f, 0.f, 0.f),
+		glm::dvec3(1.f, 0.f, 0.f),
+		cyl_rad,
+		8.f,
+		cylinder_mat_1));
+
+	cylinder_mat_1 =
+		std::make_shared<Material>(
+			glm::dvec3(0.f, 1.0f, 0.f),
+			glm::dvec3(0.f, 1.f, 0.0f),
+			glm::dvec3(0.0f, 0.0f, 0.0f));
+	sc.emplace_back(std::make_unique<Cylinder>(
+		glm::dvec3(0.f, 0.f, 0.f),
+		glm::dvec3(0.f, 1.f, 0.f),
+		cyl_rad,
+		8.f,
+		cylinder_mat_1));
+
+	cylinder_mat_1 =
+		std::make_shared<Material>(
+			glm::dvec3(0.f, 0.0f, 1.f),
+			glm::dvec3(0.f, 0.f, 1.f),
+			glm::dvec3(0.0f, 0.0f, 0.0f));
+	sc.emplace_back(std::make_unique<Cylinder>(
+		glm::dvec3(0.f, 0.f, 0.f),
+		glm::dvec3(0.f, 0.f, 1.f),
+		cyl_rad,
+		8.f,
+		cylinder_mat_1));
+#endif
+
+	//lights.emplace_back(std::make_unique<PointLight>(glm::dvec3(0.f, 5.f, 17.f),
+		//glm::dvec3(-1.0, 0.0f, -1.0f),
+		//glm::dvec3(190.f)));
+
+	lights.emplace_back(std::make_unique<PointLight>(glm::dvec3(0.0, 20.5, 20.f),
+		glm::dvec3(-1, -2.0, -1),
+		glm::dvec3(400.0)));
 
 	cam.reset(new Camera());
 	cam->setCamToWorld(translation, look_pos, cam_up);

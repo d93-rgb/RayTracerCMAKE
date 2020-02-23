@@ -238,8 +238,11 @@ LRESULT CALLBACK WindowProc(
 
 int main(int argc, char* argv[])
 {
-	int screen_width = 800;
+	int screen_width = 1000;
 	int screen_height = 600;
+
+	GLsizei render_w = 1000;
+	GLsizei render_h = 600;
 
 	int error_code;
 	const char* error_description;
@@ -307,8 +310,6 @@ int main(int argc, char* argv[])
 	ImGui_ImplGlfw_InitForOpenGL(window, true);
 	ImGui_ImplOpenGL3_Init(glsl_version);
 
-	GLsizei render_w = 800;
-	GLsizei render_h = 600;
 	glViewport(0, 0, render_w, render_h);
 	
 	Renderer renderer(render_w, render_h, std::string("picture.ppm"));
