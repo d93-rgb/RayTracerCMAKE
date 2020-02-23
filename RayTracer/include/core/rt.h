@@ -59,6 +59,10 @@
 // uncomment if you want to shade the color according to the direction of surface normals
 //#define DEBUG_NORMALS
 
+
+namespace rt
+{
+
 #if defined(_WIN32)
 #define GET_STRERR(ERROR_NUM, BUF, LEN) strerror_s(BUF, ERROR_NUM);
 #define GET_PWD(BUF, LEN) GetModuleFileNameA(nullptr, BUF, LEN)
@@ -68,9 +72,6 @@ constexpr auto OS_SLASH = "\\";
 #define GET_PWD(BUF, LEN) readlink("/proc/self/exe", BUF, LEN)
 constexpr auto OS_SLASH = "/";
 #endif
-
-namespace rt
-{
 
 struct Ray;
 class Scene;

@@ -17,7 +17,7 @@ Renderer::Renderer(size_t w, size_t h,
 	size_t max_depth) :
 	MAX_DEPTH(max_depth),
 	img(new Image(w, h, file)),
-	colors(w*h, glm::dvec3(0)),
+	colors(w* h, glm::dvec3(0)),
 	SPP(1),
 	GRID_DIM(3),
 	NUM_THREADS(4)
@@ -38,7 +38,7 @@ glm::dvec3 Renderer::reflect(glm::dvec3 dir, glm::dvec3 N)
 	V	: the view direction
 	N	: the normalized normal vector of a surface
 */
-bool Renderer::refract(glm::dvec3 V, glm::dvec3 N, double refr_idx, glm::dvec3 *refracted)
+bool Renderer::refract(glm::dvec3 V, glm::dvec3 N, double refr_idx, glm::dvec3* refracted)
 {
 	double cos_alpha = glm::dot(-V, N);
 
@@ -88,24 +88,24 @@ double Renderer::fresnel(double rel_eta, double c)
 	return r0 + (1.0 - r0) * pow(c, 5);
 }
 
-glm::dvec3 Renderer::handle_reflection(const Scene &s,
-	const Ray &ray,
-	const glm::dvec3 &isect_p,
-	SurfaceInteraction *isect,
+glm::dvec3 Renderer::handle_reflection(const Scene& s,
+	const Ray& ray,
+	const glm::dvec3& isect_p,
+	SurfaceInteraction* isect,
 	int depth)
 {
 	glm::dvec3 reflected = reflect(ray.rd, isect->normal);
 
-	return shoot_recursively(s, 
-		Ray(isect_p + shadowEpsilon * reflected, reflected), 
-		isect, 
+	return shoot_recursively(s,
+		Ray(isect_p + shadowEpsilon * reflected, reflected),
+		isect,
 		++depth);
 }
 
-glm::dvec3 Renderer::handle_transmission(const Scene &s,
-	const Ray &ray,
-	const glm::dvec3 &isect_p,
-	SurfaceInteraction *isect,
+glm::dvec3 Renderer::handle_transmission(const Scene& s,
+	const Ray& ray,
+	const glm::dvec3& isect_p,
+	SurfaceInteraction* isect,
 	int depth)
 {
 	glm::dvec3 reflected, refracted;
@@ -117,9 +117,9 @@ glm::dvec3 Renderer::handle_transmission(const Scene &s,
 	if (!refract(ray.rd, isect->normal, isect->mat->getRefractiveIdx(), &refracted))
 	{
 		//reflected = glm::normalize(reflect(ray.rd, (*o)->get_normal(isect_p)));
-		return shoot_recursively(s, 
-			Ray(isect_p + shadowEpsilon * reflected, reflected), 
-			isect, 
+		return shoot_recursively(s,
+			Ray(isect_p + shadowEpsilon * reflected, reflected),
+			isect,
 			++depth);
 	}
 
@@ -127,13 +127,13 @@ glm::dvec3 Renderer::handle_transmission(const Scene &s,
 		glm::dot(-ray.rd, isect->normal));
 	++depth;
 
-	return f * shoot_recursively(s, 
-		Ray(isect_p + shadowEpsilon * reflected, reflected), 
+	return f * shoot_recursively(s,
+		Ray(isect_p + shadowEpsilon * reflected, reflected),
 		isect,
 		depth) +
-		(1.f - f) * shoot_recursively(s, 
-			Ray(isect_p + shadowEpsilon * refracted, refracted), 
-			isect, 
+		(1.f - f) * shoot_recursively(s,
+			Ray(isect_p + shadowEpsilon * refracted, refracted),
+			isect,
 			depth);
 }
 
@@ -145,13 +145,13 @@ glm::dvec3 Renderer::handle_transmission(const Scene &s,
 	ray: the next ray to trace
 	o: the object that was hit
 */
-double Renderer::shoot_ray(const Scene &s, const Ray &ray, SurfaceInteraction *isect)
+double Renderer::shoot_ray(const Scene& s, const Ray& ray, SurfaceInteraction* isect)
 {
 	double t_int = INFINITY;
 	double tmp = INFINITY;
 
 	// get nearest intersection point
-	for (auto &objs : s.get_scene())
+	for (auto& objs : s.get_scene())
 	{
 		tmp = objs->intersect(ray, isect);
 
@@ -166,9 +166,9 @@ double Renderer::shoot_ray(const Scene &s, const Ray &ray, SurfaceInteraction *i
 	return ray.tNearest;
 }
 
-glm::dvec3 Renderer::shoot_recursively(const Scene &s,
-	const Ray &ray,
-	SurfaceInteraction *isect,
+glm::dvec3 Renderer::shoot_recursively(const Scene& s,
+	const Ray& ray,
+	SurfaceInteraction* isect,
 	int depth)
 {
 	if (depth == MAX_DEPTH)
@@ -198,7 +198,7 @@ glm::dvec3 Renderer::shoot_recursively(const Scene &s,
 	return contribution = (glm::dvec3(1.f) + isect->normal) * 0.5f;
 #endif
 
-	for (auto &l : s.lights)
+	for (auto& l : s.lights)
 	{
 		contribution += l->phong_shade(s,
 			ray/*Ray(ray.ro + shadowEpsilon * ray.rd, ray.rd)*/,
@@ -369,44 +369,22 @@ void Renderer::render_with_threads(
 	size_t array_size = GRID_DIM * GRID_DIM;
 	const glm::dvec2* samplingArray;
 	inv_spp = 1.0 / SPP;
-	/***************************************/
-	// CREATING SCENE
-	/***************************************/
-	//GatheringScene sc;
-	//MixedScene sc;
-	std::unique_ptr<Scene> sc = std::make_unique<DragonScene>();
 
-	//	// enclose with braces for destructor of ProgressReporter at the end of rendering
+	std::unique_ptr<Scene> sc = std::make_unique<TeapotScene>();
+
+	// enclose with braces for destructor of ProgressReporter at the end of rendering
 	{
 		Slice slice(*img, 16, 16);
 		std::mutex pairs_mutex;
+		std::mutex sampler_mutex;
 		std::vector<std::thread> threads_v;
-		/***************************************/
-		// START PROGRESSREPORTER
-		/***************************************/
-		pbrt::ProgressReporter reporter(slice.dx * slice.dy, "Rendering:");
-		/***************************************/
-		// LOOPING OVER PIXELS
-		/***************************************/
-			//fprintf(stderr, "\rRendering %5.2f%%", 100.*y / (HEIGHT - 1));
 
+		// launch progress reporter
+		pbrt::ProgressReporter reporter(slice.dx * slice.dy, "Rendering:");
+
+		// start rendering with threads
 		for (int i = 0; i < NUM_THREADS; ++i)
 		{
-			/*threads_v.push_back(std::thread(work,
-				std::ref(slice),
-				std::ref(pairs_mutex),
-				std::ref(col),
-				std::ref(sc),
-				std::ref(sampler),
-				std::ref(reporter),
-				array_size,
-				std::ref(samplingArray),
-				inv_grid_dim,
-				inv_spp,
-				fov_tan,
-				foc_len,
-				std::ref(get_color)));*/
-
 			threads_v.push_back(std::thread([&]() {
 				int idx = 0;
 				unsigned int h_step;
@@ -414,8 +392,7 @@ void Renderer::render_with_threads(
 
 				while (idx != -1)
 				{
-					// try to access the next free raster
-					// TODO: Change locking with mutex guards!
+					// try to access the next free image raster
 					pairs_mutex.lock();
 					idx = slice.get_index();
 					pairs_mutex.unlock();
@@ -435,8 +412,9 @@ void Renderer::render_with_threads(
 					{
 						for (unsigned int j = 0; j < w_step; ++j)
 						{
-							//TODO: NOT threadsafe
+							sampler_mutex.lock();
 							samplingArray = sampler.get2DArray();
+							sampler_mutex.unlock();
 
 							for (int s = 0; s < SPP; ++s)
 							{
@@ -454,10 +432,9 @@ void Renderer::render_with_threads(
 									colors[(slice.pairs[idx].second + i) * slice.img_width + slice.pairs[idx].first + j] +=
 										clamp(shoot_recursively(
 											*sc, sc->cam->getPrimaryRay(u, v, foc_len), &isect, 0));
-									//col[x + y] = glm::normalize(sc.cam->getPrimaryRay(u, v, d).rd);
 								}
 							}
-							colors[(slice.pairs[idx].second + i) * slice.img_width + slice.pairs[idx].first + j] *= 
+							colors[(slice.pairs[idx].second + i) * slice.img_width + slice.pairs[idx].first + j] *=
 								inv_grid_dim * inv_spp;
 						}
 					}
@@ -509,7 +486,7 @@ void Renderer::run(RenderMode mode)
 
 		LOG(INFO) << "Image will be written to \"" <<
 			fn.substr(0, fn.find_last_of("\\/")).append(OS_SLASH).append(
-			img->get_file_name());
+				img->get_file_name());
 		img->write_image_to_file(colors);
 	}
 	else
