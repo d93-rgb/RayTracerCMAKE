@@ -11,3 +11,6 @@ The ray tracer is partially based on the "pbrt" described in the book "Physicall
 
 # Example scene 2 (glass objects, teaspoon and textured floor)
 <img src="RayTracer/resources/glass_objects_scene.png" title="glass objects scene" width="600">
+
+# Example scene 3 (glass stanford dragon with mirrors)
+<img src="RayTracer/resources/glass_dragon_with_mirrors.png" title="glass dragon with mirrors scene" width="600">
