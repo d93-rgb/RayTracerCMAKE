@@ -20,11 +20,11 @@ public:
 	int dx;
 	int dy;
 
-	unsigned int w_step;
-	unsigned int h_step;
+	size_t w_step;
+	size_t h_step;
 
-	unsigned int img_width;
-	unsigned int img_height;
+	size_t img_width;
+	size_t img_height;
 
 	std::vector<std::pair<unsigned int, unsigned int>> pairs;
 
@@ -43,8 +43,8 @@ public:
 		/*dx = int(std::ceil(img_width / double(w)));
 		dy = int(std::ceil(img_height / double(h)));
 */
-		dx = img_width / w + (img_width % w == 0 ? 0 : 1);
-		dy = img_height / h + (img_height % h == 0 ? 0 : 1);
+		dx = static_cast<int>(img_width / w + (img_width % w == 0 ? 0 : 1));
+		dy = static_cast<int>(img_height / h + (img_height % h == 0 ? 0 : 1));
 
 		idx = -1;
 

@@ -315,11 +315,13 @@ int main(int argc, char* argv[])
 	Renderer renderer(render_w, render_h, std::string("picture.ppm"));
 	renderer.run(RenderMode::THREADS);
 
+	auto& updated_img_dim = renderer.get_image_dim();
 	int idx = 0;
-	std::unique_ptr<char[]> img_data(new char[static_cast<size_t>(render_w) * static_cast<size_t>(render_h) * 3]);
+	std::unique_ptr<char[]> img_data(new char[updated_img_dim.x * updated_img_dim.y * 3]);
+
 	for (const auto& c : renderer.get_colors())
 	{
-		for (int i = 0; i < (int)c.length(); ++i)
+		for (size_t i = 0; i < c.length(); ++i)
 		{
 			img_data[idx++] = static_cast<unsigned char>(std::round(c[i]));
 		}
@@ -336,7 +338,7 @@ int main(int argc, char* argv[])
 
 	// Upload pixels into texture
 	glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, render_w, render_h, 0, GL_RGB, 
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, updated_img_dim.x, updated_img_dim.y, 0, GL_RGB,
 		GL_UNSIGNED_BYTE, 
 		img_data.get());
 

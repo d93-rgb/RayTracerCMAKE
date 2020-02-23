@@ -427,23 +427,23 @@ public:
 	{
 		this->mat = mat;
 
-		this->p1 = objToWorld * glm::dvec4(p1, 1.f);
-		this->p2 = objToWorld * glm::dvec4(p2, 1.f);
-		this->p3 = objToWorld * glm::dvec4(p3, 1.f);
+		this->p0 = objToWorld * glm::dvec4(p1, 1.f);
+		this->p1 = objToWorld * glm::dvec4(p2, 1.f);
+		this->p2 = objToWorld * glm::dvec4(p3, 1.f);
 
 		//construct surrounding aabb
-		this->bounding_box = std::make_unique<Bounds3>(glm::dvec3(glm::min(glm::min(this->p1, this->p2), this->p3)),
-			glm::dvec3(glm::max(glm::max(this->p1, this->p2), this->p3)));
+		this->bounding_box = std::make_unique<Bounds3>(glm::dvec3(glm::min(glm::min(this->p0, this->p1), this->p2)),
+			glm::dvec3(glm::max(glm::max(this->p0, this->p1), this->p2)));
 
-		this->n1 = glm::transpose(worldToObj) * glm::dvec4(n1, 0.f);
-		this->n2 = glm::transpose(worldToObj) * glm::dvec4(n2, 0.f);
-		this->n3 = glm::transpose(worldToObj) * glm::dvec4(n3, 0.f);
+		this->n0 = glm::transpose(worldToObj) * glm::dvec4(n1, 0.f);
+		this->n1 = glm::transpose(worldToObj) * glm::dvec4(n2, 0.f);
+		this->n2 = glm::transpose(worldToObj) * glm::dvec4(n3, 0.f);
 
 		this->plane_normal = glm::normalize(glm::transpose(worldToObj) * glm::dvec4(n, 0.f));
 
 		// base transformation to barycentric coordinates
 		// see: https://de.wikipedia.org/wiki/Basiswechsel_(Vektorraum)
-		this->m_inv = glm::inverse(glm::dmat3(this->p1, this->p2, this->p3));
+		this->m_inv = glm::inverse(glm::dmat3(this->p0, this->p1, this->p2));
 	}
 
 	double intersect(const Ray &ray, SurfaceInteraction *isect);
@@ -455,8 +455,8 @@ public:
 		glm::dvec3 barycentric_coord = m_inv * p;
 		assert(glm::all(glm::lessThanEqual(barycentric_coord, glm::dvec3(1))));
 
-		return glm::normalize(barycentric_coord.x * n1 + barycentric_coord.y * n2 + 
-			barycentric_coord.z * n3);
+		return glm::normalize(barycentric_coord.x * n0 + barycentric_coord.y * n1 + 
+			barycentric_coord.z * n2);
 	}
 
 	void set_objToWorld(const glm::dmat4& objToWorld)
@@ -464,23 +464,23 @@ public:
 		this->objToWorld = objToWorld;
 		this->worldToObj = glm::inverse(objToWorld);
 
+		p0 = objToWorld * glm::dvec4(p0, 1.f);
 		p1 = objToWorld * glm::dvec4(p1, 1.f);
 		p2 = objToWorld * glm::dvec4(p2, 1.f);
-		p3 = objToWorld * glm::dvec4(p3, 1.f);
 
 		//construct surrounding aabb
-		bounding_box = std::make_unique<Bounds3>(glm::dvec3(glm::min(glm::min(p1, p2), p3)),
-			glm::dvec3(glm::max(glm::max(p1, p2), p3)));
+		bounding_box = std::make_unique<Bounds3>(glm::dvec3(glm::min(glm::min(p0, p1), p2)),
+			glm::dvec3(glm::max(glm::max(p0, p1), p2)));
 
+		n0 = glm::transpose(worldToObj) * glm::dvec4(n0, 0.f);
 		n1 = glm::transpose(worldToObj) * glm::dvec4(n1, 0.f);
 		n2 = glm::transpose(worldToObj) * glm::dvec4(n2, 0.f);
-		n3 = glm::transpose(worldToObj) * glm::dvec4(n3, 0.f);
 
 		plane_normal = glm::normalize(glm::transpose(worldToObj) * glm::dvec4(plane_normal, 0.f));
 
 		// base transformation to barycentric coordinates
 		// see: https://de.wikipedia.org/wiki/Basiswechsel_(Vektorraum)
-		this->m_inv = glm::inverse(glm::dmat3(p1, p2, p3));
+		this->m_inv = glm::inverse(glm::dmat3(p0, p1, p2));
 	}
 
 	void set_material(std::shared_ptr<Material> mat)
@@ -501,9 +501,9 @@ public:
 
 private:
 	// vertices
-	glm::dvec3 p1, p2, p3;
+	glm::dvec3 p0, p1, p2;
 	// normal
-	glm::dvec3 n1, n2, n3;
+	glm::dvec3 n0, n1, n2;
 	glm::dvec3 plane_normal;
 	glm::dmat4 objToWorld;
 	glm::dmat4 worldToObj;

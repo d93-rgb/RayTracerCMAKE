@@ -17,7 +17,6 @@ Renderer::Renderer(size_t w, size_t h,
 	size_t max_depth) :
 	MAX_DEPTH(max_depth),
 	img(new Image(w, h, file)),
-	colors(w* h, glm::dvec3(0)),
 	SPP(1),
 	GRID_DIM(3),
 	NUM_THREADS(4)
@@ -233,7 +232,8 @@ void Renderer::render_gradient(
 	width_img = 256 * width_stripe;
 	height = img->get_height();
 
-	colors.resize(256 * width_stripe * height);
+	img->resize_color_array(256 * width_stripe, height);
+	img->colors.resize(256 * width_stripe * height);
 
 	for (int k = 0; k < 256; ++k)
 	{
@@ -241,7 +241,7 @@ void Renderer::render_gradient(
 		{
 			for (unsigned int j = 0; j < width_stripe; ++j)
 			{
-				colors[i * width_img + j + k * width_stripe] = glm::dvec3(double(k) / 255.0f);
+				img->colors[i * width_img + j + k * width_stripe] = glm::dvec3(double(k) / 255.0f);
 			}
 		}
 	}
@@ -324,7 +324,7 @@ void Renderer::render(
 					// omp will not take the
 					/*col[i] += clamp(shoot_recursively(sc, sc.cam->getPrimaryRay(u, v, d), &isect, 0))
 						* inv_grid_dim;*/
-					colors[i] = glm::normalize(sc.cam->getPrimaryRay(u, v, d).rd);
+					img->colors[i] = glm::normalize(sc.cam->getPrimaryRay(u, v, d).rd);
 				}
 			}
 		}
@@ -429,12 +429,12 @@ void Renderer::render_with_threads(
 									/*double u = (x + samplingArray[idx].x) - WIDTH * 0.5f;
 									double v = -((y + samplingArray[idx].y) - HEIGHT * 0.5f);
 							*/
-									colors[(slice.pairs[idx].second + i) * slice.img_width + slice.pairs[idx].first + j] +=
+									img->colors[(slice.pairs[idx].second + i) * slice.img_width + slice.pairs[idx].first + j] +=
 										clamp(shoot_recursively(
 											*sc, sc->cam->getPrimaryRay(u, v, foc_len), &isect, 0));
 								}
 							}
-							colors[(slice.pairs[idx].second + i) * slice.img_width + slice.pairs[idx].first + j] *=
+							img->colors[(slice.pairs[idx].second + i) * slice.img_width + slice.pairs[idx].first + j] *=
 								inv_grid_dim * inv_spp;
 						}
 					}
@@ -487,18 +487,23 @@ void Renderer::run(RenderMode mode)
 		LOG(INFO) << "Image will be written to \"" <<
 			fn.substr(0, fn.find_last_of("\\/")).append(OS_SLASH).append(
 				img->get_file_name());
-		img->write_image_to_file(colors);
+		img->write_image_to_file();
 	}
 	else
 	{
 		//img->append_to_file_name(".ppm");
-		img->write_image_to_file(colors);
+		img->write_image_to_file();
 	}
 }
 
 std::vector<glm::dvec3> Renderer::get_colors() const
 {
-	return colors;
+	return img->colors;
+}
+
+glm::u64vec2 Renderer::get_image_dim() const
+{
+	return glm::u64vec2(img->get_width(), img->get_height());
 }
 
 

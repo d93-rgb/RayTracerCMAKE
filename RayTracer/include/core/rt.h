@@ -90,6 +90,7 @@ struct Rectangle;
 class Triangle;
 class Cube;
 class UnitCube;
+class TriangleMesh;
 
 struct Sphere;
 struct Cylinder;
@@ -106,6 +107,8 @@ class RGB_TriangleTexture;
 
 class MixedScene;
 class GatheringScene;
+class TeapotScene;
+class DragonScene;
 
 class Image;
 class Dispatcher;

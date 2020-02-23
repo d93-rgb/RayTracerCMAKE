@@ -6,7 +6,7 @@ namespace rt
 
 #define GAMMA_CORRECTION
 
-void Image::write_image_to_file(std::vector<glm::dvec3>& col)
+void Image::write_image_to_file()
 {
 #ifdef DEBUG
 	//assert(bin.size() == col.size());
@@ -36,14 +36,14 @@ void Image::write_image_to_file(std::vector<glm::dvec3>& col)
 	ofs << "P6 " << width << " " << height << " 255 ";
 
 	// write to image file
-	for (size_t i = 0; i < col.size(); ++i)
+	for (size_t i = 0; i < colors.size(); ++i)
 	{
 #ifdef GAMMA_CORRECTION
 		// gamma correction and mapping to [0;255]
-		col[i] = glm::pow(glm::min(glm::dvec3(1), col[i]),
+		colors[i] = glm::pow(glm::min(glm::dvec3(1), colors[i]),
 			glm::dvec3(1 / 2.2f)) * 255.0;
 #else
-		col[i] = glm::min(glm::dvec3(1), col[i]) * 255.f;
+		colors[i] = glm::min(glm::dvec3(1), col[i]) * 255.f;
 #endif
 
 #ifdef DEBUG
@@ -51,16 +51,23 @@ void Image::write_image_to_file(std::vector<glm::dvec3>& col)
 #endif
 
 		// prevent sign extension by casting to unsigned int
-		unsigned char r = (unsigned int)round(col[i].x);
-		unsigned char g = (unsigned int)round(col[i].y);
-		unsigned char b = (unsigned int)round(col[i].z);
+		unsigned char r = (unsigned int)round(colors[i].x);
+		unsigned char g = (unsigned int)round(colors[i].y);
+		unsigned char b = (unsigned int)round(colors[i].z);
 
 		ofs << r << g << b;
-}
+	}
 
 	ofs.close();
 
 	LOG(INFO) << "Writing image to \"" << file_name << "\" finished.";
+}
+
+void Image::resize_color_array(size_t new_width, size_t new_height)
+{
+	colors.resize(new_width * new_height);
+	width = new_width;
+	height = new_height;
 }
 
 void Image::append_to_file_name(const std::string& suffix)

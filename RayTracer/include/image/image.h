@@ -5,6 +5,8 @@ namespace rt
 class Image
 {
 public:
+	std::vector<glm::dvec3> colors;
+
 	Image(size_t width, size_t height, const std::string& file_name = "picture.ppm") :
 		width(width), 
 		height(height),
@@ -15,10 +17,13 @@ public:
 		cropped_y_start{ 0 },
 		cropped_width{ 0 },
 		cropped_height{ 0 },
-		file_name(file_name)
+		file_name(file_name),
+		colors(width * height, glm::dvec3(0))
 	{}
 
-	void write_image_to_file(std::vector<glm::dvec3>& col);
+	void write_image_to_file();
+
+	void resize_color_array(size_t new_width, size_t new_height);
 
 	size_t get_width() const
 	{

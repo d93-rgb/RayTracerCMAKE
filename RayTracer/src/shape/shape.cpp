@@ -309,11 +309,11 @@ double Cube::intersect(const Ray& ray)
 //	return INFINITY;
 //}
 
-int MaxDimension(const glm::dvec3& v) {
+static inline int MaxDimension(const glm::dvec3& v) {
 	return (v.x > v.y) ? ((v.x > v.z) ? 0 : 2) : ((v.y > v.z) ? 1 : 2);
 }
 
-glm::dvec3 Permute(const glm::dvec3& v, int x, int y, int z) {
+static inline glm::dvec3 Permute(const glm::dvec3& v, int x, int y, int z) {
 	return glm::dvec3(v[x], v[y], v[z]);
 }
 
@@ -326,9 +326,9 @@ double Triangle::intersect(const Ray& ray, SurfaceInteraction* isect)
 	// Transform triangle vertices to ray coordinate space
 
 	// Translate vertices based on ray origin
-	glm::dvec3 p0t = p1 - ray.ro;
-	glm::dvec3 p1t = p2 - ray.ro;
-	glm::dvec3 p2t = p3 - ray.ro;
+	glm::dvec3 p0t = p0 - ray.ro;
+	glm::dvec3 p1t = p1 - ray.ro;
+	glm::dvec3 p2t = p2 - ray.ro;
 
 	// Permute components of triangle vertices and ray direction
 	int kz = MaxDimension(glm::abs(ray.rd));

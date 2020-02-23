@@ -27,6 +27,8 @@ public:
 
 	std::vector<glm::dvec3> get_colors() const;
 
+	glm::u64vec2 get_image_dim() const;
+
 private:
 	size_t MAX_DEPTH;
 
@@ -36,9 +38,7 @@ private:
 	size_t GRID_DIM;
 	size_t NUM_THREADS;
 
-	std::vector<glm::dvec3> colors;
 	std::unique_ptr<Image> img;
-
 
 	double fresnel(double rel_eta, double c);
 	
