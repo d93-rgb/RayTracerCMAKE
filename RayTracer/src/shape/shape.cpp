@@ -317,6 +317,7 @@ static inline glm::dvec3 Permute(const glm::dvec3& v, int x, int y, int z) {
 	return glm::dvec3(v[x], v[y], v[z]);
 }
 
+// watertight ray-triangle intersection test based on implementation of pbrt
 double Triangle::intersect(const Ray& ray, SurfaceInteraction* isect)
 {
 	// Get triangle vertices in _p0_, _p1_, and _p2_
@@ -464,22 +465,6 @@ double TriangleMesh::intersect(const Ray& ray, SurfaceInteraction* isect)
 	bool hit = false;
 
 	return bvh->traverse_bvh(ray, isect);
-	/*hit = boundary->intersect(ray);
-	if (!hit) {
-		return INFINITY;
-	}*/
-
-	// get nearest intersection point
-	/*for (auto &objs : tr_mesh)
-	{
-		tmp = objs->intersect(ray, isect);
-
-		if (tmp >= 0 && t_int > tmp)
-		{
-			t_int = tmp;
-		}
-	}
-	return t_int;*/
 }
 
 } //namespace rt
