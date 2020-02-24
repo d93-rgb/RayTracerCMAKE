@@ -17,4 +17,4 @@ script:
   - cd RayTracer/build/Release
   - cmake -G 'Unix Makefiles' ../../
   - make
-  - ./rt
+  - ./rt --headless
