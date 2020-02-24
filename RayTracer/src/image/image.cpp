@@ -1,5 +1,5 @@
 #include <core/rt.h>
-#include "..\..\include\image\image.h"
+#include "image/image.h"
 
 namespace rt
 {

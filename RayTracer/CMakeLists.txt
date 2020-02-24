@@ -7,6 +7,16 @@ set(CMAKE_CXX_STANDARD 17)
 # with vim plugin YouCompleteMe
 set( CMAKE_EXPORT_COMPILE_COMMANDS OFF )
 
+if (NOT CMAKE_BUILD_TYPE)
+	set(CMAKE_BUILD_TYPE "Release")
+endif()
+
+set(CMAKE_BINARY_DIR ${CMAKE_CURRENT_SOURCE_DIR}/out/build/${CMAKE_BUILD_TYPE})
+message("Output directory: ${CMAKE_BINARY_DIR}")
+if(WIN32)
+	message("NOTE: Visual Studio overwrites the output directory!")
+endif()
+
 if(WIN32)
 	#set(CMAKE_WIN32_EXECUTABLE)
 	#LINK_DIRECTORIES("C:/Program Files (x86)/Windows Kits/10/Lib/10.0.18362.0/um/x64")
@@ -218,7 +228,7 @@ endif()
 
 # add headers to the target for now, because VS does not recognize header files otherwise
 # to be inside filters
-message(${RT_SRC})
+#message(${RT_SRC})
 add_executable( rt ${OPTIONS} ${RT_MAIN} ${RT_SRC} ${RT_HEADERS})
 
 if( NOT WIN32 )

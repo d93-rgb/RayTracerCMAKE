@@ -548,9 +548,9 @@ void TeapotScene::init()
 	glm::dvec3 cam_up = glm::dvec3(0.f, 1.f, 0.f);
 
 	std::string teapot =
-		"..\\..\\..\\resources\\models\\teapot.obj";
+		"../../../resources/models/teapot.obj";
 	std::string teaspoon =
-		"..\\..\\..\\resources\\models\\spoon.obj";
+		"../../../resources/models/spoon.obj";
 
 	glm::dmat4 teapot_to_world = glm::rotate(
 		glm::scale(

@@ -315,7 +315,7 @@ int main(int argc, char* argv[])
 	Renderer renderer(render_w, render_h, std::string("picture.ppm"));
 	renderer.run(RenderMode::THREADS);
 
-	auto& updated_img_dim = renderer.get_image_dim();
+	auto&& updated_img_dim = renderer.get_image_dim();
 	int idx = 0;
 	std::unique_ptr<char[]> img_data(new char[updated_img_dim.x * updated_img_dim.y * 3]);
 

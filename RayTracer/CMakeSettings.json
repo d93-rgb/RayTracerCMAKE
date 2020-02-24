@@ -206,11 +206,16 @@
         },
         {
           "name": "ASSIMP_BUILD_OBJ_EXPORTER",
-          "value": "False",
+          "value": "True",
           "type": "BOOL"
         },
         {
           "name": "ASSIMP_BUILD_BLEND_IMPORTER",
+          "value": "False",
+          "type": "BOOL"
+        },
+        {
+          "name": "BUILD_TESTING",
           "value": "False",
           "type": "BOOL"
         }
