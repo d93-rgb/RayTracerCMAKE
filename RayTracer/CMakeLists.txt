@@ -229,17 +229,17 @@ endif()
 #message(${RT_SRC})
 add_executable( rt ${OPTIONS} ${RT_MAIN} ${RT_SRC} ${RT_HEADERS})
 
-if( NOT WIN32 )
-	add_dependencies(rt ANTTWEAKBAR_MAKE)
-endif()
+#if( NOT WIN32 )
+#	add_dependencies(rt ANTTWEAKBAR_MAKE)
+#endif()
 
 target_link_libraries( rt ${ALL_RT_LIBRARIES})
 
-if(WIN32)
-	# post build command for copying dll files
-	set (ANTTWEAKBAR_DLL_DIR "${CMAKE_CURRENT_SOURCE_DIR}/ext/AntTweakBar/lib" )
-	add_custom_command(TARGET rt POST_BUILD
-		COMMAND ${CMAKE_COMMAND} -E copy_if_different
-			"${ANTTWEAKBAR_DLL_DIR}/AntTweakBar64.dll"
-			$<TARGET_FILE_DIR:rt>)
-endif()
+#if(WIN32)
+#	# post build command for copying dll files
+#	set (ANTTWEAKBAR_DLL_DIR "${CMAKE_CURRENT_SOURCE_DIR}/ext/AntTweakBar/lib" )
+#	add_custom_command(TARGET rt POST_BUILD
+#		COMMAND ${CMAKE_COMMAND} -E copy_if_different
+#			"${ANTTWEAKBAR_DLL_DIR}/AntTweakBar64.dll"
+#			$<TARGET_FILE_DIR:rt>)
+#endif()
