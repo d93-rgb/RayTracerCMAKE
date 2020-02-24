@@ -7,11 +7,13 @@ set(CMAKE_CXX_STANDARD 17)
 # with vim plugin YouCompleteMe
 set( CMAKE_EXPORT_COMPILE_COMMANDS OFF )
 
-if (NOT CMAKE_BUILD_TYPE OR (CMAKE_BUILD_TYPE STREQUAL "Release"))
-	set(CMAKE_BUILD_TYPE "Release")
-	message("*** Release build ***")
+if (NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
+	message(STATUS "Setting build type to 'Release'")
+	set(CMAKE_BUILD_TYPE Release CACHE STRING "Choose the type of build." FORCE)
+	set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS "Debug" "Release"
+    "MinSizeRel" "RelWithDebInfo")
 elseif(CMAKE_BUILD_TYPE STREQUAL "Debug")
-	message("*** Debug build ***")
+	message(STATUS "*** Debug build ***")
 endif()
 
 if(WIN32)
@@ -29,7 +31,7 @@ endif()
 ###########################################################################
 # glog
 set(WITH_GFLAGS OFF CACHE BOOL "Use gflags")
-set(BUILD_SHARED_LIBS OFF CACHE BOOL " " FORCE)
+set(BUILD_SHARED_LIBS OFF CACHE BOOL "" FORCE)
 #IF(WIN32)
 #  ADD_DEFINITIONS( -D GOOGLE_GLOG_DLL_DECL= )
 #ENDIF()
@@ -43,12 +45,12 @@ include_directories (
 ###########################################################################
 # assimp
 # turn off some unnecessary options for this ray tracer
-set(ASSIMP_BUILD_ALL_IMPORTERS_BY_DEFAULT OFF CACHE BOOL " " FORCE)
-set(ASSIMP_BUILD_ALL_EXPORTERS_BY_DEFAULT OFF CACHE BOOL " " FORCE)
-set(ASSIMP_BUILD_OBJ_IMPORTER ON CACHE BOOL " " FORCE)
-set(ASSIMP_BUILD_OBJ_EXPORTER ON CACHE BOOL " " FORCE)
-set(ASSIMP_BUILD_PLY_IMPORTER ON CACHE BOOL " " FORCE)
-set(ASSIMP_BUILD_PLY_EXPORTER ON CACHE BOOL " " FORCE)
+set(ASSIMP_BUILD_ALL_IMPORTERS_BY_DEFAULT OFF CACHE BOOL "" FORCE)
+set(ASSIMP_BUILD_ALL_EXPORTERS_BY_DEFAULT OFF CACHE BOOL "" FORCE)
+set(ASSIMP_BUILD_OBJ_IMPORTER ON CACHE BOOL "" FORCE)
+set(ASSIMP_BUILD_OBJ_EXPORTER ON CACHE BOOL "" FORCE)
+set(ASSIMP_BUILD_PLY_IMPORTER ON CACHE BOOL "" FORCE)
+set(ASSIMP_BUILD_PLY_EXPORTER ON CACHE BOOL "" FORCE)
 
 # disable testing
 set(ASSIMP_BUILD_TESTS OFF CACHE BOOL " " FORCE)
