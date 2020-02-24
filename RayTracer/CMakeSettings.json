@@ -2,13 +2,13 @@
   "configurations": [
     {
       "buildCommandArgs": "",
-      "buildRoot": "${projectDir}\\out\\build\\${name}",
+      "buildRoot": "${projectDir}\\build\\${name}",
       "cmakeCommandArgs": "",
       "configurationType": "Debug",
       "ctestCommandArgs": "",
       "generator": "Ninja",
       "inheritEnvironments": [ "msvc_x64_x64" ],
-      "installRoot": "${projectDir}\\out\\install\\${name}",
+      "installRoot": "${projectDir}\\install\\${name}",
       "name": "x64-Debug",
       "variables": [
         {
@@ -173,7 +173,7 @@
       "generator": "Ninja",
       "configurationType": "RelWithDebInfo",
       "buildRoot": "${projectDir}\\build\\${name}",
-      "installRoot": "${projectDir}\\out\\install\\${name}",
+      "installRoot": "${projectDir}\\install\\${name}",
       "cmakeCommandArgs": "",
       "buildCommandArgs": "-v",
       "ctestCommandArgs": "",

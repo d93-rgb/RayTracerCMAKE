@@ -1,5 +1,6 @@
 #include <chrono>
-#include <set>
+#include <string>
+#include <string.h>
 
 // OpenGL loader
 #include <GL/gl3w.h>
@@ -238,6 +239,15 @@ LRESULT CALLBACK WindowProc(
 
 int main(int argc, char* argv[])
 {
+	bool rt_headless = false;
+	if (argc > 1)
+	{
+		if (!strcmp(argv[1], "--headless"))
+		{
+			rt_headless = true;
+		}
+	}
+
 	int screen_width = 1000;
 	int screen_height = 600;
 
@@ -314,6 +324,18 @@ int main(int argc, char* argv[])
 	
 	Renderer renderer(render_w, render_h, std::string("picture.ppm"));
 	renderer.run(RenderMode::THREADS);
+	if (rt_headless)
+	{
+		LOG(INFO) << "Running headless mode, exiting.";
+		// Cleanup
+		ImGui_ImplOpenGL3_Shutdown();
+		ImGui_ImplGlfw_Shutdown();
+		ImGui::DestroyContext();
+
+		glfwDestroyWindow(window);
+		glfwTerminate();
+		return 0;
+	}
 
 	auto&& updated_img_dim = renderer.get_image_dim();
 	int idx = 0;
