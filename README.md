@@ -20,11 +20,11 @@ $ git clone --recursive https://github.com/d93-rgb/RayTracerCMAKE
 ```
 
 ## Linux
-Change to project directory:
+### 1. Change to project directory
 ```bash
 $ cd /path/to/RayTracer
 ```
-Create build directory tree:
+### 2. Create build directory tree:
 #### Release build
 ```bash
 $ mkdir -p build/Release
@@ -33,7 +33,7 @@ $ mkdir -p build/Release
 ```bash
 $ mkdir -p build/Debug
 ```
-Change to build directory and run cmake:
+### 3. Change to build directory and run cmake:
 #### Release build
 ```bash
 $ cd /path/to/RayTracer/build/Release && cmake ../../
@@ -43,7 +43,7 @@ Set the CMake flag `CMAKE_BUILD_TYPE` to `Debug` and run:
 ```bash
 $ cd /path/to/RayTracer/build/Debug && cmake -DCMAKE_BUILD_TYPE=Debug ../../
 ```
-Now just run make:
+### 4. Now just run make:
 ```build
 $ make
 ```
