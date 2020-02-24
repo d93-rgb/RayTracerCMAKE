@@ -7,14 +7,11 @@ set(CMAKE_CXX_STANDARD 17)
 # with vim plugin YouCompleteMe
 set( CMAKE_EXPORT_COMPILE_COMMANDS OFF )
 
-if (NOT CMAKE_BUILD_TYPE)
+if (NOT CMAKE_BUILD_TYPE OR (${CMAKE_BUILD_TYPE} EQUAL "Release"))
 	set(CMAKE_BUILD_TYPE "Release")
-endif()
-
-set(CMAKE_BINARY_DIR ${CMAKE_CURRENT_SOURCE_DIR}/out/build/${CMAKE_BUILD_TYPE})
-message("Output directory: ${CMAKE_BINARY_DIR}")
-if(WIN32)
-	message("NOTE: Visual Studio overwrites the output directory!")
+	message("*** Release build ***")
+elseif(${CMAKE_BUILD_TYPE} EQUAL "Debug")
+	message("*** Debug build ***")
 endif()
 
 if(WIN32)
@@ -42,9 +39,6 @@ include_directories (
   ext/glog/src
   ${CMAKE_BINARY_DIR}/ext/glog
 )
-
-#find_package(OpenMP REQUIRED)
-#message(STATUS ${OpenMP_C_FLAGS}) # Link against it for C++)
 
 ###########################################################################
 # assimp
