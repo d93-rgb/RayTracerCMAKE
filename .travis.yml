@@ -13,7 +13,8 @@ install:
     mkdir ${TRAVIS_BUILD_DIR}/cmake-local && travis_retry wget --no-check-certificate --quiet -O - ${CMAKE_URL} | tar --strip-components=1 -xz -C ${TRAVIS_BUILD_DIR}/cmake-local
     export PATH=${TRAVIS_BUILD_DIR}/cmake-local/bin:${PATH}
 script:
-  - cd RayTracer
-  - cmake -G 'Unix Makefiles'
+  - mkdir -p RayTracer/build/Release
+  - cd RayTracer/build/Release
+  - cmake -G 'Unix Makefiles' ../../
   - make
   - ./rt
