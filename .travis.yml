@@ -2,6 +2,7 @@ language: cpp
 compiler: gcc
 
 script:
+  - cd RayTracer
   - cmake -G 'Unix Makefiles'
   - make
   - ./rt
