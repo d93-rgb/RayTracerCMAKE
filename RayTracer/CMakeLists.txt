@@ -75,14 +75,15 @@ include_directories (
   ${CMAKE_BINARY_DIR}/ext/glm
 )
 
+# in favor of Imgui the AntTweakBar package will be ignored from now on 
 ###########################################################################
 # AntTweakBar
-if(NOT WIN32)
-    MESSAGE(STATUS "Building AntTweakBar")
-	add_custom_target( 	ANTTWEAKBAR_MAKE
-						COMMAND make 
-						WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/ext/AntTweakBar/src)
-endif()
+#if(NOT WIN32)
+#    MESSAGE(STATUS "Building AntTweakBar")
+#	add_custom_target( 	ANTTWEAKBAR_MAKE
+#						COMMAND make 
+#						WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/ext/AntTweakBar/src)
+#endif()
 
 ###########################################################################
 # glfw
