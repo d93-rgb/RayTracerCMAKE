@@ -7,10 +7,10 @@ set(CMAKE_CXX_STANDARD 17)
 # with vim plugin YouCompleteMe
 set( CMAKE_EXPORT_COMPILE_COMMANDS OFF )
 
-if (NOT CMAKE_BUILD_TYPE OR (${CMAKE_BUILD_TYPE} EQUAL "Release"))
+if (NOT CMAKE_BUILD_TYPE OR (CMAKE_BUILD_TYPE STREQUAL "Release"))
 	set(CMAKE_BUILD_TYPE "Release")
 	message("*** Release build ***")
-elseif(${CMAKE_BUILD_TYPE} EQUAL "Debug")
+elseif(CMAKE_BUILD_TYPE STREQUAL "Debug")
 	message("*** Debug build ***")
 endif()
 
@@ -20,7 +20,7 @@ if(WIN32)
 	set(SHCORE_LIB shcore.lib)
 endif()
 
-if(NOT WIN32)
+if(NOT WIN32 AND NOT (CMAKE_BUILD_TYPE STREQUAL "Debug"))
     # optimization for g++
     add_definitions("-Ofast")
 endif()
