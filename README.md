@@ -13,13 +13,13 @@ The ray tracer is partially based on the "pbrt" described in the book "Physicall
 ## Example scene 3 (glass stanford dragon with mirrors)
 <img src="RayTracer/resources/glass_dragon_with_mirrors.png" title="glass dragon with mirrors scene" width="600">
 
-## Building RayTracer
+# Building RayTracer
 First clone the project with git using the recursive flag to get all the submodules:
 ```bash
 $ git clone --recursive https://github.com/d93-rgb/RayTracerCMAKE
 ```
 
-### Linux
+## Linux
 Change to project directory:
 ```bash
 $ cd /path/to/RayTracer
