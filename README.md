@@ -1,4 +1,5 @@
 # RayTracerCMAKE
+[![Build Status](https://travis-ci.com/d93-rgb/RayTracerCMAKE.svg?branch=master)](https://travis-ci.com/d93-rgb/RayTracerCMAKE)
 
 Implementing a simple ray tracer.
 
@@ -24,7 +25,7 @@ $ git clone --recursive https://github.com/d93-rgb/RayTracerCMAKE
 ```bash
 $ cd /path/to/RayTracer
 ```
-### 2. Create build directory tree:
+### 2. Create build directory tree
 #### Release build
 ```bash
 $ mkdir -p build/Release
@@ -33,7 +34,7 @@ $ mkdir -p build/Release
 ```bash
 $ mkdir -p build/Debug
 ```
-### 3. Change to build directory and run cmake:
+### 3. Change to build directory and run cmake
 #### Release build
 ```bash
 $ cd /path/to/RayTracer/build/Release && cmake ../../
@@ -43,7 +44,7 @@ Set the CMake flag `CMAKE_BUILD_TYPE` to `Debug` and run:
 ```bash
 $ cd /path/to/RayTracer/build/Debug && cmake -DCMAKE_BUILD_TYPE=Debug ../../
 ```
-### 4. Now just run make:
+### 4. Now just run make
 ```build
 $ make
 ```
