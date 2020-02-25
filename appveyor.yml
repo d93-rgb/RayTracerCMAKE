@@ -1,25 +1,25 @@
-version: '1.0.{build}'
-image: Visual Studio 2019
+version: 1.0.{build}
 branches:
   only:
   - master
 configuration: Release
 platform: x64
-clone_folder: C:\RayTracer
-
+clone_folder: c:\RayTracer
 install:
-  - git submodule update --init --recursive
+- ps: git submodule update --init --recursive
 before_build:
-  - md c:\RayTracer\build
-  - cd c:\RayTracer\build
-  - set WIN32=1
-  - ps: cmake -G "Visual Studio 16 2019 Win64" .. 
-  build:
-   project: C:\RayTracer\build\RayTracer.sln
-   parallel: true
-   verbosity: normal
-build_script:
-  - msbuild C:\RayTracer\build\RayTracer.sln /logger:"C:\Program Files\AppVeyor\BuildAgent\Appveyor.MSBuildLogger.dll"
+- ps: >-
+    md c:\RayTracer\build
+
+    cd c:\RayTracer\build
+
+    cmake -G "Visual Studio 16 2019 Win64" ..
+build:
+  project: c:\RayTracer\build\RayTracer.sln
+  parallel: true
+  verbosity: normal
 after_build:
-  - cd C:\RayTracer\build\Release
-  - rt.exe --headless
+- ps: >-
+    cd C:\RayTracer\build\Release
+
+    rt.exe --headless
