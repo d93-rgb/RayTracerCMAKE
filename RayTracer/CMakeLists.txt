@@ -188,6 +188,7 @@ if(MSVC)
 	SOURCE_GROUP ("Source Files\\texture" REGULAR_EXPRESSION src/texture/.*)
 	SOURCE_GROUP ("Source Files\\samplers" REGULAR_EXPRESSION src/samplers/.*)
 	SOURCE_GROUP ("Source Files\\image" REGULAR_EXPRESSION src/image/.*)
+	SOURCE_GROUP ("Source Files\\integrators" REGULAR_EXPRESSION src/integrators/.*)
 
 
 	# header files
@@ -203,7 +204,9 @@ if(MSVC)
 	SOURCE_GROUP ("Header Files\\shape\\quadric" REGULAR_EXPRESSION include/shape/quadric/.*)
 	SOURCE_GROUP ("Header Files\\texture" REGULAR_EXPRESSION include/texture/.*)
 	SOURCE_GROUP ("Header Files\\samplers" REGULAR_EXPRESSION include/samplers/.*)
-	SOURCE_GROUP ("Source Files\\image" REGULAR_EXPRESSION src/image/.*)
+	SOURCE_GROUP ("Header Files\\image" REGULAR_EXPRESSION include/image/.*)
+	SOURCE_GROUP ("Header Files\\integrators" REGULAR_EXPRESSION include/integrators/.*)
+
 
 
 
@@ -221,6 +224,7 @@ else(MSVC)
 	SOURCE_GROUP (texture REGULAR_EXPRESSION src/texture/.*)
 	SOURCE_GROUP (samplers REGULAR_EXPRESSION src/samplers/.*)
 	SOURCE_GROUP (image REGULAR_EXPRESSION src/image/.*)
+	SOURCE_GROUP (integrators REGULAR_EXPRESSION src/integrators/.*)
 
 endif()
 
