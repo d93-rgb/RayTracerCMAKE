@@ -4,6 +4,7 @@ branches:
   - master
 configuration: Release
 platform: x64
+image: Visual Studio 2019
 clone_folder: c:\RayTracer
 install:
 - ps: git submodule update -q --init --recursive
