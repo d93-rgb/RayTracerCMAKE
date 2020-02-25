@@ -72,6 +72,7 @@ include_directories (
 # glm
 # disable testing
 set(GLM_TEST_ENABLE OFF CACHE BOOL " " FORCE)
+set(GLM_QUIET ON CACHE BOOL " " FORCE)
 add_subdirectory(ext/glm)
 include_directories (
   ext/glm
