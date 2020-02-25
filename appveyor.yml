@@ -14,9 +14,9 @@ before_build:
 
     cd RayTracer\build
 
-    cmake -G "Visual Studio 16 2019" .. 2> $null
+    cmake -G "Visual Studio 16 2019" ..
 build:
-  project: RayTracer.sln
+  project: c:\RayTracer\RayTracer\build\RayTracer.sln
   parallel: true
   verbosity: normal
 after_build:
