@@ -367,6 +367,7 @@ int main(int argc, char* argv[])
 	glfwShowWindow(window);
 
 	while (!glfwWindowShouldClose(window)) {
+		// TODO: change to glfwPollEvents, waiting is not good for interactive applications
 		glfwWaitEvents();
 
 		// Start the Dear ImGui frame
