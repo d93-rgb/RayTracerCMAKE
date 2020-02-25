@@ -21,6 +21,4 @@ build:
   verbosity: normal
 after_build:
 - ps: >-
-    cd C:\RayTracer\RayTracer\build\Release
-
-    rt.exe --headless
+    C:\RayTracer\RayTracer\build\Release\rt.exe --headless
