@@ -19,6 +19,7 @@ build:
   project: c:\RayTracer\RayTracer\build\RayTracer.sln
   parallel: true
   verbosity: normal
-after_build:
-- ps: >-
-    C:\RayTracer\RayTracer\build\Release\rt.exe --headless
+# OpenGL not supported, so a test run will be omitted for now
+#after_build:
+#- ps: >-
+#    C:\RayTracer\RayTracer\build\Release\rt.exe --headless
