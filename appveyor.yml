@@ -9,9 +9,9 @@ install:
 - ps: git submodule update -q --init --recursive
 before_build:
 - ps: >-
-    md c:\RayTracer\build
+    md RayTracer\build
 
-    cd c:\RayTracer\build
+    cd RayTracer\build
 
     cmake -G "Visual Studio 16 2019" ..
 build:
