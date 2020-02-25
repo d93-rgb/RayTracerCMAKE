@@ -6,7 +6,7 @@ configuration: Release
 platform: x64
 clone_folder: c:\RayTracer
 install:
-- ps: git submodule update --init --recursive 2> $null
+- ps: git submodule update -q --init --recursive
 before_build:
 - ps: >-
     md c:\RayTracer\build
