@@ -24,10 +24,7 @@ struct Light
 	virtual glm::dvec3 getEmission(glm::dvec3 dir) const = 0;
 
 	virtual bool calc_shadow(glm::dvec3 p, const Scene &sc) = 0;
-
-
 };
-
 
 struct PointLight : public Light
 {

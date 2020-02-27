@@ -1,4 +1,7 @@
 #include "integrators/phong.h"
+#include "scene/scene.h"
+#include "interaction/interaction.h"
+#include "material/material.h"
 
 namespace rt
 {
@@ -63,8 +66,53 @@ glm::dvec3 PhongIntegrator::phong_shade(const Scene& sc,
 	return color;
 }
 
-glm::vec3 PhongIntegrator::Li()
+glm::vec3 PhongIntegrator::Li(const Ray& ray, const Scene& scene)
 {
+	if (depth == scene.MAX_DEPTH)
+	{
+		return glm::dvec3(0);
+	}
+
+	glm::dvec3 isect_p;
+	SurfaceInteraction si;
+	double distance;
+	glm::dvec3 contribution = glm::dvec3(0);
+
+	// map direction of normals to a color for debugging
+#ifdef DEBUG_NORMALS
+	return contribution = (glm::dvec3(1.f) + isect->normal) * 0.5f;
+#endif
+
+	distance = scene.shoot_ray(ray, isect);
+
+	// check for no intersection
+	if (distance < 0 || distance == INFINITY)
+	{
+		return glm::dvec3(0.0f);
+	}
+
+	isect_p = ray.ro + distance * ray.rd;
+
+	for (auto& l : scene.lights)
+	{
+		contribution += phong_shade(scene,
+			ray/*Ray(ray.ro + shadowEpsilon * ray.rd, ray.rd)*/,
+			si.isect_p,
+			*si);
+	}
+
+	if (glm::length(si->mat->getReflective()) > 0)
+	{
+		glm::dvec3 reflective = si->mat->getReflective();
+		contribution += reflective * specular_reflect(ray, isect_p, si, depth);
+	}
+
+	if (glm::length(isect->mat->getTransparent()) > 0)
+	{
+		glm::dvec3 transparent = si->mat->getTransparent();
+		contribution += transparent * specular_transmit(ray, isect_p, si, depth);
+	}
+
 	return glm::vec3();
 }
 

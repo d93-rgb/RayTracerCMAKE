@@ -18,14 +18,12 @@ public:
 
 	std::unique_ptr<Camera> cam;
 
-	Scene(size_t MAX_DEPTH) : MAX_DEPTH(MAX_DEPTH) {};
+	Scene(
+		std::vector<std::unique_ptr<Shape>> sc,
+		std::vector<std::unique_ptr<Light>> lights,
+		size_t MAX_DEPTH = 4);
 
 	double shoot_ray(const Ray& ray, SurfaceInteraction* isect);
-
-	glm::dvec3 shoot_recursively(
-		const Ray& ray,
-		SurfaceInteraction* isect,
-		int depth);
 
 	const std::vector<std::unique_ptr<Shape>>& get_scene() const
 	{
@@ -41,11 +39,10 @@ protected:
 class GatheringScene : public Scene
 {
 public:
-	GatheringScene(size_t MAX_DEPTH = 4) :
-		Scene(MAX_DEPTH)
-	{
-		init();
-	}
+	GatheringScene(
+		std::vector<std::unique_ptr<Shape>> sc,
+		std::vector<std::unique_ptr<Light>> lights, 
+		size_t MAX_DEPTH = 4);
 
 	void init();
 };
@@ -53,11 +50,10 @@ public:
 class MixedScene : public Scene
 {
 public:
-	MixedScene(size_t MAX_DEPTH = 4) :
-		Scene(MAX_DEPTH)
-	{
-		init();
-	}
+	MixedScene(
+		std::vector<std::unique_ptr<Shape>> sc,
+		std::vector<std::unique_ptr<Light>> lights,
+		size_t MAX_DEPTH = 4);
 
 	void init();
 };
@@ -65,11 +61,11 @@ public:
 class TeapotScene : public Scene
 {
 public:
-	TeapotScene(size_t MAX_DEPTH = 4) :
-		Scene(MAX_DEPTH)
-	{
-		init();
-	}
+	TeapotScene(
+		std::vector<std::unique_ptr<Shape>> sc,
+		std::vector<std::unique_ptr<Light>> lights,
+		size_t MAX_DEPTH = 4);
+
 
 	void init();
 };
@@ -77,11 +73,10 @@ public:
 class SingleTriangleScene : public Scene
 {
 public:
-	SingleTriangleScene(size_t MAX_DEPTH = 4) :
-		Scene(MAX_DEPTH)
-	{
-		init();
-	}
+	SingleTriangleScene(
+		std::vector<std::unique_ptr<Shape>> sc,
+		std::vector<std::unique_ptr<Light>> lights,
+		size_t MAX_DEPTH = 4);
 
 	void init();
 };
@@ -89,11 +84,10 @@ public:
 class DragonScene : public Scene
 {
 public:
-	DragonScene(size_t MAX_DEPTH = 4) :
-		Scene(MAX_DEPTH)
-	{
-		init();
-	}
+	DragonScene(
+		std::vector<std::unique_ptr<Shape>> sc,
+		std::vector<std::unique_ptr<Light>> lights,
+		size_t MAX_DEPTH = 4);
 
 	void init();
 };

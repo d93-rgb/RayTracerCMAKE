@@ -18,6 +18,12 @@
 
 namespace rt
 {
+Scene::Scene(
+	std::vector<std::unique_ptr<Shape>> sc,
+	std::vector<std::unique_ptr<Light>> lights,
+	size_t MAX_DEPTH) : 
+	sc(std::move(sc)), lights(std::move(lights)), MAX_DEPTH(MAX_DEPTH)
+{}
 
 /*
 	Shoot next ray and obtain the next intersection point.
@@ -48,58 +54,12 @@ double Scene::shoot_ray(const Ray& ray, SurfaceInteraction* isect)
 	return ray.tNearest;
 }
 
-glm::dvec3 Scene::shoot_recursively(
-	const Ray& ray,
-	SurfaceInteraction* isect,
-	int depth)
-{
-	if (depth == MAX_DEPTH)
-	{
-		return glm::dvec3(0);
-	}
-
-	double distance;
-	glm::dvec3 contribution = glm::dvec3(0);
-	glm::dvec3 isect_p;
-
-	distance = shoot_ray(ray, isect);
-
-	// check for no intersection
-	if (distance < 0 || distance == INFINITY)
-	{
-		return glm::dvec3(0.0f);
-	}
-
-	isect_p = ray.ro + distance * ray.rd;
-
-	// map direction of normals to a color for debugging
-#ifdef DEBUG_NORMALS
-	return contribution = (glm::dvec3(1.f) + isect->normal) * 0.5f;
-#endif
-
-	for (auto& l : lights)
-	{
-		contribution += l->phong_shade(s,
-			ray/*Ray(ray.ro + shadowEpsilon * ray.rd, ray.rd)*/,
-			isect_p,
-			*isect);
-	}
-
-	if (glm::length(isect->mat->getReflective()) > 0)
-	{
-		glm::dvec3 reflective = isect->mat->getReflective();
-		contribution += reflective * specular_reflection(ray, isect_p, isect, depth);
-	}
-
-	if (glm::length(isect->mat->getTransparent()) > 0)
-	{
-		glm::dvec3 transparent = isect->mat->getTransparent();
-		contribution += transparent * specular_transmission(ray, isect_p, isect, depth);
-	}
-
-	return contribution;
-}
-
+GatheringScene::GatheringScene(
+	std::vector<std::unique_ptr<Shape>> sc,
+	std::vector<std::unique_ptr<Light>> lights,
+	size_t MAX_DEPTH) :
+	Scene(std::move(sc), std::move(lights), MAX_DEPTH)
+{}
 
 void GatheringScene::init()
 {
@@ -266,6 +226,15 @@ void GatheringScene::init()
 
 	cam->setCamToWorld(translation, glm::dvec3(0.f), glm::dvec3(0.f, 1.f, 0.f));
 	cam->update();
+}
+
+MixedScene::MixedScene(
+	std::vector<std::unique_ptr<Shape>> sc,
+	std::vector<std::unique_ptr<Light>> lights,
+	size_t MAX_DEPTH) :
+	Scene(std::move(sc), std::move(lights), std::move(MAX_DEPTH))
+{
+	init();
 }
 
 void MixedScene::init()
@@ -618,6 +587,16 @@ void MixedScene::init()
 
 }
 
+TeapotScene::TeapotScene(
+	std::vector<std::unique_ptr<Shape>> sc,
+	std::vector<std::unique_ptr<Light>> lights,
+	size_t MAX_DEPTH) :
+	Scene(std::move(sc), std::move(lights), MAX_DEPTH)
+{
+	init();
+}
+
+
 void TeapotScene::init()
 {
 	//camera position
@@ -847,6 +826,15 @@ void TeapotScene::init()
 	cam->update();
 }
 
+SingleTriangleScene::SingleTriangleScene(
+	std::vector<std::unique_ptr<Shape>> sc,
+	std::vector<std::unique_ptr<Light>> lights,
+	size_t MAX_DEPTH) :
+	Scene(std::move(sc), std::move(lights), MAX_DEPTH)
+{
+	init();
+}
+
 void SingleTriangleScene::init()
 {
 	glm::dvec3 translation = glm::dvec3(0.f, 5.f, 30.f);
@@ -883,6 +871,15 @@ void SingleTriangleScene::init()
 	cam.reset(new Camera());
 	cam->setCamToWorld(translation, look_pos, cam_up);
 	cam->update();
+}
+
+DragonScene::DragonScene(
+	std::vector<std::unique_ptr<Shape>> sc,
+	std::vector<std::unique_ptr<Light>> lights,
+	size_t MAX_DEPTH) :
+	Scene(std::move(sc), std::move(lights), MAX_DEPTH)
+{
+	init();
 }
 
 void DragonScene::init()

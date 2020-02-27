@@ -10,7 +10,7 @@ public:
 
 	virtual glm::vec3 Li();
 
-private:
+protected:
 	bool refract(glm::dvec3 V, glm::dvec3 N, double refr_idx, glm::dvec3* refracted);
 
 	glm::dvec3 reflect(glm::dvec3 dir, glm::dvec3 N);
