@@ -23,20 +23,8 @@ struct Light
 
 	virtual glm::dvec3 getEmission(glm::dvec3 dir) const = 0;
 
-	virtual glm::dvec3 diff_shade(const SurfaceInteraction & isect,
-
-		const glm::dvec3 &ob_pos) = 0;
-
-	virtual glm::dvec3 spec_shade(const SurfaceInteraction & isect,
-		const glm::dvec3 &ob_pos,
-		const glm::dvec3 &view_dir) = 0;
-
 	virtual bool calc_shadow(glm::dvec3 p, const Scene &sc) = 0;
 
-	virtual glm::dvec3 phong_shade(const Scene & sc,
-		const Ray & ray,
-		const glm::dvec3 & ob_pos, 
-		const SurfaceInteraction & isect) = 0;
 
 };
 
@@ -54,10 +42,7 @@ struct PointLight : public Light
 		return emission;
 	}
 
-	glm::dvec3 diff_shade(const SurfaceInteraction & isect, const glm::dvec3 & ob_pos);
-	glm::dvec3 spec_shade(const SurfaceInteraction & isect, const glm::dvec3 & ob_pos, const glm::dvec3 & view_dir);
 	bool calc_shadow(glm::dvec3 p, const Scene &sc);
-	glm::dvec3 phong_shade(const Scene & sc, const Ray & ray, const glm::dvec3 & ob_pos, const SurfaceInteraction & isect);
 };
 
 struct PointLightShaped : public Light
@@ -73,11 +58,7 @@ struct PointLightShaped : public Light
 		return emission;
 	}
 
-	glm::dvec3 diff_shade(const SurfaceInteraction & isect, const glm::dvec3 & ob_pos);
-	glm::dvec3 spec_shade(const SurfaceInteraction & isect, const glm::dvec3 & ob_pos, const glm::dvec3 & view_dir);
 	bool calc_shadow(glm::dvec3 p, const Scene &sc);
-	glm::dvec3 phong_shade(const Scene & sc, const Ray & ray, const glm::dvec3 & ob_pos, const SurfaceInteraction & isect);
-
 };
 
 struct SpotLight : public Light
@@ -101,9 +82,7 @@ struct DistantLight : public Light
 	{
 		return emission;
 	}
-	glm::dvec3 diff_shade(const SurfaceInteraction & isect, const glm::dvec3 & ob_pos);
-	glm::dvec3 spec_shade(const SurfaceInteraction & isect, const glm::dvec3 & ob_pos, const glm::dvec3 & view_dir);
+
 	bool calc_shadow(glm::dvec3 p, const Scene &sc);
-	glm::dvec3 phong_shade(const Scene & sc, const Ray & ray, const glm::dvec3 & ob_pos, const SurfaceInteraction & isect);
 };
 }
