@@ -1,4 +1,5 @@
 #include "integrators/integrator.h"
+#include "scene/scene.h"
 
 namespace rt
 {
@@ -75,10 +76,12 @@ glm::dvec3 Integrator::specular_reflect(const Scene& s,
 {
 	glm::dvec3 reflected = reflect(ray.rd, isect->normal);
 
-	return shoot_recursively(s,
+	auto new_ray = Ray(isect_p + shadowEpsilon * reflected, reflected);
+
+	return Li(
 		Ray(isect_p + shadowEpsilon * reflected, reflected),
-		isect,
-		++depth);
+		s,
+		depth);
 }
 
 glm::dvec3 Integrator::specular_transmit(const Scene& s,

@@ -1,5 +1,5 @@
 #pragma once
-#include "rt.h"
+#include "core/rt.h"
 
 namespace rt
 {
@@ -8,7 +8,7 @@ class Integrator
 {
 public:
 
-	virtual glm::vec3 Li();
+	virtual glm::dvec3 Li(const Ray& ray, const Scene& scene, int depth);
 
 protected:
 	bool refract(glm::dvec3 V, glm::dvec3 N, double refr_idx, glm::dvec3* refracted);

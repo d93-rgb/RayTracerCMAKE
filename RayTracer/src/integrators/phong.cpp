@@ -66,7 +66,7 @@ glm::dvec3 PhongIntegrator::phong_shade(const Scene& sc,
 	return color;
 }
 
-glm::vec3 PhongIntegrator::Li(const Ray& ray, const Scene& scene)
+glm::vec3 PhongIntegrator::Li(const Ray& ray, const Scene& scene, int depth)
 {
 	if (depth == scene.MAX_DEPTH)
 	{
@@ -93,6 +93,7 @@ glm::vec3 PhongIntegrator::Li(const Ray& ray, const Scene& scene)
 
 	isect_p = ray.ro + distance * ray.rd;
 
+	// TODO: handle shadows correctly
 	for (auto& l : scene.lights)
 	{
 		contribution += phong_shade(scene,
@@ -101,16 +102,18 @@ glm::vec3 PhongIntegrator::Li(const Ray& ray, const Scene& scene)
 			*si);
 	}
 
+	//TODO change update location or depth may not reach its intended value
+	++depth;
 	if (glm::length(si->mat->getReflective()) > 0)
 	{
 		glm::dvec3 reflective = si->mat->getReflective();
-		contribution += reflective * specular_reflect(ray, isect_p, si, depth);
+		contribution += reflective * specular_reflect(scene, ray, isect_p, &si, depth);
 	}
 
-	if (glm::length(isect->mat->getTransparent()) > 0)
+	if (glm::length(si->mat->getTransparent()) > 0)
 	{
 		glm::dvec3 transparent = si->mat->getTransparent();
-		contribution += transparent * specular_transmit(ray, isect_p, si, depth);
+		contribution += transparent * specular_transmit(scene, ray, isect_p, &si, depth);
 	}
 
 	return glm::vec3();

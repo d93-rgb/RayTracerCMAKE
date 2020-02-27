@@ -7,6 +7,7 @@
 #include "image/image.h"
 #include "samplers/sampler2D.h"
 #include "threads/dispatcher.h"
+#include "integrators/phong.h"
 
 namespace rt
 {
@@ -88,6 +89,7 @@ void Renderer::render_with_threads(
 	inv_spp = 1.0 / SPP;
 
 	std::unique_ptr<Scene> sc = std::make_unique<TeapotScene>();
+	auto integrator = std::make_unique<PhongIntegrator>();
 
 	// enclose with braces for destructor of ProgressReporter at the end of rendering
 	{
@@ -137,8 +139,6 @@ void Renderer::render_with_threads(
 							{
 								for (size_t n = 0; n < array_size; ++n)
 								{
-									SurfaceInteraction isect;
-
 									// map pixel coordinates to[-1, 1]x[-1, 1]
 									double u = (2.0 * (slice.pairs[idx].first + j + samplingArray[n].x) - img->get_width()) / img->get_height();
 									double v = (-2.0 * (slice.pairs[idx].second + i + samplingArray[n].y) + img->get_height()) / img->get_height();
@@ -147,8 +147,8 @@ void Renderer::render_with_threads(
 									double v = -((y + samplingArray[idx].y) - HEIGHT * 0.5f);
 							*/
 									img->colors[(slice.pairs[idx].second + i) * slice.img_width + slice.pairs[idx].first + j] +=
-										clamp(sc->shoot_recursively(
-											sc->cam->getPrimaryRay(u, v, foc_len), &isect, 0));
+										clamp(integrator->Li(
+											sc->cam->getPrimaryRay(u, v, foc_len), *sc.get(), 0));
 								}
 							}
 							img->colors[(slice.pairs[idx].second + i) * slice.img_width + slice.pairs[idx].first + j] *=
