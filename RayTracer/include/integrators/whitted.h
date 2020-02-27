@@ -1,5 +1,6 @@
 #pragma once
-#include "rt.h"
+#include "core/rt.h"
+#include "integrators/integrator.h"
 
 namespace rt
 {
@@ -7,9 +8,7 @@ namespace rt
 class WhittedIntegrator : public Integrator
 {
 public:
-
-	virtual glm::vec3 Li();
-
+	glm::dvec3 Li(const Ray& ray, const Scene& scene, int depth);
 private:
 
 };

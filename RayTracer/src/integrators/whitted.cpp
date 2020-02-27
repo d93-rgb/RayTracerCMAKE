@@ -3,9 +3,9 @@
 namespace rt
 {
 
-glm::vec3 WhittedIntegrator::Li()
+glm::dvec3 Li(const Ray& ray, const Scene& scene, int depth)
 {
-	return glm::vec3();
+	return glm::dvec3();
 }
 
 } // namespace rt

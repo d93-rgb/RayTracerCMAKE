@@ -1,3 +1,5 @@
+#include "shape/ray.h"
+#include "interaction/interaction.h"
 #include "integrators/integrator.h"
 #include "scene/scene.h"
 
@@ -99,9 +101,9 @@ glm::dvec3 Integrator::specular_transmit(const Scene& s,
 	if (!refract(ray.rd, isect->normal, isect->mat->getRefractiveIdx(), &refracted))
 	{
 		//reflected = glm::normalize(reflect(ray.rd, (*o)->get_normal(isect_p)));
-		return shoot_recursively(s,
+		return Li(
 			Ray(isect_p + shadowEpsilon * reflected, reflected),
-			isect,
+			s,
 			++depth);
 	}
 
@@ -109,13 +111,13 @@ glm::dvec3 Integrator::specular_transmit(const Scene& s,
 		glm::dot(-ray.rd, isect->normal));
 	++depth;
 
-	return f * shoot_recursively(s,
+	return f * Li(
 		Ray(isect_p + shadowEpsilon * reflected, reflected),
-		isect,
+		s,
 		depth) +
-		(1.f - f) * shoot_recursively(s,
+		(1.f - f) * Li(
 			Ray(isect_p + shadowEpsilon * refracted, refracted),
-			isect,
+			s,
 			depth);
 }
 

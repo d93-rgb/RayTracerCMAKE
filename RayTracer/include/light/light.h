@@ -23,7 +23,7 @@ struct Light
 
 	virtual glm::dvec3 getEmission(glm::dvec3 dir) const = 0;
 
-	virtual bool calc_shadow(glm::dvec3 p, const Scene &sc) = 0;
+	virtual bool calc_shadow(const glm::dvec3& p, const Scene &sc) const = 0 ;
 };
 
 struct PointLight : public Light
@@ -39,7 +39,7 @@ struct PointLight : public Light
 		return emission;
 	}
 
-	bool calc_shadow(glm::dvec3 p, const Scene &sc);
+	bool calc_shadow(const glm::dvec3& p, const Scene &sc) const;
 };
 
 struct PointLightShaped : public Light
@@ -55,7 +55,7 @@ struct PointLightShaped : public Light
 		return emission;
 	}
 
-	bool calc_shadow(glm::dvec3 p, const Scene &sc);
+	bool calc_shadow(const glm::dvec3& p, const Scene &sc) const;
 };
 
 struct SpotLight : public Light
@@ -80,6 +80,6 @@ struct DistantLight : public Light
 		return emission;
 	}
 
-	bool calc_shadow(glm::dvec3 p, const Scene &sc);
+	bool calc_shadow(const glm::dvec3& p, const Scene &sc) const;
 };
 }

@@ -13,6 +13,8 @@ namespace rt
 class Scene
 {
 public:
+	const size_t MAX_DEPTH;
+
 	std::vector<std::unique_ptr<Shape>> sc;
 	std::vector<std::unique_ptr<Light>> lights;
 
@@ -23,7 +25,7 @@ public:
 		std::vector<std::unique_ptr<Light>> lights,
 		size_t MAX_DEPTH = 4);
 
-	double shoot_ray(const Ray& ray, SurfaceInteraction* isect);
+	double shoot_ray(const Ray& ray, SurfaceInteraction* isect) const;
 
 	const std::vector<std::unique_ptr<Shape>>& get_scene() const
 	{
@@ -33,7 +35,6 @@ public:
 	virtual void init() = 0;
 
 protected:
-	const size_t MAX_DEPTH;
 };
 
 class GatheringScene : public Scene

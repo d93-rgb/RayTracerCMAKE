@@ -33,7 +33,7 @@ Scene::Scene(
 	ray: the next ray to trace
 	o: the object that was hit
 */
-double Scene::shoot_ray(const Ray& ray, SurfaceInteraction* isect)
+double Scene::shoot_ray(const Ray& ray, SurfaceInteraction* isect) const
 {
 	double t_int = INFINITY;
 	double tmp = INFINITY;

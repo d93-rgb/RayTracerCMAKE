@@ -88,7 +88,8 @@ void Renderer::render_with_threads(
 	const glm::dvec2* samplingArray;
 	inv_spp = 1.0 / SPP;
 
-	std::unique_ptr<Scene> sc = std::make_unique<TeapotScene>();
+	std::unique_ptr<Scene> sc = std::make_unique<TeapotScene>(std::vector<std::unique_ptr<Shape>>(),
+		std::vector<std::unique_ptr<Light>>());
 	auto integrator = std::make_unique<PhongIntegrator>();
 
 	// enclose with braces for destructor of ProgressReporter at the end of rendering

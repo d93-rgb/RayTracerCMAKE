@@ -12,7 +12,7 @@ Light::~Light() {}
 /*
 	Return true if object is visible to the light and false otherwise
 */
-bool PointLight::calc_shadow(glm::dvec3 p, const Scene &sc)
+bool PointLight::calc_shadow(const glm::dvec3& p, const Scene &sc) const
 {
 	double dist;
 	double t_int = INFINITY;
@@ -83,7 +83,7 @@ bool PointLight::calc_shadow(glm::dvec3 p, const Scene &sc)
 //		pow(angle, isect.mat->getShininess());
 //}
 
-bool DistantLight::calc_shadow(glm::dvec3 p, const Scene &sc)
+bool DistantLight::calc_shadow(const glm::dvec3& p, const Scene &sc) const
 {
 	double t_int = INFINITY;
 	double tmp = INFINITY;

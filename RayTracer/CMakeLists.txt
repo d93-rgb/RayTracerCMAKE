@@ -151,7 +151,8 @@ src/shape/quadric/*
 src/texture/*
 src/samplers/*
 src/image/*
-src/threads/*)
+src/threads/*
+src/integrators/*)
 
 file (GLOB RT_HEADERS LIST_DIRECTORIES false
 include/camera/*
@@ -167,7 +168,8 @@ include/shape/quadric/*
 include/texture/*
 include/samplers/*
 include/image/*
-include/threads/*)
+include/threads/*,
+include/integrators/*)
 
 include_directories( "include/" )
 
