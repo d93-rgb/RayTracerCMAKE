@@ -120,6 +120,10 @@ class BVH_Node;
 
 enum class ImageWrap;
 
+class Integrator;
+class PhongIntegrator;
+class WhittedIntegrator;
+
 static constexpr bool QUIET = false;
 
 static constexpr double shadowEpsilon = 1e-3f;

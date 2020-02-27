@@ -3,9 +3,6 @@ cmake_policy(SET CMP0048 NEW)
 project (RayTracer VERSION 1.0)
 
 set(CMAKE_CXX_STANDARD 17)
-# create compiler specific information needed for linting
-# with vim plugin YouCompleteMe
-set( CMAKE_EXPORT_COMPILE_COMMANDS OFF )
 
 if (NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
 	message(STATUS "*** Setting build type to 'Release' ***")

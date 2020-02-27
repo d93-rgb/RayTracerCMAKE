@@ -19,9 +19,87 @@
 namespace rt
 {
 
-Scene::Scene() = default;
+/*
+	Shoot next ray and obtain the next intersection point.
+	Returns the distance to the hit surface and saves hit object
+	in the given pointer 'o'.
+	s: the scene with its objects
+	ray: the next ray to trace
+	o: the object that was hit
+*/
+double Scene::shoot_ray(const Ray& ray, SurfaceInteraction* isect)
+{
+	double t_int = INFINITY;
+	double tmp = INFINITY;
 
-Scene::~Scene() = default;
+	// get nearest intersection point
+	for (auto& objs : sc)
+	{
+		tmp = objs->intersect(ray, isect);
+
+		//if (tmp >= 0 && t_int > tmp)
+		//{
+		//	t_int = tmp;
+		//	// update intersection data with the properties of the closer object
+		//	//col[i] = sphs.color * glm::max(0.f, glm::dot(-rd, sphs.get_normal(inters_p)));
+		//	//std::cout << col[i].x << " " << col[i].y << " " << col[i].z << std::endl;
+		//}
+	}
+	return ray.tNearest;
+}
+
+glm::dvec3 Scene::shoot_recursively(
+	const Ray& ray,
+	SurfaceInteraction* isect,
+	int depth)
+{
+	if (depth == MAX_DEPTH)
+	{
+		return glm::dvec3(0);
+	}
+
+	double distance;
+	glm::dvec3 contribution = glm::dvec3(0);
+	glm::dvec3 isect_p;
+
+	distance = shoot_ray(ray, isect);
+
+	// check for no intersection
+	if (distance < 0 || distance == INFINITY)
+	{
+		return glm::dvec3(0.0f);
+	}
+
+	isect_p = ray.ro + distance * ray.rd;
+
+	// map direction of normals to a color for debugging
+#ifdef DEBUG_NORMALS
+	return contribution = (glm::dvec3(1.f) + isect->normal) * 0.5f;
+#endif
+
+	for (auto& l : lights)
+	{
+		contribution += l->phong_shade(s,
+			ray/*Ray(ray.ro + shadowEpsilon * ray.rd, ray.rd)*/,
+			isect_p,
+			*isect);
+	}
+
+	if (glm::length(isect->mat->getReflective()) > 0)
+	{
+		glm::dvec3 reflective = isect->mat->getReflective();
+		contribution += reflective * specular_reflection(ray, isect_p, isect, depth);
+	}
+
+	if (glm::length(isect->mat->getTransparent()) > 0)
+	{
+		glm::dvec3 transparent = isect->mat->getTransparent();
+		contribution += transparent * specular_transmission(ray, isect_p, isect, depth);
+	}
+
+	return contribution;
+}
+
 
 void GatheringScene::init()
 {

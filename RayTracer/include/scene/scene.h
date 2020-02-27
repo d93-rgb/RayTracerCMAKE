@@ -18,23 +18,31 @@ public:
 
 	std::unique_ptr<Camera> cam;
 
-	Scene();
+	Scene(size_t MAX_DEPTH) : MAX_DEPTH(MAX_DEPTH) {};
+
+	double shoot_ray(const Ray& ray, SurfaceInteraction* isect);
+
+	glm::dvec3 shoot_recursively(
+		const Ray& ray,
+		SurfaceInteraction* isect,
+		int depth);
 
 	const std::vector<std::unique_ptr<Shape>>& get_scene() const
 	{
 		return sc;
 	}
 
-	~Scene();
-
 	virtual void init() = 0;
 
+protected:
+	const size_t MAX_DEPTH;
 };
 
 class GatheringScene : public Scene
 {
 public:
-	GatheringScene()
+	GatheringScene(size_t MAX_DEPTH = 4) :
+		Scene(MAX_DEPTH)
 	{
 		init();
 	}
@@ -45,7 +53,8 @@ public:
 class MixedScene : public Scene
 {
 public:
-	MixedScene()
+	MixedScene(size_t MAX_DEPTH = 4) :
+		Scene(MAX_DEPTH)
 	{
 		init();
 	}
@@ -56,7 +65,8 @@ public:
 class TeapotScene : public Scene
 {
 public:
-	TeapotScene()
+	TeapotScene(size_t MAX_DEPTH = 4) :
+		Scene(MAX_DEPTH)
 	{
 		init();
 	}
@@ -67,7 +77,8 @@ public:
 class SingleTriangleScene : public Scene
 {
 public:
-	SingleTriangleScene()
+	SingleTriangleScene(size_t MAX_DEPTH = 4) :
+		Scene(MAX_DEPTH)
 	{
 		init();
 	}
@@ -78,7 +89,8 @@ public:
 class DragonScene : public Scene
 {
 public:
-	DragonScene()
+	DragonScene(size_t MAX_DEPTH = 4) :
+		Scene(MAX_DEPTH)
 	{
 		init();
 	}

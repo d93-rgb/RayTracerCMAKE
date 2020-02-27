@@ -7,15 +7,13 @@ namespace rt
 {
 
 enum class RenderMode {
-	NO_THREADS, THREADS, GRADIENT
+	THREADS, GRADIENT
 };
 
 class Renderer
 {
 public:
 	Renderer(size_t w, size_t h, const std::string& file, size_t max_depth = 4);
-
-	void render(size_t& width, size_t& height);
 
 	void render_with_threads(size_t& width, size_t& height);
 
@@ -39,31 +37,6 @@ private:
 	size_t NUM_THREADS;
 
 	std::unique_ptr<Image> img;
-
-	double fresnel(double rel_eta, double c);
-	
-	bool refract(glm::dvec3 V, glm::dvec3 N, double refr_idx, glm::dvec3* refracted);
-	
-	glm::dvec3 reflect(glm::dvec3 dir, glm::dvec3 N);
-	
-	double shoot_ray(const Scene& s, const Ray& ray, SurfaceInteraction* isect);
-	
-	glm::dvec3 shoot_recursively(const Scene& s,
-		const Ray& ray,
-		SurfaceInteraction* isect,
-		int depth);
-	
-	glm::dvec3 handle_transmission(const Scene& s,
-		const Ray& ray,
-		const glm::dvec3& isect_p,
-		SurfaceInteraction* isect,
-		int depth);
-	
-	glm::dvec3 handle_reflection(const Scene& s,
-		const Ray& ray,
-		const glm::dvec3& isect_p,
-		SurfaceInteraction* isect,
-		int depth);
 };
 
 } // namespace rt

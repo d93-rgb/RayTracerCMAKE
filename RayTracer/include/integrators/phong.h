@@ -4,7 +4,7 @@
 namespace rt
 {
 
-class WhittedIntegrator : public Integrator
+class PhongIntegrator : public Integrator
 {
 public:
 
