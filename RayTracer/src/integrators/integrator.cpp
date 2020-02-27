@@ -104,12 +104,12 @@ glm::dvec3 Integrator::specular_transmit(const Scene& s,
 		return Li(
 			Ray(isect_p + shadowEpsilon * reflected, reflected),
 			s,
-			++depth);
+			depth);
 	}
 
 	f = fresnel(1.f / isect->mat->getRefractiveIdx(),
 		glm::dot(-ray.rd, isect->normal));
-	++depth;
+	depth;
 
 	return f * Li(
 		Ray(isect_p + shadowEpsilon * reflected, reflected),

@@ -18,6 +18,11 @@
 
 namespace rt
 {
+
+Scene::Scene(size_t MAX_DEPTH) :
+	MAX_DEPTH(MAX_DEPTH)
+{}
+
 Scene::Scene(
 	std::vector<std::unique_ptr<Shape>> sc,
 	std::vector<std::unique_ptr<Light>> lights,
@@ -52,6 +57,12 @@ double Scene::shoot_ray(const Ray& ray, SurfaceInteraction* isect) const
 		//}
 	}
 	return ray.tNearest;
+}
+
+GatheringScene::GatheringScene(size_t MAX_DEPTH) :
+	Scene(MAX_DEPTH)
+{
+	init();
 }
 
 GatheringScene::GatheringScene(
@@ -226,6 +237,12 @@ void GatheringScene::init()
 
 	cam->setCamToWorld(translation, glm::dvec3(0.f), glm::dvec3(0.f, 1.f, 0.f));
 	cam->update();
+}
+
+MixedScene::MixedScene(size_t MAX_DEPTH) :
+	Scene(MAX_DEPTH)
+{
+	init();
 }
 
 MixedScene::MixedScene(
@@ -587,6 +604,12 @@ void MixedScene::init()
 
 }
 
+TeapotScene::TeapotScene(size_t MAX_DEPTH) :
+	Scene(MAX_DEPTH)
+{
+	init();
+}
+
 TeapotScene::TeapotScene(
 	std::vector<std::unique_ptr<Shape>> sc,
 	std::vector<std::unique_ptr<Light>> lights,
@@ -825,6 +848,11 @@ void TeapotScene::init()
 	cam->setCamToWorld(translation, look_pos, cam_up);
 	cam->update();
 }
+SingleTriangleScene::SingleTriangleScene(size_t MAX_DEPTH) :
+	Scene(MAX_DEPTH)
+{
+	init();
+}
 
 SingleTriangleScene::SingleTriangleScene(
 	std::vector<std::unique_ptr<Shape>> sc,
@@ -871,6 +899,12 @@ void SingleTriangleScene::init()
 	cam.reset(new Camera());
 	cam->setCamToWorld(translation, look_pos, cam_up);
 	cam->update();
+}
+
+DragonScene::DragonScene(size_t MAX_DEPTH) :
+	Scene(MAX_DEPTH)
+{
+	init();
 }
 
 DragonScene::DragonScene(

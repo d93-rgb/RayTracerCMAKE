@@ -20,6 +20,8 @@ public:
 
 	std::unique_ptr<Camera> cam;
 
+	Scene(size_t MAX_DEPTH = 4);
+
 	Scene(
 		std::vector<std::unique_ptr<Shape>> sc,
 		std::vector<std::unique_ptr<Light>> lights,
@@ -40,6 +42,7 @@ protected:
 class GatheringScene : public Scene
 {
 public:
+	GatheringScene(size_t MAX_DEPTH = 4);
 	GatheringScene(
 		std::vector<std::unique_ptr<Shape>> sc,
 		std::vector<std::unique_ptr<Light>> lights, 
@@ -51,6 +54,7 @@ public:
 class MixedScene : public Scene
 {
 public:
+	MixedScene(size_t MAX_DEPTH = 4);
 	MixedScene(
 		std::vector<std::unique_ptr<Shape>> sc,
 		std::vector<std::unique_ptr<Light>> lights,
@@ -62,6 +66,7 @@ public:
 class TeapotScene : public Scene
 {
 public:
+	TeapotScene(size_t MAX_DEPTH = 4);
 	TeapotScene(
 		std::vector<std::unique_ptr<Shape>> sc,
 		std::vector<std::unique_ptr<Light>> lights,
@@ -74,6 +79,7 @@ public:
 class SingleTriangleScene : public Scene
 {
 public:
+	SingleTriangleScene(size_t MAX_DEPTH = 4);
 	SingleTriangleScene(
 		std::vector<std::unique_ptr<Shape>> sc,
 		std::vector<std::unique_ptr<Light>> lights,
@@ -85,6 +91,7 @@ public:
 class DragonScene : public Scene
 {
 public:
+	DragonScene(size_t MAX_DEPTH = 4);
 	DragonScene(
 		std::vector<std::unique_ptr<Shape>> sc,
 		std::vector<std::unique_ptr<Light>> lights,
