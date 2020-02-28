@@ -124,6 +124,8 @@ class Integrator;
 class PhongIntegrator;
 class WhittedIntegrator;
 
+using RGB_Color = glm::dvec3;
+
 static constexpr bool QUIET = false;
 
 static constexpr double shadowEpsilon = 1e-3f;

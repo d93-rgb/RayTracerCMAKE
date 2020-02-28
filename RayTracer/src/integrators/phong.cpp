@@ -74,7 +74,7 @@ glm::dvec3 PhongIntegrator::phong_shade(
 	return color;
 }
 
-glm::dvec3 PhongIntegrator::Li(const Ray& ray, const Scene& scene, int depth)
+RGB_Color PhongIntegrator::Li(const Ray& ray, const Scene& scene, int depth)
 {
 	if (depth == scene.MAX_DEPTH)
 	{
@@ -84,7 +84,7 @@ glm::dvec3 PhongIntegrator::Li(const Ray& ray, const Scene& scene, int depth)
 	glm::dvec3 isect_p;
 	SurfaceInteraction si;
 	double distance;
-	glm::dvec3 contribution = glm::dvec3(0);
+	RGB_Color contribution = glm::dvec3(0);
 
 	// map direction of normals to a color for debugging
 #ifdef DEBUG_NORMALS
@@ -111,6 +111,8 @@ glm::dvec3 PhongIntegrator::Li(const Ray& ray, const Scene& scene, int depth)
 			isect_p,
 			si);
 	}
+	// LTE
+	// L += f * L * cos(N, L) / pdf
 
 	//TODO change update location or depth may not reach its intended value
 	++depth;

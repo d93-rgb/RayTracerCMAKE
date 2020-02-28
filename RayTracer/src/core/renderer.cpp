@@ -16,12 +16,21 @@ namespace rt
 Renderer::Renderer(size_t w, size_t h,
 	const std::string& file,
 	size_t max_depth) :
-	MAX_DEPTH(max_depth),
 	img(new Image(w, h, file)),
 	SPP(1),
-	GRID_DIM(3),
+	GRID_DIM(4),
 	NUM_THREADS(4)
-{}
+{
+	if (max_depth < 0)
+	{
+		MAX_DEPTH = 4;
+		LOG(WARNING) << "max_depth < 0, setting MAX_DEPTH to 4";
+	}
+	else
+	{
+		this->MAX_DEPTH = max_depth;
+	}
+}
 
 void Renderer::render_gradient(
 	size_t& width_img,
@@ -88,7 +97,7 @@ void Renderer::render_with_threads(
 	const glm::dvec2* samplingArray;
 	inv_spp = 1.0 / SPP;
 
-	std::unique_ptr<Scene> sc = std::make_unique<DragonScene>();
+	std::unique_ptr<Scene> sc = std::make_unique<TeapotScene>();
 	auto integrator = std::make_unique<PhongIntegrator>();
 
 	// enclose with braces for destructor of ProgressReporter at the end of rendering
