@@ -63,7 +63,7 @@ glm::dvec3 PhongIntegrator::phong_shade(
 
 	//if (sqd_dist > 1.f) sqd_dist *= 0.1f;
 
-	visible = light.calc_shadow(ob_pos, sc);
+	visible = light.visible(ob_pos, sc);
 
 	color = 0.01 * isect.mat->getAmbient(isect.p) * light.getEmission(ray.rd);
 
