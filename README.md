@@ -1,5 +1,6 @@
 # RayTracerCMAKE
 [![Build Status](https://travis-ci.com/d93-rgb/RayTracerCMAKE.svg?branch=master)](https://travis-ci.com/d93-rgb/RayTracerCMAKE)
+[![Build status](https://ci.appveyor.com/api/projects/status/u0r8ueclub7ndgav?svg=true)](https://ci.appveyor.com/project/d93-rgb/raytracercmake)
 
 Implementing a simple ray tracer.
 
