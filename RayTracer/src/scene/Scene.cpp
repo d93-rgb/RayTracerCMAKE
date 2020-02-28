@@ -924,8 +924,7 @@ void DragonScene::init()
 	glm::dvec3 cam_up = glm::dvec3(0.0, 1.0, 0.0);
 
 	std::vector<std::string> dragon_files = {
-	//"C:\\Users\\Damian\\Downloads\\stanford-dragon-vrip\\source\\stanford_dragon.ply"
-	"C:\\Users\\Damian\\Downloads\\dragon\\dragon.obj"
+	"../../resources/models/dragon.obj"
 	};
 
 	glm::dmat4 dr_to_world =
