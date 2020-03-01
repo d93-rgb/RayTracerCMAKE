@@ -10,7 +10,7 @@ jobs:
  
     - name: Install Dependencies
       run: |
-        CURRENT_BUILD_DIR=$(PWD)
+        CURRENT_BUILD_DIR="$PWD"
         git submodule update -q --init --recursive
         sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test
         sudo apt-get update
