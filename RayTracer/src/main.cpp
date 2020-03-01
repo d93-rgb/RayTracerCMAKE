@@ -108,7 +108,7 @@ int main(int argc, const char** argv)
 			}
 		}
 	}
-// launch rendering
+	// launch rendering
 	Renderer renderer(img_w, img_h, std::string("picture.ppm"));
 	renderer.run(RenderMode::THREADS);
 
@@ -118,10 +118,10 @@ int main(int argc, const char** argv)
 	window_class.lpszClassName = CLASS_NAME;
 	window_class.lpfnWndProc = WindowProc;
 
-	if (!RegisterClass(&window_class))                                    
+	if (!RegisterClass(&window_class))
 	{
 		MessageBox(NULL, L"Failed To Register the window class.", L"ERROR", MB_OK | MB_ICONEXCLAMATION);
-		exit(1);                                           
+		exit(1);
 	}
 
 	RECT client_rect = {
@@ -138,14 +138,14 @@ int main(int argc, const char** argv)
 
 	// disable automatic rescaling 
 	SetProcessDpiAwareness(PROCESS_SYSTEM_DPI_AWARE);
-	
+
 	HWND hwnd = CreateWindowEx(
 		0,                              // Optional window styles.
 		CLASS_NAME,     // Window class
 		L"Raytracer",    // Window text
 		WS_OVERLAPPEDWINDOW ^ WS_THICKFRAME,    // prevent resizing
-		CW_USEDEFAULT, CW_USEDEFAULT, 
-		client_rect.right - client_rect.left, 
+		CW_USEDEFAULT, CW_USEDEFAULT,
+		client_rect.right - client_rect.left,
 		client_rect.bottom - client_rect.top,
 		NULL,       // Parent window    
 		NULL,       // Menu
@@ -165,13 +165,13 @@ int main(int argc, const char** argv)
 	BITMAPINFO bmi;
 	HDC hdc = GetDC(hwnd);
 
-	const auto & colors = renderer.get_colors();
+	const auto& colors = renderer.get_colors();
 	for (size_t i = 0, j = 0; i < buffer_size; i += 4, ++j)
 	{
 		// prevent sign extension by casting to unsigned char
-		color_mem[i + 2]	= (unsigned char)round((colors)[j].x);
-		color_mem[i + 1]	= (unsigned char)round((colors)[j].y);
-		color_mem[i]		= (unsigned char)round((colors)[j].z);
+		color_mem[i + 2] = (unsigned char)round((colors)[j].x);
+		color_mem[i + 1] = (unsigned char)round((colors)[j].y);
+		color_mem[i] = (unsigned char)round((colors)[j].z);
 		//color_mem[i + 3]	= 0;
 	}
 
@@ -183,16 +183,16 @@ int main(int argc, const char** argv)
 	bmi.bmiHeader.biCompression = BI_RGB;
 
 	ShowWindow(hwnd, SW_SHOW);
-	
+
 	// Run the message loop.
-	while(!RT_EXIT_PROGRAM)
+	while (!RT_EXIT_PROGRAM)
 	{
 		// render into window
-		StretchDIBits(hdc, 0, 0, static_cast<int>(img_w), 
-			static_cast<int>(img_h), 0, 0, 
-			static_cast<int>(img_w), 
-			static_cast<int>(img_h), 
-			color_mem.data(), 
+		StretchDIBits(hdc, 0, 0, static_cast<int>(img_w),
+			static_cast<int>(img_h), 0, 0,
+			static_cast<int>(img_w),
+			static_cast<int>(img_h),
+			color_mem.data(),
 			&bmi,
 			DIB_RGB_COLORS, SRCCOPY);
 
@@ -209,9 +209,9 @@ int main(int argc, const char** argv)
 }
 
 LRESULT CALLBACK WindowProc(
-	HWND hwnd, 
-	UINT uMsg, 
-	WPARAM wParam, 
+	HWND hwnd,
+	UINT uMsg,
+	WPARAM wParam,
 	LPARAM lParam)
 {
 	switch (uMsg)
@@ -239,20 +239,23 @@ LRESULT CALLBACK WindowProc(
 
 int main(int argc, char* argv[])
 {
-	bool rt_headless = false;
-	if (argc > 1)
-	{
-		if (!strcmp(argv[1], "--headless"))
-		{
-			rt_headless = true;
-		}
-	}
-
 	int screen_width = 1000;
 	int screen_height = 600;
 
 	GLsizei render_w = 1000;
 	GLsizei render_h = 600;
+
+	bool rt_headless = false;
+	if (argc > 1)
+	{
+		if (!strcmp(argv[1], "--headless"))
+		{
+			Renderer renderer(render_w, render_h, std::string("picture.ppm"));
+			renderer.run(RenderMode::THREADS);
+			LOG(INFO) << "Running headless mode, exiting.";
+			return 0;
+		}
+	}
 
 	int error_code;
 	const char* error_description;
@@ -286,11 +289,11 @@ int main(int argc, char* argv[])
 		glfwTerminate();
 		std::exit(1);
 	}
-	
+
 	center_glfw_window(window, glfwGetPrimaryMonitor());
 
 	glfwMakeContextCurrent(window);
-	
+
 
 	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
 	glfwSetKeyCallback(window, key_callback);
@@ -321,21 +324,9 @@ int main(int argc, char* argv[])
 	ImGui_ImplOpenGL3_Init(glsl_version);
 
 	glViewport(0, 0, render_w, render_h);
-	
+
 	Renderer renderer(render_w, render_h, std::string("picture.ppm"));
 	renderer.run(RenderMode::THREADS);
-	if (rt_headless)
-	{
-		LOG(INFO) << "Running headless mode, exiting.";
-		// Cleanup
-		ImGui_ImplOpenGL3_Shutdown();
-		ImGui_ImplGlfw_Shutdown();
-		ImGui::DestroyContext();
-
-		glfwDestroyWindow(window);
-		glfwTerminate();
-		return 0;
-	}
 
 	auto&& updated_img_dim = renderer.get_image_dim();
 	int idx = 0;
@@ -348,7 +339,7 @@ int main(int argc, char* argv[])
 			img_data[idx++] = static_cast<unsigned char>(std::round(c[i]));
 		}
 	}
-	
+
 	// Create an OpenGL texture identifier
 	GLuint image_texture;
 	glGenTextures(1, &image_texture);
@@ -361,7 +352,7 @@ int main(int argc, char* argv[])
 	// Upload pixels into texture
 	glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, updated_img_dim.x, updated_img_dim.y, 0, GL_RGB,
-		GL_UNSIGNED_BYTE, 
+		GL_UNSIGNED_BYTE,
 		img_data.get());
 
 	glfwShowWindow(window);
@@ -376,14 +367,14 @@ int main(int argc, char* argv[])
 		ImGui::NewFrame();
 
 		ImGui::SetNextWindowPos(ImVec2(0, 0));
-		ImGui::Begin("OpenGL Texture Test", 
-			0, 
-			ImGuiWindowFlags_NoResize | 
-			ImGuiWindowFlags_NoMove | 
-			ImGuiWindowFlags_NoCollapse | 
+		ImGui::Begin("OpenGL Texture Test",
+			0,
+			ImGuiWindowFlags_NoResize |
+			ImGuiWindowFlags_NoMove |
+			ImGuiWindowFlags_NoCollapse |
 			ImGuiWindowFlags_NoSavedSettings |
-			ImGuiWindowFlags_NoTitleBar | 
-			ImGuiWindowFlags_NoScrollbar | 
+			ImGuiWindowFlags_NoTitleBar |
+			ImGuiWindowFlags_NoScrollbar |
 			ImGuiWindowFlags_NoScrollWithMouse);
 		//ImGui::Text("size = %d x %d", render_w, render_h);
 		ImGui::Image((void*)image_texture, ImVec2(static_cast<float>(render_w), static_cast<float>(render_h)));
