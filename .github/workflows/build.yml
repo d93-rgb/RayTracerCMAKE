@@ -1,19 +1,24 @@
-name: C/C++ CI
+name: build
 
 on: [push]
 
-jobs:
-  build:
-
-    runs-on: ubuntu-latest
-    
+  Linux:
+    runs-on: ubuntu-18.04
     steps:
-    - uses: actions/checkout@v2
-    - name: configure
-      run: ./configure
-    - name: make
-      run: make
-    - name: make check
-      run: make check
-    - name: make distcheck
-      run: make distcheck
+    - uses: actions/checkout@v1
+ 
+    - name: Install Dependencies
+      run: |
+        sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test
+        sudo apt-get update
+        sudo apt-get install -yq build-essential gcc g++ make xorg-dev libgl1-mesa-dev libglu1-mesa-dev
+        CMAKE_URL="http://www.cmake.org/files/v3.17/cmake-3.17.0-rc1-Linux-x86_64.tar.gz"
+        mkdir ${TRAVIS_BUILD_DIR}/cmake-local && travis_retry wget --no-check-certificate --quiet -O - ${CMAKE_URL} | tar --strip-components=1 -xz -C ${TRAVIS_BUILD_DIR}/cmake-local
+        export PATH=${TRAVIS_BUILD_DIR}/cmake-local/bin:${PATH}
+    - name: Build Project 
+      run: |
+       mkdir -p RayTracer/build/Release
+       cd RayTracer/build/Release
+       cmake -G 'Unix Makefiles' ../../
+       make
+       ./rt --headless
