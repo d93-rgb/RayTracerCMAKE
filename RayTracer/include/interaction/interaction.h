@@ -17,6 +17,7 @@ public:
 	glm::dvec2 uv;
 	std::shared_ptr<Material> mat;
 	std::shared_ptr<Texture> texture;
+	std::shared_ptr<BSDF> bsdf;
 
 	SurfaceInteraction() :
 		p(0), normal(0), uv(0){}

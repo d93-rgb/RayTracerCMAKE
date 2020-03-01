@@ -7,9 +7,12 @@
 namespace rt
 {
 
+/*
+	DEPRECATED
+*/
 glm::dvec3 PhongIntegrator::diff_shade(
 	const Light& light,
-	const SurfaceInteraction& isect, 
+	const SurfaceInteraction& isect,
 	const glm::dvec3& ob_pos)
 {
 	glm::dvec3 dir = ob_pos - light.p;
@@ -18,7 +21,7 @@ glm::dvec3 PhongIntegrator::diff_shade(
 
 	diffuse = isect.mat->getDiffuse(isect.p);
 
-	glm::dvec3 col = light.getEmission(dir) * diffuse *
+	glm::dvec3 col = diffuse *
 		glm::max(0.0,
 			glm::dot(isect.normal,
 				-glm::normalize(dir)));
@@ -27,6 +30,7 @@ glm::dvec3 PhongIntegrator::diff_shade(
 }
 
 /*
+	DEPRECATED
 	Calculate specular shading of an object.
 */
 glm::dvec3 PhongIntegrator::spec_shade(
@@ -42,7 +46,7 @@ glm::dvec3 PhongIntegrator::spec_shade(
 	half /= glm::length(half);
 	//refl = glm::normalize(refl);
 
-	return light.getEmission(view_dir) *
+	return
 		isect.mat->getSpecular() *
 		pow(glm::max(0.0, glm::dot(half, isect.normal)),
 			isect.mat->getShininess());
@@ -53,24 +57,32 @@ glm::dvec3 PhongIntegrator::phong_shade(
 	const Scene& sc,
 	const Ray& ray,
 	const glm::dvec3& ob_pos,
-	const SurfaceInteraction& isect)
+	const SurfaceInteraction& si)
 {
 	bool visible = true;
 	glm::dvec3 color(0);
 
-	glm::dvec3 dir = light.p - ob_pos;
-	double sqd_dist = glm::dot(dir, dir);
-
-	//if (sqd_dist > 1.f) sqd_dist *= 0.1f;
-
-	visible = light.visible(ob_pos, sc);
-
-	color = 0.01 * isect.mat->getAmbient(isect.p) * light.getEmission(ray.rd);
-
-	if (visible) {
-		color += (diff_shade(light, isect, ob_pos) +
-			spec_shade(light, isect, ob_pos, ray.rd)) / sqd_dist;
+	if (!light.visible(ob_pos, sc))
+	{
+		return glm::dvec3(0);
 	}
+
+	glm::dvec3 light_dir = light.p - ob_pos;
+	glm::dvec3 half = (glm::normalize(light_dir) - ray.rd);
+	half /= glm::length(half);
+
+	// ambient
+	//color += 0.01 * si.mat->getAmbient(si.p) * light.getEmission(ray.rd);
+
+	// diffuse (lambert)
+	color += si.mat->getDiffuse(si.p) * inv_pi;
+
+	// specular
+	color += si.mat->getSpecular() *
+		pow(glm::max(0.0, glm::dot(half, si.normal)),
+			si.mat->getShininess()) /
+		glm::abs(glm::dot(si.normal, light_dir));
+
 	return color;
 }
 
@@ -84,7 +96,7 @@ RGB_Color PhongIntegrator::Li(const Ray& ray, const Scene& scene, int depth)
 	glm::dvec3 isect_p;
 	SurfaceInteraction si;
 	double distance;
-	RGB_Color contribution = glm::dvec3(0);
+	RGB_Color Lo = glm::dvec3(0); // received radiance at camera point
 
 	// map direction of normals to a color for debugging
 #ifdef DEBUG_NORMALS
@@ -102,33 +114,48 @@ RGB_Color PhongIntegrator::Li(const Ray& ray, const Scene& scene, int depth)
 	isect_p = ray.ro + distance * ray.rd;
 
 	// TODO: handle shadows correctly
+	// TODO: enhance support for different light types
+	// TODO: Add emission term Le if area light source was hit
+	// => Lo += Le;
+
 	for (auto& l : scene.lights)
 	{
-		contribution += phong_shade(
-			*l.get(), 
+		glm::dvec3 light_dir;
+		double pdf;
+
+		RGB_Color Li = l->sample_light(isect_p, light_dir, pdf);
+
+		if (Li == glm::dvec3(0.0) || pdf == 0.0)
+		{
+			continue;
+		}
+
+		Lo += phong_shade(
+			*l.get(),
 			scene,
-			ray/*Ray(ray.ro + shadowEpsilon * ray.rd, ray.rd)*/,
+			ray,
 			isect_p,
-			si);
+			si) * Li * std::abs(glm::dot(si.normal, light_dir)) / pdf;
 	}
 	// LTE
 	// L += f * L * cos(N, L) / pdf
 
-	//TODO change update location or depth may not reach its intended value
+	// TODO: remove from phong integrator, since this belongs to Whitted style ray tracing
+	// TODO: change update location or depth may not reach its intended value
 	++depth;
 	if (glm::length(si.mat->getReflective()) > 0)
 	{
 		glm::dvec3 reflective = si.mat->getReflective();
-		contribution += reflective * specular_reflect(scene, ray, isect_p, &si, depth);
+		Lo += reflective * specular_reflect(scene, ray, isect_p, &si, depth);
 	}
 
 	if (glm::length(si.mat->getTransparent()) > 0)
 	{
 		glm::dvec3 transparent = si.mat->getTransparent();
-		contribution += transparent * specular_transmit(scene, ray, isect_p, &si, depth);
+		Lo += transparent * specular_transmit(scene, ray, isect_p, &si, depth);
 	}
 
-	return contribution;
+	return Lo;
 }
 
 

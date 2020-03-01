@@ -28,7 +28,7 @@ private:
 		const Scene& sc,
 		const Ray& ray,
 		const glm::dvec3& ob_pos,
-		const SurfaceInteraction& isect);
+		const SurfaceInteraction& si);
 };
 
 } // namespace rt

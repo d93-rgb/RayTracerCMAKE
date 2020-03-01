@@ -9,6 +9,15 @@ namespace rt
 
 Light::~Light() {}
 
+RGB_Color PointLight::sample_light(const glm::dvec3 isect_p, glm::dvec3& dir_to_light, double& pdf)
+{
+	glm::dvec3 diff_vec = this->p - isect_p;
+	dir_to_light = glm::normalize(diff_vec);
+	pdf = 1;
+
+	return intensity / glm::dot(diff_vec, diff_vec);
+}
+
 /*
 	Return true if object is visible to the light and false otherwise
 */

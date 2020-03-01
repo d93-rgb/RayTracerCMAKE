@@ -8,7 +8,7 @@ namespace rt
 class WhittedIntegrator : public Integrator
 {
 public:
-	glm::dvec3 Li(const Ray& ray, const Scene& scene, int depth);
+	RGB_Color Li(const Ray& ray, const Scene& scene, int depth);
 private:
 
 };

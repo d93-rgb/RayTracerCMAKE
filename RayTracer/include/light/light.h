@@ -23,6 +23,8 @@ struct Light
 
 	virtual glm::dvec3 getEmission(glm::dvec3 dir) const = 0;
 
+	virtual RGB_Color sample_light(const glm::dvec3 isect_p, glm::dvec3& dir_to_light, double& pdf) = 0;
+
 	virtual bool visible(const glm::dvec3& p, const Scene &sc) const = 0 ;
 };
 
@@ -31,6 +33,7 @@ struct PointLight : public Light
 	PointLight(glm::dvec3 p, glm::dvec3 dir, glm::dvec3 col) :
 		Light(p, dir, col)
 	{
+		intensity = col;
 	}
 
 	// equal light emission in all directions
@@ -39,7 +42,12 @@ struct PointLight : public Light
 		return emission;
 	}
 
+	RGB_Color sample_light(const glm::dvec3 isect_p, glm::dvec3& dir_to_light, double& pdf);
+
 	bool visible(const glm::dvec3& p, const Scene &sc) const;
+
+private:
+	RGB_Color intensity; // dimension: [W/m^2]
 };
 
 struct PointLightShaped : public Light
