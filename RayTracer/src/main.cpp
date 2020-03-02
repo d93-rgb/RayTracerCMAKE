@@ -255,6 +255,13 @@ int main(int argc, char* argv[])
 			LOG(INFO) << "Running headless mode, exiting.";
 			return 0;
 		}
+		else if (!strcmp(argv[1], "--animate"))
+		{
+			Renderer renderer(render_w, render_h, std::string("picture.ppm"));
+			renderer.run(RenderMode::ANIMATE);
+			LOG(INFO) << "Running animate mode, exiting.";
+			return 0;
+		}
 	}
 
 	int error_code;

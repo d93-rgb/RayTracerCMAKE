@@ -40,6 +40,11 @@ public:
 		return file_name;
 	}
 
+	void change_file_name(const std::string& new_file_name)
+	{
+		file_name = new_file_name;
+	}
+
 	void append_to_file_name(const std::string& suffix);
 
 private:

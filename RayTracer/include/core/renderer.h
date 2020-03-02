@@ -7,7 +7,7 @@ namespace rt
 {
 
 enum class RenderMode {
-	THREADS, GRADIENT
+	THREADS, GRADIENT, ANIMATE
 };
 
 class Renderer
@@ -16,6 +16,11 @@ public:
 	Renderer(size_t w, size_t h, const std::string& file, size_t max_depth = 4);
 
 	void render_with_threads(size_t& width, size_t& height);
+
+	void render_with_threads(
+		size_t& width,
+		size_t& height,
+		double degree);
 
 	// for creating color gradients
 	void render_gradient(size_t& width_img, const size_t& width_stripe,

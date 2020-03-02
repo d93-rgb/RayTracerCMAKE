@@ -1078,7 +1078,7 @@ void DragonScene::init()
 TetrahedronScene::TetrahedronScene(double degree_step, size_t MAX_DEPTH) :
 	Scene(MAX_DEPTH)
 {
-	degree_step = degree_step;
+	this->degree_step = degree_step;
 	init();
 }
 
