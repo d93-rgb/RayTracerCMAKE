@@ -55,8 +55,6 @@ RGB_Color WhittedIntegrator::Li(const Ray& ray, const Scene& scene, int depth)
 		RGB_Color f = si.bsdf->f(ray.rd, light_dir);
 		Lo += f * Li * std::abs(glm::dot(si.normal, light_dir)) / pdf;
 	}
-	// LTE
-	// L += f * L * cos(N, L) / pdf
 
 	//TODO change update location or depth may not reach its intended value
 	++depth;

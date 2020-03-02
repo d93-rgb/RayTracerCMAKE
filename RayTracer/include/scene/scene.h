@@ -100,4 +100,18 @@ public:
 	void init();
 };
 
+class TetrahedronScene : public Scene
+{
+public:
+	double degree_step;
+
+	TetrahedronScene(double degree_step, size_t MAX_DEPTH = 4);
+	TetrahedronScene(
+		std::vector<std::unique_ptr<Shape>> sc,
+		std::vector<std::unique_ptr<Light>> lights,
+		size_t MAX_DEPTH = 4);
+
+	void init();
+};
+
 } // namespace rt

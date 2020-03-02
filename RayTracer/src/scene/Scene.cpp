@@ -1075,4 +1075,179 @@ void DragonScene::init()
 	cam->update();
 }
 
+TetrahedronScene::TetrahedronScene(double degree_step, size_t MAX_DEPTH) :
+	Scene(MAX_DEPTH)
+{
+	degree_step = degree_step;
+	init();
+}
+
+TetrahedronScene::TetrahedronScene(
+	std::vector<std::unique_ptr<Shape>> sc,
+	std::vector<std::unique_ptr<Light>> lights,
+	size_t MAX_DEPTH) :
+	Scene(std::move(sc), std::move(lights), MAX_DEPTH)
+{
+	init();
+}
+
+void TetrahedronScene::init()
+{
+	//camera position
+	glm::dvec3 translation = glm::dvec3(0.0, 10.5, 45.0);
+	glm::dvec3 look_pos = glm::dvec3(-1.0, -0.5, -1.0);
+	glm::dvec3 cam_up = glm::dvec3(0.0, 1.0, 0.0);
+
+	std::vector<std::string> tetrahedron_file = {
+		"C:/Users/Damian/Downloads/tetrahedron.obj"
+	};
+
+	glm::dmat4 th_to_world =
+		glm::rotate(
+			glm::scale(
+				//glm::dmat4(1.f),
+				glm::translate(glm::dmat4(1.0), glm::dvec3(0.5, 4.2, 20.0)),
+				glm::dvec3(5.0)),
+			glm::radians(0 + degree_step),
+			glm::dvec3(1.0, 1.0, 0.0));
+
+	// material for walls
+	auto wall_bot =
+		std::make_shared<Material>(
+			glm::dvec3(0.02, 0.02, 0.02),
+			glm::dvec3(0.4, 0.4, 0.4),
+			glm::dvec3(0.0, 0.0, 0.0));
+	wall_bot->setReflective(glm::dvec3(0.2f));
+
+	auto wall_left =
+		std::make_shared<Material>(
+			glm::dvec3(0.02, 0.02, 0.02),
+			glm::dvec3(0.2, 0.2, 0.2),
+			glm::dvec3(0.0, 0.0, 0.0));
+	wall_left->setReflective(glm::dvec3(1.0f));
+
+	auto wall_diffuse =
+		std::make_shared<Material>(
+			glm::dvec3(0.01, 0.01, 0.01),
+			glm::dvec3(0.3, 0.3, 0.3),
+			glm::dvec3(0.5, 0.5, 0.5));
+
+	//bottom
+	sc.emplace_back(std::make_unique<Rectangle>(glm::dvec3(-4, 0, -18),
+		glm::dvec3(150, 0, 0), glm::dvec3(0, 0, -150), wall_bot));
+	//front
+	sc.emplace_back(std::make_unique<Rectangle>(glm::dvec3(-4, 0, -18 - 10),
+		glm::dvec3(150, 0, 0), glm::dvec3(0, 150, 0), wall_diffuse));
+	//back
+	sc.emplace_back(std::make_unique<Rectangle>(glm::dvec3(-4, 0, -18 + 75),
+		glm::dvec3(500, 0, 0), glm::dvec3(0, 500, 0), wall_diffuse));
+	//left
+	sc.emplace_back(std::make_unique<Rectangle>(glm::dvec3(-4 - 7, 0, -18),
+		glm::dvec3(0, 150, 0), glm::dvec3(0, 0, -150), wall_left));
+	//right
+	sc.emplace_back(std::make_unique<Rectangle>(glm::dvec3(-4 + 15, 0, -18),
+		glm::dvec3(0, 150, 0), glm::dvec3(0, 0, -150), wall_left));
+
+	//	// mirror
+	//auto sphere_mat =
+	//	std::make_shared<Material>();
+	////sphere_mat->setReflective(glm::dvec3(1.f));
+
+	//sc.emplace_back(std::make_unique<Sphere>(
+	//	glm::dvec3(-4.0, 0.0, 18.0),
+	//	3.0,
+	//	glm::dvec3(1.0),
+	//	sphere_mat));
+
+	/////////////////////////////////////
+	// Dragon mesh
+	/////////////////////////////////////
+
+	for (const auto& dr_file : tetrahedron_file)
+	{
+		auto tr_meshes = extractMeshes(dr_file);
+
+		std::shared_ptr<Material> th_mat =
+			std::shared_ptr<Material>(
+				new Material(glm::dvec3(0.0, 0.0, 0.0),
+					glm::dvec3(0.6, 0.3, 0.1),
+					glm::dvec3(0.5, 0.5, 0.5)));
+		th_mat->setShininess(30.f);
+		//th_mat->setTransparent(glm::dvec3(1.0));
+		//th_mat->setRefractiveIdx(1.5);
+
+		for (auto& tm : tr_meshes)
+		{
+			for (auto& tr : tm.tr_mesh)
+			{
+				dynamic_cast<Triangle*>(tr.get())->set_objToWorld(th_to_world);
+				dynamic_cast<Triangle*>(tr.get())->set_material(th_mat);
+			}
+		}
+
+		// put triangle mesh into scene
+		for (auto& tm : tr_meshes)
+		{
+			/*tm.tr_mesh.erase(std::remove_if(tm.tr_mesh.begin(), tm.tr_mesh.end(), [](std::shared_ptr<Shape> s) {
+				return (dynamic_cast<Triangle*>(s.get())->bounding_box->centroid.y < 8.0f ||
+					dynamic_cast<Triangle*>(s.get())->bounding_box->centroid.z < 21.0f);
+				}),
+				tm.tr_mesh.end());*/
+			sc.emplace_back(std::make_unique<TriangleMesh>(tm.tr_mesh));
+		}
+	}
+
+#ifdef SHOW_AXIS
+	double cyl_rad = 0.1f;
+	auto cylinder_mat_1 =
+		std::make_shared<Material>(
+			glm::dvec3(1.f, 0.f, 0.f),
+			glm::dvec3(1.f, 0.f, 0.0f),
+			glm::dvec3(0.0f, 0.0f, 0.0f));
+
+	sc.emplace_back(std::make_unique<Cylinder>(
+		glm::dvec3(0.f, 0.f, 0.f),
+		glm::dvec3(1.f, 0.f, 0.f),
+		cyl_rad,
+		8.f,
+		cylinder_mat_1));
+
+	cylinder_mat_1 =
+		std::make_shared<Material>(
+			glm::dvec3(0.f, 1.0f, 0.f),
+			glm::dvec3(0.f, 1.f, 0.0f),
+			glm::dvec3(0.0f, 0.0f, 0.0f));
+	sc.emplace_back(std::make_unique<Cylinder>(
+		glm::dvec3(0.f, 0.f, 0.f),
+		glm::dvec3(0.f, 1.f, 0.f),
+		cyl_rad,
+		8.f,
+		cylinder_mat_1));
+
+	cylinder_mat_1 =
+		std::make_shared<Material>(
+			glm::dvec3(0.f, 0.0f, 1.f),
+			glm::dvec3(0.f, 0.f, 1.f),
+			glm::dvec3(0.0f, 0.0f, 0.0f));
+	sc.emplace_back(std::make_unique<Cylinder>(
+		glm::dvec3(0.f, 0.f, 0.f),
+		glm::dvec3(0.f, 0.f, 1.f),
+		cyl_rad,
+		8.f,
+		cylinder_mat_1));
+#endif
+
+	//lights.emplace_back(std::make_unique<PointLight>(glm::dvec3(0.f, 5.f, 17.f),
+		//glm::dvec3(-1.0, 0.0f, -1.0f),
+		//glm::dvec3(190.f)));
+
+	lights.emplace_back(std::make_unique<PointLight>(glm::dvec3(0.0, 20.5, 20.f),
+		glm::dvec3(-1, -2.0, -1),
+		glm::dvec3(600.0)));
+
+	cam.reset(new Camera());
+	cam->setCamToWorld(translation, look_pos, cam_up);
+	cam->update();
+}
+
 } // namespace rt

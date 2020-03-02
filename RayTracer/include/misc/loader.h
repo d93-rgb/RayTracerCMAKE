@@ -113,7 +113,7 @@ std::vector<TriangleMesh> extractMeshes(const std::string& file)
 				normals[0],
 				normals[1],
 				normals[2],
-				glm::normalize(glm::cross(points[1] - points[0], points[2] - points[0])),
+				glm::normalize(glm::cross(points[1] - points[0], points[2] - points[1])),
 				glm::dmat4(1.0), //TODO: can't be set to unity matrix... look at constructor of Triangle
 				nullptr));
 		}
