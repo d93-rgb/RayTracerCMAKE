@@ -97,7 +97,7 @@ void Renderer::render_with_threads(
 	const glm::dvec2* samplingArray;
 	inv_spp = 1.0 / SPP;
 
-	std::unique_ptr<Scene> sc = std::make_unique<TetrahedronScene>(1);
+	std::unique_ptr<Scene> sc = std::make_unique<DragonScene>();
 	auto integrator = std::make_unique<PhongIntegrator>();
 
 	// enclose with braces for destructor of ProgressReporter at the end of rendering
@@ -217,7 +217,7 @@ void Renderer::render_with_threads(
 	const glm::dvec2* samplingArray;
 	inv_spp = 1.0 / SPP;
 
-	std::unique_ptr<Scene> sc = std::make_unique<TetrahedronScene>(degree);
+	std::unique_ptr<Scene> sc = std::make_unique<DragonScene>();
 	auto integrator = std::make_unique<PhongIntegrator>();
 
 	// enclose with braces for destructor of ProgressReporter at the end of rendering

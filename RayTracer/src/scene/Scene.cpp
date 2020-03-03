@@ -1068,7 +1068,7 @@ void DragonScene::init()
 
 	lights.emplace_back(std::make_unique<PointLight>(glm::dvec3(0.0, 20.5, 20.f),
 		glm::dvec3(-1, -2.0, -1),
-		glm::dvec3(400.0)));
+		glm::dvec3(2000.0)));
 
 	cam.reset(new Camera());
 	cam->setCamToWorld(translation, look_pos, cam_up);
@@ -1099,7 +1099,7 @@ void TetrahedronScene::init()
 	glm::dvec3 cam_up = glm::dvec3(0.0, 1.0, 0.0);
 
 	std::vector<std::string> tetrahedron_file = {
-		"C:/Users/Damian/Downloads/tetrahedron.obj"
+		"../../resources/models/tetrahedron.obj"
 	};
 
 	glm::dmat4 th_to_world =
@@ -1108,7 +1108,7 @@ void TetrahedronScene::init()
 				//glm::dmat4(1.f),
 				glm::translate(glm::dmat4(1.0), glm::dvec3(0.5, 4.2, 20.0)),
 				glm::dvec3(5.0)),
-			glm::radians(0 + degree_step),
+			glm::radians(150 + degree_step),
 			glm::dvec3(1.0, 1.0, 0.0));
 
 	// material for walls
