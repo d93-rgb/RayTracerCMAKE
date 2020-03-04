@@ -30,7 +30,8 @@ public:
 
 	virtual Ray getPrimaryRay(double u, double v, double d)
 	{
-		return Ray(origin, glm::normalize(u * right + v * up - d * front));
+		auto dir = glm::normalize((u * right + v * up - d * front));
+		return Ray(origin, dir);
 	}
 
 	glm::dvec4 getOrigin()
@@ -38,7 +39,7 @@ public:
 		return origin;
 	}
 
-	glm::dvec4 getUpVec()
+	glm::dvec4 getUpVec()	
 	{
 		return up;
 	}

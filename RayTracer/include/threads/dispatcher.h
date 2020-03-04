@@ -26,7 +26,7 @@ public:
 	size_t img_width;
 	size_t img_height;
 
-	std::vector<std::pair<unsigned int, unsigned int>> pairs;
+	std::vector<std::pair<int, int>> pairs;
 
 	Slice(const rt::Image& img, int w, int h)
 	{

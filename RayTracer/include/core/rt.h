@@ -35,7 +35,6 @@
 #include <memory>
 
 #include <math.h>
-#include <omp.h>
 
 #include <glm/glm.hpp>
 #include <glog/logging.h>
